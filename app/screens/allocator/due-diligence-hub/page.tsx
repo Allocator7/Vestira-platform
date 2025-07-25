@@ -1313,12 +1313,19 @@ export default function AllocatorDueDiligenceHubPage() {
                           className="hidden"
                           id="ddq-file-upload"
                         />
-                        <Label htmlFor="ddq-file-upload">
-                          <Button variant="outline" className="cursor-pointer bg-transparent">
-                            <Upload className="h-4 w-4 mr-2" />
-                            Choose File
-                          </Button>
-                        </Label>
+                        <Button
+                          variant="outline"
+                          className="cursor-pointer bg-transparent"
+                          onClick={() => {
+                            const fileInput = document.getElementById("ddq-file-upload") as HTMLInputElement
+                            if (fileInput) {
+                              fileInput.click()
+                            }
+                          }}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
+                          Choose File
+                        </Button>
                         <p className="text-xs text-gray-500 mt-2">Supported formats: PDF, DOCX (Max 10MB)</p>
                       </div>
                     ) : (
