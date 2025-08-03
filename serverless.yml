@@ -18,15 +18,8 @@ custom:
   domainName: ${self:service}-${self:provider.stage}.example.com
   s3BucketName: ${self:service}-${self:provider.stage}-static-assets
   cloudfrontOriginAccessIdentity: ${self:service}-${self:provider.stage}-oai
-  nextjs:
-    dir: ./
-    distDir: .next
-  webpack:
-    webpackConfig: ./webpack.config.js
-    includeModules: true
 
 plugins:
-  - serverless-nextjs-plugin
   - serverless-s3-sync
 
 package:
