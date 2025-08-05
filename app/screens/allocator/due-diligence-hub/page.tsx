@@ -1292,11 +1292,13 @@ export default function AllocatorDueDiligenceHubPage() {
     
     if (isQuestionSelectorForDDQ) {
       // Add to current DDQ questions
-      setCurrentDDQQuestions(prev => [...prev, questionWithId])
-      // Store in localStorage and sessionStorage
-      const updatedQuestions = [...currentDDQQuestions, questionWithId]
-      localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-      sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+      setCurrentDDQQuestions(prev => {
+        const updatedQuestions = [...prev, questionWithId]
+        // Store in localStorage and sessionStorage
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        return updatedQuestions
+      })
     } else {
       // Add to template questions
       handleAddQuestionToTemplate(questionWithId)
@@ -3156,7 +3158,7 @@ const handleUseTemplate = () => {
               </Button>
             </div>
 
-                          <div className="space-y-6">
+            <div className="space-y-6">
                 {/* Current Questions Summary */}
                 {isQuestionSelectorForDDQ && currentDDQQuestions.length > 0 && (
                   <Card>
