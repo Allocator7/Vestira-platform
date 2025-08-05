@@ -193,16 +193,63 @@ export default function AllocatorDueDiligenceHubPage() {
     }
   }, [searchParams])
 
-  // Add available managers data
+  // Real manager data from the system
   const availableManagers = [
-    { id: "mgr-1", name: "Global Infrastructure Partners", contact: "Sarah Chen", title: "Managing Director" },
-    { id: "mgr-2", name: "Apex Capital Management", contact: "Michael Rodriguez", title: "Portfolio Manager" },
-    { id: "mgr-3", name: "Metropolitan Real Estate", contact: "Jennifer Park", title: "Investment Director" },
-    { id: "mgr-4", name: "Structured Credit Partners", contact: "Robert Kim", title: "Senior Partner" },
-    { id: "mgr-5", name: "Energy Infrastructure Fund", contact: "David Thompson", title: "Chief Investment Officer" },
-    { id: "mgr-6", name: "Growth Equity Partners", contact: "Lisa Wang", title: "Managing Partner" },
-    { id: "mgr-7", name: "Commercial Property Fund", contact: "Carlos Martinez", title: "Investment Committee Chair" },
-    { id: "mgr-8", name: "Distressed Credit Advisors", contact: "Amanda Foster", title: "Senior Investment Analyst" },
+    { 
+      id: "1", 
+      name: "Growth Capital Partners", 
+      contact: "David Rodriguez", 
+      title: "Managing Partner",
+      firm: "Growth Capital Partners",
+      firmType: "Private Equity",
+      location: "San Francisco, CA",
+      aum: "$2.5B",
+      email: "david.rodriguez@growthcapital.com"
+    },
+    { 
+      id: "2", 
+      name: "Sustainable Equity Fund", 
+      contact: "Sarah Chen", 
+      title: "Portfolio Manager",
+      firm: "Sustainable Equity Fund",
+      firmType: "Hedge Fund",
+      location: "New York, NY",
+      aum: "$1.2B",
+      email: "sarah.chen@sustainableequity.com"
+    },
+    { 
+      id: "3", 
+      name: "Infrastructure Capital", 
+      contact: "Michael Thompson", 
+      title: "Senior Managing Director",
+      firm: "Infrastructure Capital",
+      firmType: "Infrastructure",
+      location: "London, UK",
+      aum: "$3.8B",
+      email: "michael.thompson@infrastructurecapital.com"
+    },
+    { 
+      id: "4", 
+      name: "Venture Dynamics", 
+      contact: "Jennifer Park", 
+      title: "Founding Partner",
+      firm: "Venture Dynamics",
+      firmType: "Venture Capital",
+      location: "Palo Alto, CA",
+      aum: "$800M",
+      email: "jennifer.park@venturedynamics.com"
+    },
+    { 
+      id: "5", 
+      name: "Fixed Income Strategies", 
+      contact: "Robert Wilson", 
+      title: "Chief Investment Officer",
+      firm: "Fixed Income Strategies",
+      firmType: "Credit",
+      location: "Chicago, IL",
+      aum: "$4.2B",
+      email: "robert.wilson@fixedincome.com"
+    }
   ]
 
   // Available strategies
@@ -1574,7 +1621,7 @@ const handleUseTemplate = () => {
                   </div>
                   <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
                     {availableManagers.map((manager) => (
-                      <div key={manager.id} className="flex items-center space-x-3 py-2">
+                      <div key={manager.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
                         <Checkbox
                           id={manager.id}
                           checked={createDDQForm.selectedManagers.includes(manager.id)}
@@ -1594,11 +1641,19 @@ const handleUseTemplate = () => {
                         />
                         <div className="flex-1">
                           <Label htmlFor={manager.id} className="text-sm font-medium cursor-pointer">
-                            {manager.name}
+                            {manager.contact}
                           </Label>
-                          <p className="text-xs text-gray-500">
-                            {manager.contact} • {manager.title}
+                          <p className="text-xs text-gray-600 font-medium">
+                            {manager.name}
                           </p>
+                          <p className="text-xs text-gray-500">
+                            {manager.title} • {manager.location} • {manager.aum} AUM
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {manager.firmType}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1771,7 +1826,7 @@ const handleUseTemplate = () => {
                 <Label>Select Managers *</Label>
                 <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
                   {availableManagers.map((manager) => (
-                    <div key={manager.id} className="flex items-center space-x-3 py-2">
+                    <div key={manager.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
                       <Checkbox
                         id={`use-${manager.id}`}
                         checked={useTemplateForm.selectedManagers.includes(manager.id)}
@@ -1791,11 +1846,19 @@ const handleUseTemplate = () => {
                       />
                       <div className="flex-1">
                         <Label htmlFor={`use-${manager.id}`} className="text-sm font-medium cursor-pointer">
-                          {manager.name}
+                          {manager.contact}
                         </Label>
-                        <p className="text-xs text-gray-500">
-                          {manager.contact} • {manager.title}
+                        <p className="text-xs text-gray-600 font-medium">
+                          {manager.name}
                         </p>
+                        <p className="text-xs text-gray-500">
+                          {manager.title} • {manager.location} • {manager.aum} AUM
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {manager.firmType}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   ))}

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   ArrowLeft, 
   Plus, 
@@ -18,7 +19,9 @@ import {
   Save,
   Send,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Search,
+  X
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -70,6 +73,77 @@ export default function InformalDueDiligencePage() {
   const [newQuestion, setNewQuestion] = useState("")
   const [newNote, setNewNote] = useState("")
   const [selectedManager, setSelectedManager] = useState<string>("")
+  const [showManagerModal, setShowManagerModal] = useState(false)
+  const [managerSearchQuery, setManagerSearchQuery] = useState("")
+
+  // Real manager data from the system
+  const availableManagers = [
+    {
+      id: "1",
+      name: "Growth Capital Partners",
+      contactPerson: "David Rodriguez",
+      contactTitle: "Managing Partner",
+      firm: "Growth Capital Partners",
+      firmType: "Private Equity",
+      location: "San Francisco, CA",
+      aum: "$2.5B",
+      experience: "18 years",
+      email: "david.rodriguez@growthcapital.com",
+      avatar: "/placeholder-user.jpg"
+    },
+    {
+      id: "2", 
+      name: "Sustainable Equity Fund",
+      contactPerson: "Sarah Chen",
+      contactTitle: "Portfolio Manager",
+      firm: "Sustainable Equity Fund",
+      firmType: "Hedge Fund",
+      location: "New York, NY",
+      aum: "$1.2B",
+      experience: "12 years",
+      email: "sarah.chen@sustainableequity.com",
+      avatar: "/placeholder-user.jpg"
+    },
+    {
+      id: "3",
+      name: "Infrastructure Capital",
+      contactPerson: "Michael Thompson",
+      contactTitle: "Senior Managing Director",
+      firm: "Infrastructure Capital",
+      firmType: "Infrastructure",
+      location: "London, UK",
+      aum: "$3.8B",
+      experience: "22 years",
+      email: "michael.thompson@infrastructurecapital.com",
+      avatar: "/placeholder-user.jpg"
+    },
+    {
+      id: "4",
+      name: "Venture Dynamics",
+      contactPerson: "Jennifer Park",
+      contactTitle: "Founding Partner",
+      firm: "Venture Dynamics",
+      firmType: "Venture Capital",
+      location: "Palo Alto, CA",
+      aum: "$800M",
+      experience: "15 years",
+      email: "jennifer.park@venturedynamics.com",
+      avatar: "/placeholder-user.jpg"
+    },
+    {
+      id: "5",
+      name: "Fixed Income Strategies",
+      contactPerson: "Robert Wilson",
+      contactTitle: "Chief Investment Officer",
+      firm: "Fixed Income Strategies",
+      firmType: "Credit",
+      location: "Chicago, IL",
+      aum: "$4.2B",
+      experience: "20 years",
+      email: "robert.wilson@fixedincome.com",
+      avatar: "/placeholder-user.jpg"
+    }
+  ]
 
   // Load current session on mount
   useEffect(() => {
@@ -201,25 +275,51 @@ export default function InformalDueDiligencePage() {
   }
 
   const addManager = () => {
+    setShowManagerModal(true)
+  }
+
+  const selectManager = (manager: any) => {
     if (!currentSession) return
 
-    const manager: InformalManager = {
-      id: `m-${Date.now()}`,
-      name: "New Manager",
-      firm: "Manager Firm",
-      title: "Managing Director",
-      email: "manager@firm.com",
+    // Check if manager is already added
+    const isAlreadyAdded = currentSession.managers.some(m => m.id === manager.id)
+    if (isAlreadyAdded) {
+      showNotification("Manager already added to session")
+      return
+    }
+
+    const informalManager: InformalManager = {
+      id: manager.id,
+      name: manager.contactPerson,
+      firm: manager.firm,
+      title: manager.contactTitle,
+      email: manager.email,
       status: "contacted"
     }
 
     const updatedSession = {
       ...currentSession,
-      managers: [...currentSession.managers, manager]
+      managers: [...currentSession.managers, informalManager]
     }
 
     setCurrentSession(updatedSession)
     saveSession()
-    showNotification("Manager added")
+    setShowManagerModal(false)
+    setManagerSearchQuery("")
+    showNotification(`${manager.contactPerson} from ${manager.firm} added to session`)
+  }
+
+  const removeManager = (managerId: string) => {
+    if (!currentSession) return
+
+    const updatedSession = {
+      ...currentSession,
+      managers: currentSession.managers.filter(m => m.id !== managerId)
+    }
+
+    setCurrentSession(updatedSession)
+    saveSession()
+    showNotification("Manager removed from session")
   }
 
   const updateManagerStatus = (managerId: string, status: InformalManager['status']) => {
@@ -480,10 +580,16 @@ export default function InformalDueDiligencePage() {
                         <Card key={manager.id}>
                           <CardContent className="p-4">
                             <div className="flex items-center justify-between">
-                              <div>
-                                <p className="font-medium">{manager.name}</p>
-                                <p className="text-sm text-gray-600">{manager.firm} • {manager.title}</p>
-                                <p className="text-sm text-gray-500">{manager.email}</p>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10">
+                                  <img src="/placeholder-user.jpg" alt={manager.name} />
+                                  <AvatarFallback>{manager.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-medium">{manager.name}</p>
+                                  <p className="text-sm text-gray-600">{manager.firm} • {manager.title}</p>
+                                  <p className="text-sm text-gray-500">{manager.email}</p>
+                                </div>
                               </div>
                               <div className="flex items-center gap-2">
                                 <Badge className={
@@ -500,11 +606,26 @@ export default function InformalDueDiligencePage() {
                                 >
                                   Update Status
                                 </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => removeManager(manager.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  Remove
+                                </Button>
                               </div>
                             </div>
                           </CardContent>
                         </Card>
                       ))}
+                      {currentSession.managers.length === 0 && (
+                        <div className="text-center py-8 text-gray-500">
+                          <User className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                          <p className="text-sm">No managers added yet</p>
+                          <p className="text-xs mt-1">Click "Add Manager" to select managers from your network</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -513,6 +634,94 @@ export default function InformalDueDiligencePage() {
           </Tabs>
         </div>
       </div>
+
+      {/* Manager Selection Modal */}
+      {showManagerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">Add Manager to Session</h3>
+                <p className="text-sm text-gray-600">Select a manager from your network to add to this informal due diligence session</p>
+              </div>
+              <Button variant="outline" onClick={() => setShowManagerModal(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search managers..."
+                  value={managerSearchQuery}
+                  onChange={(e) => setManagerSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              {/* Manager List */}
+              <div className="space-y-3">
+                {availableManagers
+                  .filter(manager => 
+                    manager.contactPerson.toLowerCase().includes(managerSearchQuery.toLowerCase()) ||
+                    manager.firm.toLowerCase().includes(managerSearchQuery.toLowerCase()) ||
+                    manager.firmType.toLowerCase().includes(managerSearchQuery.toLowerCase())
+                  )
+                  .map((manager) => {
+                    const isAdded = currentSession?.managers.some(m => m.id === manager.id)
+                    return (
+                      <Card key={manager.id} className={`${isAdded ? 'bg-green-50 border-green-200' : ''}`}>
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                              <Avatar className="h-12 w-12">
+                                <img src={manager.avatar} alt={manager.contactPerson} />
+                                <AvatarFallback>{manager.contactPerson.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <h4 className="font-medium text-gray-900">{manager.contactPerson}</h4>
+                                <p className="text-sm text-gray-600">{manager.contactTitle} • {manager.firm}</p>
+                                <p className="text-xs text-gray-500">{manager.location} • {manager.aum} AUM</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">{manager.firmType}</Badge>
+                              {isAdded ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => removeManager(manager.id)}
+                                  className="text-red-600 hover:text-red-700"
+                                >
+                                  Remove
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  onClick={() => selectManager(manager)}
+                                >
+                                  Add
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+              <Button variant="outline" onClick={() => setShowManagerModal(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Screen>
   )
 }
