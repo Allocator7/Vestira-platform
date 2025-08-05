@@ -1,7 +1,7 @@
+"use client"
+
 // Force dynamic rendering to prevent SSR issues
 export const dynamic = 'force-dynamic'
-
-"use client"
 
 import { useState } from "react"
 import { Screen } from "../../../../components/Screen"
