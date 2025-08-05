@@ -50,7 +50,7 @@ const mockManagers: Manager[] = [
     experience: "18 years",
     assetClasses: ["Private Equity & Other Alternatives"],
     strategies: ["Growth Equity", "Buyouts"],
-    avatar: "/placeholder-user.jpg",
+    avatar: "/managers/david-rodriguez.jpg",
     connections: 156,
     lastActive: "2024-01-15",
     trackRecord: {
@@ -73,7 +73,7 @@ const mockManagers: Manager[] = [
     experience: "12 years",
     assetClasses: ["Public Equities"],
     strategies: ["ESG/Sustainable Equity", "Long/Short Equity"],
-    avatar: "/placeholder-user.jpg",
+    avatar: "/managers/sarah-chen.jpg",
     connections: 203,
     lastActive: "2024-01-14",
     trackRecord: {
@@ -95,7 +95,7 @@ const mockManagers: Manager[] = [
     experience: "22 years",
     assetClasses: ["Private Fixed Income", "Real Estate"],
     strategies: ["Infrastructure Debt", "Real Estate Debt"],
-    avatar: "/placeholder-user.jpg",
+    avatar: "/managers/michael-thompson.jpg",
     connections: 287,
     lastActive: "2024-01-13",
     trackRecord: {
@@ -118,7 +118,7 @@ const mockManagers: Manager[] = [
     experience: "15 years",
     assetClasses: ["Private Equity & Other Alternatives"],
     strategies: ["Venture Capital", "Growth Equity"],
-    avatar: "/placeholder-user.jpg",
+    avatar: "/managers/jennifer-park.jpg",
     connections: 342,
     lastActive: "2024-01-12",
     trackRecord: {
@@ -140,7 +140,7 @@ const mockManagers: Manager[] = [
     experience: "25 years",
     assetClasses: ["Public Fixed Income", "Private Fixed Income"],
     strategies: ["High Yield Bonds", "Corporate Private Placements", "Direct Lending"],
-    avatar: "/placeholder-user.jpg",
+    avatar: "/managers/robert-williams.jpg",
     connections: 198,
     lastActive: "2024-01-11",
     trackRecord: {
@@ -162,7 +162,7 @@ const mockManagers: Manager[] = [
     experience: "16 years",
     assetClasses: ["Real Estate"],
     strategies: ["Real Estate Equity", "Commercial Mortgage Loans"],
-    avatar: "/placeholder-user.jpg",
+    avatar: "/managers/lisa-anderson.jpg",
     connections: 167,
     lastActive: "2024-01-10",
     trackRecord: {

@@ -39,7 +39,7 @@ export default function AllocatorEventsCenter() {
       rating: 4.9,
       description: "Comprehensive summit covering advanced due diligence methodologies and risk assessment strategies.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=DD+Summit",
+      image: "/events/dd-summit.jpg",
     },
     {
       id: 2,
@@ -56,7 +56,7 @@ export default function AllocatorEventsCenter() {
       rating: 4.7,
       description: "Strategic insights into alternative investment allocation for institutional portfolios.",
       isRegistered: true,
-      image: "/placeholder.svg?height=200&width=400&text=Allocation+Strategies",
+      image: "/events/allocation-strategies.jpg",
     },
     {
       id: 3,
@@ -73,7 +73,7 @@ export default function AllocatorEventsCenter() {
       rating: 4.8,
       description: "Hands-on workshop on performance measurement and benchmarking in private markets.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Analytics+Workshop",
+      image: "/events/analytics-workshop.jpg",
     },
     {
       id: 4,
@@ -90,7 +90,7 @@ export default function AllocatorEventsCenter() {
       rating: 4.6,
       description: "Networking and knowledge sharing for endowment and foundation investment professionals.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Investment+Forum",
+      image: "/events/investment-forum.jpg",
     },
   ]
 

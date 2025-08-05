@@ -89,7 +89,7 @@ export default function InformalDueDiligencePage() {
       aum: "$2.5B",
       experience: "18 years",
       email: "david.rodriguez@growthcapital.com",
-      avatar: "/placeholder-user.jpg"
+      avatar: "/managers/david-rodriguez.jpg"
     },
     {
       id: "2", 
@@ -102,7 +102,7 @@ export default function InformalDueDiligencePage() {
       aum: "$1.2B",
       experience: "12 years",
       email: "sarah.chen@sustainableequity.com",
-      avatar: "/placeholder-user.jpg"
+      avatar: "/managers/sarah-chen.jpg"
     },
     {
       id: "3",
@@ -115,7 +115,7 @@ export default function InformalDueDiligencePage() {
       aum: "$3.8B",
       experience: "22 years",
       email: "michael.thompson@infrastructurecapital.com",
-      avatar: "/placeholder-user.jpg"
+      avatar: "/managers/michael-thompson.jpg"
     },
     {
       id: "4",
@@ -128,7 +128,7 @@ export default function InformalDueDiligencePage() {
       aum: "$800M",
       experience: "15 years",
       email: "jennifer.park@venturedynamics.com",
-      avatar: "/placeholder-user.jpg"
+      avatar: "/managers/jennifer-park.jpg"
     },
     {
       id: "5",
