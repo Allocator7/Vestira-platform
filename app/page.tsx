@@ -1,34 +1,31 @@
-import Link from "next/link"
+"use client"
+
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useSession } from "../context/SessionContext"
 
 export default function HomePage() {
+  const router = useRouter()
+  const { userRole, isLoading } = useSession()
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (userRole) {
+        router.push(`/screens/${userRole}/home`)
+      } else {
+        router.push("/login")
+      }
+    }
+  }, [userRole, isLoading, router])
+
+  // Simple loading screen
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-canvas-bg to-white">
       <div className="text-center">
-        <div className="h-12 w-12 rounded-xl bg-deep-brand flex items-center justify-center text-white font-bold text-xl shadow-vestira mx-auto mb-4">
+        <div className="h-12 w-12 rounded-xl bg-deep-brand flex items-center justify-center text-white font-bold text-xl shadow-vestira mx-auto mb-4 animate-pulse">
           V
         </div>
-        <h1 className="text-2xl font-bold text-deep-brand mb-4">Welcome to Vestira</h1>
-        <p className="text-base-gray mb-6">Your platform is ready</p>
-        <div className="space-y-2">
-          <Link 
-            href="/login" 
-            className="block px-6 py-2 bg-deep-brand text-white rounded-lg hover:bg-opacity-90 transition-colors"
-          >
-            Login
-          </Link>
-          <Link 
-            href="/screens/allocator/home" 
-            className="block px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Allocator Dashboard
-          </Link>
-          <Link 
-            href="/screens/manager/home" 
-            className="block px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Manager Dashboard
-          </Link>
-        </div>
+        <p className="text-base-gray">Loading Vestira...</p>
       </div>
     </div>
   )
