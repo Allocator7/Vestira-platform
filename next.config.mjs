@@ -62,6 +62,8 @@ const nextConfig = {
       },
     ]
   },
+  // AWS Amplify deployment settings
+  trailingSlash: false,
 }
 
 export default nextConfig
