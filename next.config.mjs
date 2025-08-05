@@ -19,9 +19,10 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Fix SSR issues for AWS deployment
-  output: 'standalone',
+  // AWS Amplify deployment settings
   trailingSlash: false,
+  // Disable static export for Amplify
+  output: undefined,
 }
 
 export default nextConfig
