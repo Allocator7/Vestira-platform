@@ -1339,13 +1339,21 @@ export default function AllocatorDueDiligenceHubPage() {
     setSelectedQuestionsInSelector(prev => [...prev, questionKey])
   }
 
-  // Get all available questions from both Vestira and custom templates
+  // Enhanced question management with filtering and categorization
+  const [questionSearchTerm, setQuestionSearchTerm] = useState("")
+  const [questionSourceFilter, setQuestionSourceFilter] = useState("all")
+  const [questionCategoryFilter, setQuestionCategoryFilter] = useState("all")
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState([])
+  const [bulkSelectMode, setBulkSelectMode] = useState(false)
+
+  // Get all available questions from both Vestira and custom templates with enhanced filtering
   const getAllAvailableQuestions = () => {
     const vestiraQuestions = vestiraTemplates.flatMap(template => 
       generateTemplateQuestions(template).map(q => ({
         ...q,
         source: 'Vestira Template',
-        templateName: template.name
+        templateName: template.name,
+        category: q.section || 'General'
       }))
     )
     
@@ -1353,11 +1361,96 @@ export default function AllocatorDueDiligenceHubPage() {
       template.questions.map(q => ({
         ...q,
         source: 'Custom Template',
-        templateName: template.name
+        templateName: template.name,
+        category: q.section || 'General'
       }))
     )
 
-    return [...vestiraQuestions, ...customQuestions]
+    let allQuestions = [...vestiraQuestions, ...customQuestions]
+
+    // Apply source filter
+    if (questionSourceFilter !== "all") {
+      allQuestions = allQuestions.filter(q => {
+        if (questionSourceFilter === "vestira") return q.source === 'Vestira Template'
+        if (questionSourceFilter === "custom") return q.source === 'Custom Template'
+        return true
+      })
+    }
+
+    // Apply category filter
+    if (questionCategoryFilter !== "all") {
+      allQuestions = allQuestions.filter(q => q.category === questionCategoryFilter)
+    }
+
+    // Apply search filter
+    if (questionSearchTerm.trim()) {
+      const searchLower = questionSearchTerm.toLowerCase()
+      allQuestions = allQuestions.filter(q => 
+        q.question.toLowerCase().includes(searchLower) ||
+        q.templateName.toLowerCase().includes(searchLower) ||
+        q.category.toLowerCase().includes(searchLower)
+      )
+    }
+
+    return allQuestions
+  }
+
+  // Get unique categories for filtering
+  const getAvailableCategories = () => {
+    const allQuestions = vestiraTemplates.flatMap(template => 
+      generateTemplateQuestions(template).map(q => ({
+        ...q,
+        source: 'Vestira Template',
+        templateName: template.name,
+        category: q.section || 'General'
+      }))
+    ).concat(customTemplates.flatMap(template => 
+      template.questions.map(q => ({
+        ...q,
+        source: 'Custom Template',
+        templateName: template.name,
+        category: q.section || 'General'
+      }))
+    ))
+
+    const categories = [...new Set(allQuestions.map(q => q.category))]
+    return categories.sort()
+  }
+
+  // Bulk selection functions
+  const handleBulkSelectAll = () => {
+    const allQuestions = getAllAvailableQuestions()
+    const allQuestionKeys = allQuestions.map(q => 
+      `${q.source}-${q.templateName}-${q.question.substring(0, 50)}`
+    )
+    setSelectedQuestionIds(allQuestionKeys)
+  }
+
+  const handleBulkDeselectAll = () => {
+    setSelectedQuestionIds([])
+  }
+
+  const handleBulkAddSelected = () => {
+    const allQuestions = getAllAvailableQuestions()
+    const selectedQuestions = allQuestions.filter(q => 
+      selectedQuestionIds.includes(`${q.source}-${q.templateName}-${q.question.substring(0, 50)}`)
+    )
+
+    if (isQuestionSelectorForDDQ) {
+      setCurrentDDQQuestions(prev => {
+        const updatedQuestions = [...prev, ...selectedQuestions]
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        return updatedQuestions
+      })
+      showNotification(`Added ${selectedQuestions.length} questions to DDQ`)
+    } else {
+      selectedQuestions.forEach(q => handleAddQuestionToTemplate(q))
+      showNotification(`Added ${selectedQuestions.length} questions to template`)
+    }
+    
+    setSelectedQuestionIds([])
+    setBulkSelectMode(false)
   }
 
 const handleUseTemplate = () => {
@@ -3330,87 +3423,185 @@ const handleUseTemplate = () => {
                   </Card>
                 )}
 
-                {/* Search and Filters */}
+                {/* Enhanced Search and Filters */}
                 <Card>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex-1">
-                        <Input
-                          placeholder="Search questions..."
-                          className="w-full"
-                        />
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      {/* Search Bar */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Search questions by text, template, or category..."
+                            value={questionSearchTerm}
+                            onChange={(e) => setQuestionSearchTerm(e.target.value)}
+                            className="w-full"
+                          />
+                        </div>
+                        <Button
+                          variant={bulkSelectMode ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setBulkSelectMode(!bulkSelectMode)}
+                        >
+                          {bulkSelectMode ? "Exit Bulk Mode" : "Bulk Select"}
+                        </Button>
                       </div>
-                      <Select>
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="Filter by source" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">All Sources</SelectItem>
-                          <SelectItem value="vestira">Vestira Templates</SelectItem>
-                          <SelectItem value="custom">Custom Templates</SelectItem>
-                        </SelectContent>
-                      </Select>
+
+                      {/* Filters Row */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium">Source:</Label>
+                          <Select value={questionSourceFilter} onValueChange={setQuestionSourceFilter}>
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Sources</SelectItem>
+                              <SelectItem value="vestira">Vestira Templates</SelectItem>
+                              <SelectItem value="custom">Custom Templates</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium">Category:</Label>
+                          <Select value={questionCategoryFilter} onValueChange={setQuestionCategoryFilter}>
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Categories</SelectItem>
+                              {getAvailableCategories().map(category => (
+                                <SelectItem key={category} value={category}>{category}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-auto">
+                          <span className="text-sm text-gray-600">
+                            {getAllAvailableQuestions().length} questions found
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bulk Selection Controls */}
+                      {bulkSelectMode && (
+                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" onClick={handleBulkSelectAll}>
+                              Select All
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={handleBulkDeselectAll}>
+                              Deselect All
+                            </Button>
+                            <span className="text-sm text-gray-600">
+                              {selectedQuestionIds.length} selected
+                            </span>
+                          </div>
+                          <div className="ml-auto">
+                            <Button size="sm" onClick={handleBulkAddSelected} disabled={selectedQuestionIds.length === 0}>
+                              Add Selected ({selectedQuestionIds.length})
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
 
-              {/* Questions List */}
+              {/* Enhanced Questions List */}
               <div className="space-y-4 max-h-96 overflow-y-auto">
-                {getAllAvailableQuestions().map((question, index) => (
-                  <Card key={`${question.id}-${index}`} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <Checkbox
-                          id={`question-${index}`}
-                          checked={selectedQuestionsInSelector.includes(`${question.source}-${question.templateName}-${question.question.substring(0, 50)}`)}
-                          onCheckedChange={(checked) => {
-                            if (checked) {
-                              handleSelectQuestion(question)
-                            } else {
-                              // Remove question when unchecked
-                              const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
-                              setSelectedQuestionsInSelector(prev => prev.filter(key => key !== questionKey))
-                              
-                              if (isQuestionSelectorForDDQ) {
-                                setCurrentDDQQuestions(prev => {
-                                  // Remove by matching the original question text and source
-                                  const updatedQuestions = prev.filter(q => 
-                                    !(q.question === question.question && 
-                                      q.source === question.source && 
-                                      q.templateName === question.templateName)
-                                  )
-                                  localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-                                  sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-                                  return updatedQuestions
-                                })
-                                showNotification("Question removed from DDQ")
+                {getAllAvailableQuestions().map((question, index) => {
+                  const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
+                  const isSelected = bulkSelectMode 
+                    ? selectedQuestionIds.includes(questionKey)
+                    : selectedQuestionsInSelector.includes(questionKey)
+                  
+                  return (
+                    <Card key={`${question.id}-${index}`} className={`hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <Checkbox
+                            id={`question-${index}`}
+                            checked={isSelected}
+                            onCheckedChange={(checked) => {
+                              if (bulkSelectMode) {
+                                // Bulk selection mode
+                                if (checked) {
+                                  setSelectedQuestionIds(prev => [...prev, questionKey])
+                                } else {
+                                  setSelectedQuestionIds(prev => prev.filter(key => key !== questionKey))
+                                }
                               } else {
-                                setNewTemplate(prev => ({
-                                  ...prev,
-                                  questions: prev.questions.filter(q => 
-                                    !(q.question === question.question && 
-                                      q.source === question.source && 
-                                      q.templateName === question.templateName)
-                                  )
-                                }))
-                                showNotification("Question removed from template")
+                                // Individual selection mode
+                                if (checked) {
+                                  handleSelectQuestion(question)
+                                } else {
+                                  // Remove question when unchecked
+                                  setSelectedQuestionsInSelector(prev => prev.filter(key => key !== questionKey))
+                                  
+                                  if (isQuestionSelectorForDDQ) {
+                                    setCurrentDDQQuestions(prev => {
+                                      // Remove by matching the original question text and source
+                                      const updatedQuestions = prev.filter(q => 
+                                        !(q.question === question.question && 
+                                          q.source === question.source && 
+                                          q.templateName === question.templateName)
+                                      )
+                                      localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                      sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                      return updatedQuestions
+                                    })
+                                    showNotification("Question removed from DDQ")
+                                  } else {
+                                    setNewTemplate(prev => ({
+                                      ...prev,
+                                      questions: prev.questions.filter(q => 
+                                        !(q.question === question.question && 
+                                          q.source === question.source && 
+                                          q.templateName === question.templateName)
+                                      )
+                                    }))
+                                    showNotification("Question removed from template")
+                                  }
+                                }
                               }
-                            }
-                          }}
-                          className="mt-1"
-                        />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-3">
-                            <Badge variant="outline" className="text-xs">{question.source}</Badge>
-                            <Badge variant="secondary" className="text-xs">{question.type}</Badge>
-                            <span className="text-xs text-gray-500">from {question.templateName}</span>
+                            }}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Badge variant="outline" className="text-xs">{question.source}</Badge>
+                              <Badge variant="secondary" className="text-xs">{question.type}</Badge>
+                              <Badge variant="outline" className="text-xs">{question.category}</Badge>
+                              <span className="text-xs text-gray-500">from {question.templateName}</span>
+                            </div>
+                            <p className="text-sm font-medium text-gray-900 leading-relaxed mb-2">{question.question}</p>
+                            
+                            {/* Question Preview */}
+                            {question.question.length > 150 && (
+                              <div className="text-xs text-gray-500">
+                                {question.question.substring(0, 150)}...
+                              </div>
+                            )}
                           </div>
-                          <p className="text-sm font-medium text-gray-900 leading-relaxed">{question.question}</p>
                         </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+                
+                {getAllAvailableQuestions().length === 0 && (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <div className="text-gray-500">
+                        <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium mb-2">No questions found</p>
+                        <p className="text-sm">Try adjusting your search terms or filters</p>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                )}
               </div>
 
               {/* Action Buttons */}
