@@ -1,4 +1,3 @@
-import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
@@ -13,6 +12,9 @@ export const metadata: Metadata = {
   description: "Investment management platform",
     generator: 'v0.dev'
 }
+
+// Force dynamic rendering for the entire app to prevent SSR issues
+export const dynamic = 'force-dynamic'
 
 export default function RootLayout({
   children,

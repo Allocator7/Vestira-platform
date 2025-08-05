@@ -11,6 +11,7 @@ frontend:
         - echo "GOOGLE_CLIENT_ID=your-google-client-id" >> .env.local
         - echo "GOOGLE_CLIENT_SECRET=your-google-client-secret" >> .env.local
         - echo "NODE_ENV=production" >> .env.local
+        - echo "NEXT_TELEMETRY_DISABLED=1" >> .env.local
         - npm run build
   artifacts:
     baseDirectory: .next
