@@ -1,0 +1,518 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import { Screen } from "@/components/Screen"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { 
+  ArrowLeft, 
+  Plus, 
+  FileText, 
+  MessageSquare, 
+  Calendar, 
+  User, 
+  Save,
+  Send,
+  Clock,
+  CheckCircle
+} from "lucide-react"
+import { useRouter } from "next/navigation"
+
+interface InformalSession {
+  id: string
+  type: "informal"
+  createdAt: string
+  status: "active" | "completed" | "archived"
+  questions: InformalQuestion[]
+  notes: InformalNote[]
+  managers: InformalManager[]
+  allocator: string
+  title?: string
+  description?: string
+}
+
+interface InformalQuestion {
+  id: string
+  question: string
+  answer?: string
+  category: string
+  createdAt: string
+  status: "pending" | "answered" | "follow_up"
+}
+
+interface InformalNote {
+  id: string
+  content: string
+  managerId?: string
+  createdAt: string
+  type: "general" | "question" | "observation"
+}
+
+interface InformalManager {
+  id: string
+  name: string
+  firm: string
+  title: string
+  email: string
+  status: "contacted" | "responding" | "completed"
+  lastContact?: string
+}
+
+export default function InformalDueDiligencePage() {
+  const router = useRouter()
+  const [notification, setNotification] = useState("")
+  const [currentSession, setCurrentSession] = useState<InformalSession | null>(null)
+  const [activeTab, setActiveTab] = useState("overview")
+  const [newQuestion, setNewQuestion] = useState("")
+  const [newNote, setNewNote] = useState("")
+  const [selectedManager, setSelectedManager] = useState<string>("")
+
+  // Load current session on mount
+  useEffect(() => {
+    const loadCurrentSession = () => {
+      try {
+        const sessionData = sessionStorage.getItem('current-informal-session')
+        if (sessionData) {
+          const session = JSON.parse(sessionData)
+          setCurrentSession(session)
+        } else {
+          // Create new session if none exists
+          createNewSession()
+        }
+      } catch (error) {
+        console.error("Error loading session:", error)
+        createNewSession()
+      }
+    }
+
+    loadCurrentSession()
+  }, [])
+
+  const createNewSession = () => {
+    const newSession: InformalSession = {
+      id: `informal-${Date.now()}`,
+      type: "informal",
+      createdAt: new Date().toISOString(),
+      status: "active",
+      questions: [],
+      notes: [],
+      managers: [],
+      allocator: "Current User",
+      title: "New Informal Due Diligence",
+      description: "Informal due diligence session"
+    }
+    
+    setCurrentSession(newSession)
+    sessionStorage.setItem('current-informal-session', JSON.stringify(newSession))
+    
+    // Save to localStorage
+    const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
+    existingSessions.push(newSession)
+    localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+  }
+
+  const showNotification = (message: string) => {
+    setNotification(message)
+    setTimeout(() => setNotification(""), 3000)
+  }
+
+  const saveSession = () => {
+    if (currentSession) {
+      try {
+        // Update sessionStorage
+        sessionStorage.setItem('current-informal-session', JSON.stringify(currentSession))
+        
+        // Update localStorage
+        const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
+        const updatedSessions = existingSessions.map((session: InformalSession) => 
+          session.id === currentSession.id ? currentSession : session
+        )
+        localStorage.setItem('informal-dd-sessions', JSON.stringify(updatedSessions))
+        
+        showNotification("Session saved successfully")
+      } catch (error) {
+        console.error("Error saving session:", error)
+        showNotification("Error saving session")
+      }
+    }
+  }
+
+  const addQuestion = () => {
+    if (!newQuestion.trim() || !currentSession) return
+
+    const question: InformalQuestion = {
+      id: `q-${Date.now()}`,
+      question: newQuestion,
+      category: "General",
+      createdAt: new Date().toISOString(),
+      status: "pending"
+    }
+
+    const updatedSession = {
+      ...currentSession,
+      questions: [...currentSession.questions, question]
+    }
+
+    setCurrentSession(updatedSession)
+    setNewQuestion("")
+    saveSession()
+    showNotification("Question added")
+  }
+
+  const addNote = () => {
+    if (!newNote.trim() || !currentSession) return
+
+    const note: InformalNote = {
+      id: `n-${Date.now()}`,
+      content: newNote,
+      createdAt: new Date().toISOString(),
+      type: "general"
+    }
+
+    const updatedSession = {
+      ...currentSession,
+      notes: [...currentSession.notes, note]
+    }
+
+    setCurrentSession(updatedSession)
+    setNewNote("")
+    saveSession()
+    showNotification("Note added")
+  }
+
+  const answerQuestion = (questionId: string, answer: string) => {
+    if (!currentSession) return
+
+    const updatedQuestions = currentSession.questions.map(q =>
+      q.id === questionId ? { ...q, answer, status: "answered" as const } : q
+    )
+
+    const updatedSession = {
+      ...currentSession,
+      questions: updatedQuestions
+    }
+
+    setCurrentSession(updatedSession)
+    saveSession()
+  }
+
+  const addManager = () => {
+    if (!currentSession) return
+
+    const manager: InformalManager = {
+      id: `m-${Date.now()}`,
+      name: "New Manager",
+      firm: "Manager Firm",
+      title: "Managing Director",
+      email: "manager@firm.com",
+      status: "contacted"
+    }
+
+    const updatedSession = {
+      ...currentSession,
+      managers: [...currentSession.managers, manager]
+    }
+
+    setCurrentSession(updatedSession)
+    saveSession()
+    showNotification("Manager added")
+  }
+
+  const updateManagerStatus = (managerId: string, status: InformalManager['status']) => {
+    if (!currentSession) return
+
+    const updatedManagers = currentSession.managers.map(m =>
+      m.id === managerId ? { ...m, status, lastContact: new Date().toISOString() } : m
+    )
+
+    const updatedSession = {
+      ...currentSession,
+      managers: updatedManagers
+    }
+
+    setCurrentSession(updatedSession)
+    saveSession()
+  }
+
+  const completeSession = () => {
+    if (!currentSession) return
+
+    const updatedSession = {
+      ...currentSession,
+      status: "completed" as const
+    }
+
+    setCurrentSession(updatedSession)
+    saveSession()
+    showNotification("Session completed")
+  }
+
+  if (!currentSession) {
+    return (
+      <Screen>
+        <div className="container mx-auto py-6 px-4">
+          <div className="text-center">
+            <div className="animate-spin h-8 w-8 border-2 border-electric-blue border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p>Loading session...</p>
+          </div>
+        </div>
+      </Screen>
+    )
+  }
+
+  return (
+    <Screen>
+      {/* Notification */}
+      {notification && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
+          {notification}
+        </div>
+      )}
+
+      <div className="container mx-auto py-6 px-4">
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button variant="ghost" onClick={() => router.back()}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to Due Diligence Hub
+              </Button>
+              <div>
+                <h1 className="text-3xl font-bold text-deepBrand">Informal Due Diligence</h1>
+                <p className="text-baseGray">Session started {new Date(currentSession.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" onClick={saveSession}>
+                <Save className="h-4 w-4 mr-2" />
+                Save Session
+              </Button>
+              <Button onClick={completeSession} className="bg-electric-blue hover:bg-electric-blue/90">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Complete Session
+              </Button>
+            </div>
+          </div>
+
+          {/* Session Overview */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Session Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{currentSession.questions.length}</div>
+                  <div className="text-sm text-gray-600">Questions</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{currentSession.notes.length}</div>
+                  <div className="text-sm text-gray-600">Notes</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">{currentSession.managers.length}</div>
+                  <div className="text-sm text-gray-600">Managers</div>
+                </div>
+                <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {currentSession.questions.filter(q => q.status === "answered").length}
+                  </div>
+                  <div className="text-sm text-gray-600">Answered</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Main Content */}
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="questions">Questions</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="managers">Managers</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Activity</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {currentSession.questions.slice(-3).map((question) => (
+                      <div key={question.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                        <FileText className="h-4 w-4 text-blue-600" />
+                        <div className="flex-1">
+                          <p className="font-medium">{question.question}</p>
+                          <p className="text-sm text-gray-500">{question.category}</p>
+                        </div>
+                        <Badge className={question.status === "answered" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                          {question.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="questions" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Questions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Add Question */}
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Add a new question..."
+                        value={newQuestion}
+                        onChange={(e) => setNewQuestion(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && addQuestion()}
+                      />
+                      <Button onClick={addQuestion}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add
+                      </Button>
+                    </div>
+
+                    {/* Questions List */}
+                    <div className="space-y-3">
+                      {currentSession.questions.map((question) => (
+                        <Card key={question.id}>
+                          <CardContent className="p-4">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <p className="font-medium">{question.question}</p>
+                                <Badge className={question.status === "answered" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                                  {question.status}
+                                </Badge>
+                              </div>
+                              {question.answer && (
+                                <div className="bg-gray-50 p-3 rounded-lg">
+                                  <p className="text-sm text-gray-700">{question.answer}</p>
+                                </div>
+                              )}
+                              {question.status === "pending" && (
+                                <div className="flex gap-2">
+                                  <Textarea
+                                    placeholder="Add your answer..."
+                                    rows={2}
+                                    onChange={(e) => answerQuestion(question.id, e.target.value)}
+                                  />
+                                  <Button size="sm" onClick={() => answerQuestion(question.id, "Answered")}>
+                                    Save
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="notes" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {/* Add Note */}
+                    <div className="flex gap-2">
+                      <Textarea
+                        placeholder="Add a new note..."
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                        rows={3}
+                      />
+                      <Button onClick={addNote}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add
+                      </Button>
+                    </div>
+
+                    {/* Notes List */}
+                    <div className="space-y-3">
+                      {currentSession.notes.map((note) => (
+                        <Card key={note.id}>
+                          <CardContent className="p-4">
+                            <p className="text-gray-700">{note.content}</p>
+                            <p className="text-xs text-gray-500 mt-2">
+                              {new Date(note.createdAt).toLocaleString()}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="managers" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Managers</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <Button onClick={addManager}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Manager
+                    </Button>
+
+                    <div className="space-y-3">
+                      {currentSession.managers.map((manager) => (
+                        <Card key={manager.id}>
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium">{manager.name}</p>
+                                <p className="text-sm text-gray-600">{manager.firm} • {manager.title}</p>
+                                <p className="text-sm text-gray-500">{manager.email}</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge className={
+                                  manager.status === "completed" ? "bg-green-100 text-green-800" :
+                                  manager.status === "responding" ? "bg-blue-100 text-blue-800" :
+                                  "bg-yellow-100 text-yellow-800"
+                                }>
+                                  {manager.status}
+                                </Badge>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => updateManagerStatus(manager.id, "responding")}
+                                >
+                                  Update Status
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
+    </Screen>
+  )
+}

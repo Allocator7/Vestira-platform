@@ -8,8 +8,13 @@ export default function PrivacyPage() {
   const router = useRouter()
 
   const handleBack = () => {
-    // Go back to the previous page instead of home
-    router.back()
+    // Check if there's a previous page in history
+    if (window.history.length > 1) {
+      router.back()
+    } else {
+      // Fallback to signup page if no history
+      router.push('/signup')
+    }
   }
 
   return (

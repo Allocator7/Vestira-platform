@@ -267,7 +267,29 @@ export default function DDQResponsePage() {
   }
 
   const handleSendMessage = () => {
-    showNotification(`Message sent to ${ddqData.allocatorName}`)
+    try {
+      // Create message data
+      const message = {
+        id: `msg-${Date.now()}`,
+        from: "Manager",
+        to: ddqData.allocatorName,
+        subject: `DDQ Response - ${ddqData.templateName}`,
+        content: `I have questions regarding the DDQ response for ${ddqData.templateName}. Please contact me to discuss.`,
+        timestamp: new Date().toISOString(),
+        ddqId: ddqData.id,
+        status: "sent"
+      }
+      
+      // Store message in localStorage
+      const existingMessages = JSON.parse(localStorage.getItem('ddq-messages') || '[]')
+      existingMessages.push(message)
+      localStorage.setItem('ddq-messages', JSON.stringify(existingMessages))
+      
+      showNotification(`Message sent to ${ddqData.allocatorName}`)
+    } catch (error) {
+      console.error("Error sending message:", error)
+      showNotification("Error sending message - please try again")
+    }
   }
 
   const getStatusBadge = (status: string) => {

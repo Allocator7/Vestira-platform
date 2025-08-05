@@ -1017,9 +1017,8 @@ const handleStartInformalDueDiligence = () => {
     
     showNotification("Informal Due Diligence session started")
     
-    // Navigate to informal due diligence interface
-    // In a real implementation, this would navigate to a dedicated page
-    console.log("Informal DD session created:", informalSession)
+    // Navigate to the informal due diligence page
+    router.push('/screens/allocator/informal-due-diligence')
     
   } catch (error) {
     console.error("Error starting informal due diligence:", error)
@@ -1701,26 +1700,35 @@ const handleUseTemplate = () => {
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-gray-900">Sample Questions</h4>
               <div className="space-y-3">
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <div className="font-medium text-gray-900 mb-2">Organization & Management</div>
-                  <div className="text-sm text-gray-600">
-                    Please provide a detailed overview of your organization's structure, key personnel, and governance
-                    framework.
+                {selectedTemplateForPreview.sampleQuestions?.map((question: any, index: number) => (
+                  <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                    <div className="font-medium text-gray-900 mb-2">{question.section}</div>
+                    <div className="text-sm text-gray-600">{question.question}</div>
                   </div>
-                </div>
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <div className="font-medium text-gray-900 mb-2">Investment Strategy</div>
-                  <div className="text-sm text-gray-600">
-                    Describe your investment strategy, target markets, and approach to portfolio construction.
-                  </div>
-                </div>
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <div className="font-medium text-gray-900 mb-2">Risk Management</div>
-                  <div className="text-sm text-gray-600">
-                    Please describe your risk management framework, including identification, assessment, and mitigation
-                    processes.
-                  </div>
-                </div>
+                )) || (
+                  <>
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="font-medium text-gray-900 mb-2">Organization & Management</div>
+                      <div className="text-sm text-gray-600">
+                        Please provide a detailed overview of your organization's structure, key personnel, and governance
+                        framework.
+                      </div>
+                    </div>
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="font-medium text-gray-900 mb-2">Investment Strategy</div>
+                      <div className="text-sm text-gray-600">
+                        Describe your investment strategy, target markets, and approach to portfolio construction.
+                      </div>
+                    </div>
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="font-medium text-gray-900 mb-2">Risk Management</div>
+                      <div className="text-sm text-gray-600">
+                        Please describe your risk management framework, including identification, assessment, and mitigation
+                        processes.
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
