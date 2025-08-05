@@ -3,7 +3,7 @@ frontend:
   phases:
     preBuild:
       commands:
-        - pnpm install
+        - npm install
     build:
       commands:
         - echo "NEXTAUTH_URL=https://vestira.co" >> .env.local
@@ -11,7 +11,7 @@ frontend:
         - echo "GOOGLE_CLIENT_ID=your-google-client-id" >> .env.local
         - echo "GOOGLE_CLIENT_SECRET=your-google-client-secret" >> .env.local
         - echo "NODE_ENV=production" >> .env.local
-        - pnpm run build
+        - npm run build
   artifacts:
     baseDirectory: .next
     files:
