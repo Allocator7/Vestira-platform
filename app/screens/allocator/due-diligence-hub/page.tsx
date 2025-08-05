@@ -162,6 +162,7 @@ export default function AllocatorDueDiligenceHubPage() {
   })
   const [currentDDQQuestions, setCurrentDDQQuestions] = useState([])
   const [isQuestionSelectorForDDQ, setIsQuestionSelectorForDDQ] = useState(false)
+  const [selectedQuestionsInSelector, setSelectedQuestionsInSelector] = useState([])
 
   const [showTemplatePreviewModal, setShowTemplatePreviewModal] = useState(false)
   const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState(null)
@@ -1267,6 +1268,7 @@ export default function AllocatorDueDiligenceHubPage() {
       ...newTemplate,
       questions: [...newTemplate.questions, question]
     })
+    showNotification("Question added to template")
   }
 
   const handleRemoveQuestionFromTemplate = (questionId: string) => {
@@ -1274,9 +1276,11 @@ export default function AllocatorDueDiligenceHubPage() {
       ...newTemplate,
       questions: newTemplate.questions.filter(q => q.id !== questionId)
     })
+    showNotification("Question removed from template")
   }
 
   const handleOpenQuestionSelector = () => {
+    setIsQuestionSelectorForDDQ(false) // Ensure it's for template creation, not DDQ
     setShowQuestionSelector(true)
   }
 
@@ -1297,6 +1301,9 @@ export default function AllocatorDueDiligenceHubPage() {
       // Add to template questions
       handleAddQuestionToTemplate(questionWithId)
     }
+    
+    // Track selected questions in selector
+    setSelectedQuestionsInSelector(prev => [...prev, questionWithId.id])
   }
 
   // Get all available questions from both Vestira and custom templates
@@ -3136,6 +3143,7 @@ const handleUseTemplate = () => {
                 onClick={() => {
                   setShowQuestionSelector(false)
                   setIsQuestionSelectorForDDQ(false)
+                  setSelectedQuestionsInSelector([])
                 }}
               >
                 <X className="h-4 w-4" />
@@ -3199,6 +3207,7 @@ const handleUseTemplate = () => {
                       <div className="flex items-start gap-3">
                         <Checkbox
                           id={`question-${index}`}
+                          checked={selectedQuestionsInSelector.includes(question.id)}
                           onCheckedChange={(checked) => {
                             if (checked) {
                               handleSelectQuestion(question)
@@ -3221,7 +3230,11 @@ const handleUseTemplate = () => {
 
               {/* Action Buttons */}
               <div className="flex items-center justify-end gap-3">
-                <Button variant="outline" onClick={() => setShowQuestionSelector(false)}>
+                <Button variant="outline" onClick={() => {
+                  setShowQuestionSelector(false)
+                  setIsQuestionSelectorForDDQ(false)
+                  setSelectedQuestionsInSelector([])
+                }}>
                   Done
                 </Button>
               </div>
