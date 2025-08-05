@@ -749,7 +749,7 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-15",
       version: "3.2",
       isVestiraStandard: true,
-      usage: "Used by 89% of allocators",
+      usage: "Completed by 89% of Managers",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -762,7 +762,7 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-10",
       version: "2.8",
       isVestiraStandard: true,
-      usage: "Used by 92% of allocators",
+      usage: "Completed by 92% of Managers",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -775,7 +775,7 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-08",
       version: "2.1",
       isVestiraStandard: true,
-      usage: "Used by 76% of allocators",
+      usage: "Completed by 76% of Managers",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -788,7 +788,7 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-12",
       version: "1.9",
       isVestiraStandard: true,
-      usage: "Used by 68% of allocators",
+      usage: "Completed by 68% of Managers",
       compliance: "SOC 2 Compliant",
     },
   ]
@@ -916,6 +916,14 @@ export default function AllocatorDueDiligenceHubPage() {
     const template = [...vestiraTemplates, ...customTemplates].find((t) => t.id === templateId)
     setSelectedTemplateForPreview(template)
     setShowTemplatePreviewModal(true)
+  }
+
+  const handleAddAllQuestions = (templateId: string) => {
+    const template = [...vestiraTemplates, ...customTemplates].find((t) => t.id === templateId)
+    if (template) {
+      // Add all questions from the template to the current DDQ
+      showNotification(`Added all ${template.questionCount} questions from ${template.name} to your DDQ`)
+    }
   }
 
   const handleUseTemplate = () => {
@@ -2175,10 +2183,26 @@ export default function AllocatorDueDiligenceHubPage() {
             <h1 className="text-2xl font-bold text-gray-900">Due Diligence Hub</h1>
             <p className="text-gray-600">Manage and review due diligence questionnaires</p>
           </div>
-          <Button onClick={handleCreateDDQClick}>
-            <FileText className="h-4 w-4 mr-2" />
-            Create DDQ
-          </Button>
+          <CustomDropdown
+            trigger={
+              <Button>
+                <FileText className="h-4 w-4 mr-2" />
+                Launch Due Diligence
+              </Button>
+            }
+            items={[
+              {
+                label: "Create DDQ",
+                onClick: handleCreateDDQClick,
+              },
+              {
+                label: "Start Informal Due Diligence",
+                onClick: () => {
+                  showNotification("Informal Due Diligence feature coming soon")
+                },
+              },
+            ]}
+          />
         </div>
 
         {/* Tabs */}
@@ -2432,20 +2456,24 @@ export default function AllocatorDueDiligenceHubPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-4 border-t">
-                        <div className="text-sm text-gray-500">
-                          Last updated: {new Date(template.lastUpdated).toLocaleDateString()}
+                                              <div className="flex items-center justify-between pt-4 border-t">
+                          <div className="text-sm text-gray-500">
+                            Last updated: {new Date(template.lastUpdated).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handlePreviewTemplate(template.id)}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleAddAllQuestions(template.id)}>
+                              <FileText className="h-4 w-4 mr-1" />
+                              Add All Questions
+                            </Button>
+                            <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
+                              Use Template
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handlePreviewTemplate(template.id)}>
-                            <Eye className="h-4 w-4 mr-1" />
-                            Preview
-                          </Button>
-                          <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
-                            Use Template
-                          </Button>
-                        </div>
-                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -2492,6 +2520,10 @@ export default function AllocatorDueDiligenceHubPage() {
                             <Button variant="outline" size="sm" onClick={() => handlePreviewTemplate(template.id)}>
                               <Eye className="h-4 w-4 mr-1" />
                               Preview
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleAddAllQuestions(template.id)}>
+                              <FileText className="h-4 w-4 mr-1" />
+                              Add All Questions
                             </Button>
                             <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
                               Use Template

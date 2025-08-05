@@ -423,11 +423,7 @@ export default function AllocatorManagersPage() {
 
                   {/* Bottom Section - Fixed Position */}
                   <div className="mt-auto pt-4 border-t">
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-4 text-xs text-baseGray">
-                        <span>IRR: {manager.trackRecord.irr}</span>
-                        <span>Multiple: {manager.trackRecord.multiple}</span>
-                      </div>
+                    <div className="flex items-center justify-end">
                       <div className="flex gap-2 flex-shrink-0">
                         <Button
                           size="sm"

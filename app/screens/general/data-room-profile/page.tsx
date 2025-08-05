@@ -405,14 +405,7 @@ export default function DataRoomProfilePage() {
                 <p className="text-xl font-bold text-deepBrand">{dataRoomData.totalDocuments}</p>
                 <p className="text-xs text-gray-500">Total available</p>
               </div>
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
-                  <Users className="h-4 w-4" />
-                  <span className="text-sm font-medium">Contacts</span>
-                </div>
-                <p className="text-xl font-bold text-deepBrand">{dataRoomData.participants}</p>
-                <p className="text-xs text-gray-500">Active users</p>
-              </div>
+
               <div className="text-center p-3 bg-purple-50 rounded-lg">
                 <div className="flex items-center justify-center gap-1 text-purple-600 mb-1">
                   <Clock className="h-4 w-4" />
@@ -445,9 +438,7 @@ export default function DataRoomProfilePage() {
             <TabsTrigger value="activity" className="data-[state=active]:bg-white data-[state=active]:text-deepBrand">
               Activity
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:text-deepBrand">
-              Analytics
-            </TabsTrigger>
+
             <TabsTrigger
               value="participants"
               className="data-[state=active]:bg-white data-[state=active]:text-deepBrand"
@@ -700,7 +691,6 @@ export default function DataRoomProfilePage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-baseGray">{doc.views} views</span>
                         <Button variant="outline" size="sm" onClick={() => handleViewDocument(doc)}>
                           <Eye className="h-4 w-4 mr-1" />
                           View
@@ -747,61 +737,12 @@ export default function DataRoomProfilePage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Document Engagement
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {documentsData.slice(0, 5).map((doc) => (
-                      <div key={doc.id} className="flex justify-between items-center p-2 rounded hover:bg-gray-50">
-                        <span className="text-sm truncate">{doc.name}</span>
-                        <div className="flex items-center gap-3 text-xs text-gray-600">
-                          <span>{doc.views} views</span>
-                          <span>{doc.downloadCount} downloads</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Engagement Trends
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {documentsData.reduce((sum, doc) => sum + doc.views, 0)}
-                      </div>
-                      <div className="text-sm text-gray-600">Total Views</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
-                        {documentsData.reduce((sum, doc) => sum + doc.downloadCount, 0)}
-                      </div>
-                      <div className="text-sm text-gray-600">Total Downloads</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
 
           <TabsContent value="participants">
             <Card>
               <CardHeader>
-                <CardTitle>Contacts ({dataRoomData.participants})</CardTitle>
+                <CardTitle>Firm Contacts (3)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -838,25 +779,55 @@ export default function DataRoomProfilePage() {
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <img src="/placeholder.svg?height=40&width=40" alt="Michael Chen" />
-                        <AvatarFallback>MC</AvatarFallback>
+                        <img src="/placeholder.svg?height=40&width=40" alt="David Rodriguez" />
+                        <AvatarFallback>DR</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">Michael Chen</p>
-                        <p className="text-sm text-baseGray">Investment Analyst • CalPERS</p>
+                        <p className="font-medium">David Rodriguez</p>
+                        <p className="text-sm text-baseGray">Senior Director • BlackRock</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">Viewer</Badge>
+                      <Badge variant="outline">Manager</Badge>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() =>
                           handleSendMessage({
-                            name: "Michael Chen",
-                            title: "Investment Analyst",
-                            company: "CalPERS",
-                            email: "michael.chen@calpers.ca.gov",
+                            name: "David Rodriguez",
+                            title: "Senior Director",
+                            company: "BlackRock",
+                            email: "david.rodriguez@blackrock.com",
+                          })
+                        }
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        Message
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <img src="/placeholder.svg?height=40&width=40" alt="Lisa Thompson" />
+                        <AvatarFallback>LT</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">Lisa Thompson</p>
+                        <p className="text-sm text-baseGray">Investment Manager • BlackRock</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">Manager</Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleSendMessage({
+                            name: "Lisa Thompson",
+                            title: "Investment Manager",
+                            company: "BlackRock",
+                            email: "lisa.thompson@blackrock.com",
                           })
                         }
                       >

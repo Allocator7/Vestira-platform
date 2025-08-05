@@ -343,8 +343,13 @@ export function BranchingQuestionManager({
                       <Textarea
                         placeholder="Enter your response or 'N/A' if not applicable..."
                         rows={3}
+                        value={branch.answer || ""}
                         onChange={(e) => {
-                          // Store the value temporarily - you might want to implement a debounced save
+                          // Update the branch answer in real-time
+                          const updatedBranches = branches.map(b => 
+                            b.id === branch.id ? { ...b, answer: e.target.value } : b
+                          )
+                          onUpdateBranches(updatedBranches)
                         }}
                       />
                       <Button
@@ -392,8 +397,13 @@ export function BranchingQuestionManager({
                     <div className="space-y-2">
                       <Input
                         placeholder="Enter your response or 'N/A' if not applicable..."
+                        value={branch.answer || ""}
                         onChange={(e) => {
-                          // Store the value temporarily
+                          // Update the branch answer in real-time
+                          const updatedBranches = branches.map(b => 
+                            b.id === branch.id ? { ...b, answer: e.target.value } : b
+                          )
+                          onUpdateBranches(updatedBranches)
                         }}
                       />
                       <Button
