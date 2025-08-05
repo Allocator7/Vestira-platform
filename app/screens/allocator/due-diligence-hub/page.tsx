@@ -1305,13 +1305,20 @@ export default function AllocatorDueDiligenceHubPage() {
   const handleOpenQuestionSelectorForDDQ = () => {
     setIsQuestionSelectorForDDQ(true) // For DDQ creation
     setShowQuestionSelector(true)
+    // Clear any previous selections when opening for DDQ
+    setSelectedQuestionsInSelector([])
   }
 
   const handleSelectQuestion = (question: any) => {
+    // Create a unique ID for the question
+    const questionId = `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     const questionWithId = {
       ...question,
-      id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      id: questionId
     }
+    
+    // Create a consistent tracking key
+    const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
     
     if (isQuestionSelectorForDDQ) {
       // Add to current DDQ questions
@@ -1328,8 +1335,7 @@ export default function AllocatorDueDiligenceHubPage() {
       handleAddQuestionToTemplate(questionWithId)
     }
     
-    // Track selected questions in selector using a unique identifier
-    const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
+    // Track selected questions in selector
     setSelectedQuestionsInSelector(prev => [...prev, questionKey])
   }
 
@@ -3367,16 +3373,27 @@ const handleUseTemplate = () => {
                               
                               if (isQuestionSelectorForDDQ) {
                                 setCurrentDDQQuestions(prev => {
-                                  const updatedQuestions = prev.filter(q => q.question !== question.question)
+                                  // Remove by matching the original question text and source
+                                  const updatedQuestions = prev.filter(q => 
+                                    !(q.question === question.question && 
+                                      q.source === question.source && 
+                                      q.templateName === question.templateName)
+                                  )
                                   localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
                                   sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
                                   return updatedQuestions
                                 })
+                                showNotification("Question removed from DDQ")
                               } else {
                                 setNewTemplate(prev => ({
                                   ...prev,
-                                  questions: prev.questions.filter(q => q.question !== question.question)
+                                  questions: prev.questions.filter(q => 
+                                    !(q.question === question.question && 
+                                      q.source === question.source && 
+                                      q.templateName === question.templateName)
+                                  )
                                 }))
+                                showNotification("Question removed from template")
                               }
                             }
                           }}
@@ -3402,6 +3419,10 @@ const handleUseTemplate = () => {
                   setShowQuestionSelector(false)
                   setIsQuestionSelectorForDDQ(false)
                   setSelectedQuestionsInSelector([])
+                  showNotification(isQuestionSelectorForDDQ 
+                    ? `Added ${currentDDQQuestions.length} questions to DDQ` 
+                    : `Added ${newTemplate.questions.length} questions to template`
+                  )
                 }}>
                   Done
                 </Button>
