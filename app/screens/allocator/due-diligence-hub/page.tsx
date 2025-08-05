@@ -163,6 +163,24 @@ export default function AllocatorDueDiligenceHubPage() {
   const [currentDDQQuestions, setCurrentDDQQuestions] = useState([])
   const [isQuestionSelectorForDDQ, setIsQuestionSelectorForDDQ] = useState(false)
   const [selectedQuestionsInSelector, setSelectedQuestionsInSelector] = useState([])
+  
+  // DDQ Editing State
+  const [showEditDDQModal, setShowEditDDQModal] = useState(false)
+  const [editingDDQ, setEditingDDQ] = useState(null)
+  const [editDDQForm, setEditDDQForm] = useState({
+    ddqName: "",
+    description: "",
+    dueDate: "",
+    selectedManagers: [],
+    strategies: [],
+    fundTypes: {
+      fund: false,
+      sma: false,
+      other: false,
+    },
+    fundSize: "",
+    visibility: "private",
+  })
 
   const [showTemplatePreviewModal, setShowTemplatePreviewModal] = useState(false)
   const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState(null)
@@ -1280,7 +1298,12 @@ export default function AllocatorDueDiligenceHubPage() {
   }
 
   const handleOpenQuestionSelector = () => {
-    setIsQuestionSelectorForDDQ(false) // Ensure it's for template creation, not DDQ
+    setIsQuestionSelectorForDDQ(false) // Default for template creation
+    setShowQuestionSelector(true)
+  }
+
+  const handleOpenQuestionSelectorForDDQ = () => {
+    setIsQuestionSelectorForDDQ(true) // For DDQ creation
     setShowQuestionSelector(true)
   }
 
@@ -1615,6 +1638,96 @@ const handleUseTemplate = () => {
     }
   }
 
+  // DDQ Editing Functions
+  const handleEditDDQ = (ddqId: string) => {
+    const ddq = activeDDQs.find((d) => d.id === ddqId)
+    if (ddq) {
+      setEditingDDQ(ddq)
+      setEditDDQForm({
+        ddqName: ddq.templateName,
+        description: ddq.description || "",
+        dueDate: ddq.dueDate,
+        selectedManagers: [ddq.managerId],
+        strategies: [ddq.strategy],
+        fundTypes: {
+          fund: ddq.investmentType === "fund",
+          sma: ddq.investmentType === "sma",
+          other: ddq.investmentType === "other",
+        },
+        fundSize: ddq.fundSize || "",
+        visibility: ddq.visibility || "private",
+      })
+      setShowEditDDQModal(true)
+    }
+  }
+
+  const handleSaveEditDDQ = () => {
+    if (!editDDQForm.ddqName.trim() || editDDQForm.selectedManagers.length === 0 || !editDDQForm.dueDate) {
+      showNotification("Please fill in all required fields")
+      return
+    }
+
+    // Update the DDQ in the activeDDQs array
+    const updatedDDQs = activeDDQs.map(ddq => {
+      if (ddq.id === editingDDQ.id) {
+        return {
+          ...ddq,
+          templateName: editDDQForm.ddqName,
+          description: editDDQForm.description,
+          dueDate: editDDQForm.dueDate,
+          managerId: editDDQForm.selectedManagers[0],
+          managerName: availableManagers.find(m => m.id === editDDQForm.selectedManagers[0])?.name || ddq.managerName,
+          strategy: editDDQForm.strategies[0] || ddq.strategy,
+          investmentType: editDDQForm.fundTypes.fund ? "fund" : editDDQForm.fundTypes.sma ? "sma" : "other",
+          fundSize: editDDQForm.fundSize,
+          visibility: editDDQForm.visibility,
+          lastUpdated: new Date().toISOString(),
+        }
+      }
+      return ddq
+    })
+
+    // Update localStorage
+    localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
+    
+    showNotification("DDQ updated successfully")
+    setShowEditDDQModal(false)
+    setEditingDDQ(null)
+    setEditDDQForm({
+      ddqName: "",
+      description: "",
+      dueDate: "",
+      selectedManagers: [],
+      strategies: [],
+      fundTypes: {
+        fund: false,
+        sma: false,
+        other: false,
+      },
+      fundSize: "",
+      visibility: "private",
+    })
+  }
+
+  const handleCancelEditDDQ = () => {
+    setShowEditDDQModal(false)
+    setEditingDDQ(null)
+    setEditDDQForm({
+      ddqName: "",
+      description: "",
+      dueDate: "",
+      selectedManagers: [],
+      strategies: [],
+      fundTypes: {
+        fund: false,
+        sma: false,
+        other: false,
+      },
+      fundSize: "",
+      visibility: "private",
+    })
+  }
+
   console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
 
   return (
@@ -1879,10 +1992,7 @@ const handleUseTemplate = () => {
                               variant="outline" 
                               size="sm" 
                               className="w-full"
-                              onClick={() => {
-                                setIsQuestionSelectorForDDQ(true)
-                                setShowQuestionSelector(true)
-                              }}
+                              onClick={handleOpenQuestionSelectorForDDQ}
                             >
                               <Plus className="h-4 w-4 mr-2" />
                               Pull from Multiple Sources
@@ -2834,6 +2944,10 @@ const handleUseTemplate = () => {
                             </Button>
                           }
                           items={[
+                            {
+                              label: "Edit DDQ",
+                              onClick: () => handleEditDDQ(ddq.id),
+                            },
                             {
                               label: "Send Message",
                               onClick: () => handleMessageManager(ddq),
