@@ -19,6 +19,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // AWS Amplify deployment settings
+  trailingSlash: false,
 }
 
 export default nextConfig

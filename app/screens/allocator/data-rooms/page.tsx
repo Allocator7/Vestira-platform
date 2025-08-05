@@ -11,6 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components
 import { Search, Filter, Calendar, FileText, Download, Eye, Clock, Star, MoreHorizontal, X } from "lucide-react"
 import { Progress } from "../../../../components/ui/progress"
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic'
+
 const dataRooms = [
   {
     id: 1,

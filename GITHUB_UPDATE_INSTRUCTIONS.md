@@ -1,3 +1,20 @@
+# GitHub Update Instructions
+
+## 🚨 **The Issue**
+The 404 error is caused by the root page being a client-side component that uses browser APIs. This doesn't work with SSR on Amplify.
+
+## ✅ **The Fix**
+I've updated the root page (`app/page.tsx`) to be a static server component that will work properly with Amplify.
+
+## 📋 **What You Need to Do**
+
+### **Step 1: Update the File in GitHub**
+1. **Go to your GitHub repository**
+2. **Navigate to** `app/page.tsx`
+3. **Click the pencil icon** (Edit)
+4. **Replace the entire content** with this:
+
+```typescript
 import Link from "next/link"
 
 export default function HomePage() {
@@ -33,3 +50,22 @@ export default function HomePage() {
     </div>
   )
 }
+```
+
+### **Step 2: Commit the Changes**
+1. **Add a commit message**: `"Fix root page for SSR compatibility"`
+2. **Click "Commit changes"**
+
+### **Step 3: Redeploy**
+1. **Wait 2-3 minutes** for changes to reach Amplify
+2. **Go to AWS Amplify Console**
+3. **Click "Redeploy this version"**
+
+## 🎯 **What This Will Do**
+
+- ✅ **Fix the 404 error** at vestira.co
+- ✅ **Create a static landing page** that works with SSR
+- ✅ **Provide navigation links** to different parts of the app
+- ✅ **Maintain the existing UI/functionality** for the rest of the app
+
+**This should finally get vestira.co working properly!**
