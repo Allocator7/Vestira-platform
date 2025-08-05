@@ -141,7 +141,7 @@ export default function InformalDueDiligencePage() {
       aum: "$4.2B",
       experience: "20 years",
       email: "robert.wilson@fixedincome.com",
-      avatar: "/placeholder-user.jpg"
+      avatar: "/managers/robert-wilson.jpg"
     }
   ]
 
@@ -582,7 +582,7 @@ export default function InformalDueDiligencePage() {
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-10 w-10">
-                                  <img src="/placeholder-user.jpg" alt={manager.name} />
+                                  <img src={manager.avatar} alt={manager.name} />
                                   <AvatarFallback>{manager.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                 </Avatar>
                                 <div>

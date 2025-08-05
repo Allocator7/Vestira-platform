@@ -40,7 +40,7 @@ export default function ConsultantEventsCenter() {
       rating: 4.8,
       description: "Comprehensive summit covering latest trends and best practices in financial advisory services.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Advisory+Summit",
+      image: "/events/advisory-summit.jpg",
     },
     {
       id: 2,
@@ -57,7 +57,7 @@ export default function ConsultantEventsCenter() {
       rating: 4.7,
       description: "Stay updated on the latest regulatory requirements and compliance strategies.",
       isRegistered: true,
-      image: "/placeholder.svg?height=200&width=400&text=Compliance+Conference",
+      image: "/events/compliance-conference.jpg",
     },
     {
       id: 3,
@@ -74,7 +74,7 @@ export default function ConsultantEventsCenter() {
       rating: 4.9,
       description: "Enhance your client relationship management skills and grow your practice.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=CRM+Workshop",
+      image: "/events/crm-workshop.jpg",
     },
     {
       id: 4,
@@ -91,7 +91,7 @@ export default function ConsultantEventsCenter() {
       rating: 4.6,
       description: "Explore how technology is transforming financial services and advisory practices.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=FinTech+Forum",
+      image: "/events/fintech-forum.jpg",
     },
   ]
 

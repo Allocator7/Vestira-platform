@@ -40,7 +40,7 @@ export default function ManagerEventsCenter() {
       description:
         "Premier event for alternative investment professionals focusing on fundraising strategies and market trends.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Investment+Summit",
+      image: "/events/investment-summit.jpg",
     },
     {
       id: 2,
@@ -57,7 +57,7 @@ export default function ManagerEventsCenter() {
       rating: 4.6,
       description: "Hands-on workshop covering effective investor communication and relationship management.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=IR+Workshop",
+      image: "/events/ir-workshop.jpg",
     },
     {
       id: 3,
@@ -74,7 +74,7 @@ export default function ManagerEventsCenter() {
       rating: 4.9,
       description: "Exploring ESG integration strategies in private market investments.",
       isRegistered: true,
-      image: "/placeholder.svg?height=200&width=400&text=ESG+Symposium",
+      image: "/events/esg-symposium.jpg",
     },
   ]
 
