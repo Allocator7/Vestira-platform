@@ -1302,8 +1302,9 @@ export default function AllocatorDueDiligenceHubPage() {
       handleAddQuestionToTemplate(questionWithId)
     }
     
-    // Track selected questions in selector
-    setSelectedQuestionsInSelector(prev => [...prev, questionWithId.id])
+    // Track selected questions in selector using a unique identifier
+    const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
+    setSelectedQuestionsInSelector(prev => [...prev, questionKey])
   }
 
   // Get all available questions from both Vestira and custom templates
@@ -3004,12 +3005,12 @@ const handleUseTemplate = () => {
 
       {/* Custom Template Creation Modal */}
       {showCreateTemplateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 w-full max-w-5xl mx-auto max-h-[95vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">Create Custom Template</h3>
-                <p className="text-sm text-gray-600">Build your own DDQ template for future use</p>
+                <h3 className="text-2xl font-semibold text-gray-900">Create Custom Template</h3>
+                <p className="text-sm text-gray-600 mt-1">Build your own DDQ template for future use</p>
               </div>
               <Button
                 variant="outline"
@@ -3019,7 +3020,7 @@ const handleUseTemplate = () => {
               </Button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Template Details */}
               <Card>
                 <CardContent className="p-6">
@@ -3070,34 +3071,39 @@ const handleUseTemplate = () => {
               {/* Questions Section */}
               <Card>
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="text-lg font-medium text-gray-900">Questions ({newTemplate.questions.length})</h4>
-                    <Button onClick={handleOpenQuestionSelector} variant="outline">
-                      <Plus className="h-4 w-4 mr-2" />
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h4 className="text-lg font-medium text-gray-900">Questions ({newTemplate.questions.length})</h4>
+                      <p className="text-sm text-gray-500 mt-1">Add questions from existing templates or create your own</p>
+                    </div>
+                    <Button onClick={handleOpenQuestionSelector} variant="outline" className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
                       Add Questions
                     </Button>
                   </div>
 
                   {newTemplate.questions.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                      <p>No questions added yet. Click "Add Questions" to get started.</p>
+                    <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                      <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium mb-2">No questions added yet</p>
+                      <p className="text-sm">Click "Add Questions" to get started with your template</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
                       {newTemplate.questions.map((question, index) => (
-                        <div key={question.id} className="flex items-start gap-3 p-3 border rounded-lg">
+                        <div key={question.id} className="flex items-start gap-4 p-4 border rounded-lg bg-gray-50">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline">Q{index + 1}</Badge>
+                            <div className="flex items-center gap-3 mb-3">
+                              <Badge variant="outline" className="font-medium">Question {index + 1}</Badge>
                               <Badge variant="secondary">{question.type}</Badge>
                             </div>
-                            <p className="text-sm font-medium">{question.question}</p>
+                            <p className="text-sm font-medium text-gray-900 leading-relaxed">{question.question}</p>
                           </div>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleRemoveQuestionFromTemplate(question.id)}
+                            className="flex-shrink-0"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -3109,7 +3115,7 @@ const handleUseTemplate = () => {
               </Card>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-3">
+              <div className="flex items-center justify-end gap-4 pt-6 border-t">
                 <Button variant="outline" onClick={() => setShowCreateTemplateModal(false)}>
                   Cancel
                 </Button>
@@ -3124,14 +3130,14 @@ const handleUseTemplate = () => {
 
       {/* Question Selector Modal */}
       {showQuestionSelector && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 w-full max-w-6xl mx-auto max-h-[95vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-xl font-semibold text-gray-900">
+                <h3 className="text-2xl font-semibold text-gray-900">
                   {isQuestionSelectorForDDQ ? "Select Questions for DDQ" : "Select Questions for Template"}
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 mt-1">
                   {isQuestionSelectorForDDQ 
                     ? "Choose questions from Vestira templates or your custom templates for your DDQ" 
                     : "Choose questions from Vestira templates or your custom templates for your template"
@@ -3200,27 +3206,28 @@ const handleUseTemplate = () => {
                 </Card>
 
               {/* Questions List */}
-              <div className="space-y-3">
+              <div className="space-y-4 max-h-96 overflow-y-auto">
                 {getAllAvailableQuestions().map((question, index) => (
                   <Card key={`${question.id}-${index}`} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
                         <Checkbox
                           id={`question-${index}`}
-                          checked={selectedQuestionsInSelector.includes(question.id)}
+                          checked={selectedQuestionsInSelector.includes(`${question.source}-${question.templateName}-${question.question.substring(0, 50)}`)}
                           onCheckedChange={(checked) => {
                             if (checked) {
                               handleSelectQuestion(question)
                             }
                           }}
+                          className="mt-1"
                         />
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline">{question.source}</Badge>
-                            <Badge variant="secondary">{question.type}</Badge>
+                          <div className="flex items-center gap-3 mb-3">
+                            <Badge variant="outline" className="text-xs">{question.source}</Badge>
+                            <Badge variant="secondary" className="text-xs">{question.type}</Badge>
                             <span className="text-xs text-gray-500">from {question.templateName}</span>
                           </div>
-                          <p className="text-sm font-medium">{question.question}</p>
+                          <p className="text-sm font-medium text-gray-900 leading-relaxed">{question.question}</p>
                         </div>
                       </div>
                     </CardContent>
@@ -3229,7 +3236,7 @@ const handleUseTemplate = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-end gap-3">
+              <div className="flex items-center justify-end gap-4 pt-6 border-t">
                 <Button variant="outline" onClick={() => {
                   setShowQuestionSelector(false)
                   setIsQuestionSelectorForDDQ(false)
