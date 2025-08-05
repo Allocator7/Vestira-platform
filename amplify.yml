@@ -6,7 +6,7 @@ frontend:
         - pnpm install
     build:
       commands:
-        - echo "NEXTAUTH_URL=https://$AWS_APP_ID.amplifyapp.com" >> .env.local
+        - echo "NEXTAUTH_URL=https://vestira.co" >> .env.local
         - echo "NEXTAUTH_SECRET=your-secure-random-string-here" >> .env.local
         - echo "GOOGLE_CLIENT_ID=your-google-client-id" >> .env.local
         - echo "GOOGLE_CLIENT_SECRET=your-google-client-secret" >> .env.local
