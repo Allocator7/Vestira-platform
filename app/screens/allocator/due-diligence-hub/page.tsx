@@ -914,19 +914,120 @@ export default function AllocatorDueDiligenceHubPage() {
 
   const handlePreviewTemplate = (templateId: string) => {
     const template = [...vestiraTemplates, ...customTemplates].find((t) => t.id === templateId)
-    setSelectedTemplateForPreview(template)
-    setShowTemplatePreviewModal(true)
+    if (template) {
+      // Generate sample questions for preview
+      const sampleQuestions = generateTemplateQuestions(template)
+      const previewData = {
+        ...template,
+        sampleQuestions: sampleQuestions.slice(0, 5) // Show first 5 questions
+      }
+      setSelectedTemplateForPreview(previewData)
+      setShowTemplatePreviewModal(true)
+    }
   }
 
   const handleAddAllQuestions = (templateId: string) => {
     const template = [...vestiraTemplates, ...customTemplates].find((t) => t.id === templateId)
     if (template) {
-      // Add all questions from the template to the current DDQ
-      showNotification(`Added all ${template.questionCount} questions from ${template.name} to your DDQ`)
+      try {
+        // Generate mock questions based on template
+        const mockQuestions = generateTemplateQuestions(template)
+        
+        // Store the questions in localStorage for the current DDQ session
+        const currentQuestions = JSON.parse(localStorage.getItem('current-ddq-questions') || '[]')
+        const updatedQuestions = [...currentQuestions, ...mockQuestions]
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        
+        // Also store in sessionStorage for immediate access
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        
+        showNotification(`Added all ${template.questionCount} questions from ${template.name} to your DDQ`)
+      } catch (error) {
+        console.error("Error adding questions:", error)
+        showNotification("Error adding questions - please try again")
+      }
     }
   }
 
-  const handleUseTemplate = () => {
+  // Helper function to generate template questions
+  const generateTemplateQuestions = (template: any) => {
+    const baseQuestions = [
+      {
+        id: `q-${Date.now()}-1`,
+        section: "Organization & Management",
+        question: "Describe your firm's organizational structure and key personnel.",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${Date.now()}-2`,
+        section: "Investment Strategy",
+        question: "What is your investment philosophy and approach?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${Date.now()}-3`,
+        section: "Risk Management",
+        question: "How do you identify and manage investment risks?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      }
+    ]
+    
+    // Add more questions based on template category
+    if (template.category === "Infrastructure") {
+      baseQuestions.push({
+        id: `q-${Date.now()}-4`,
+        section: "Infrastructure Focus",
+        question: "What types of infrastructure assets do you typically invest in?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      })
+    }
+    
+      return baseQuestions
+}
+
+const handleStartInformalDueDiligence = () => {
+  try {
+    // Create informal due diligence session
+    const informalSession = {
+      id: `informal-${Date.now()}`,
+      type: "informal",
+      createdAt: new Date().toISOString(),
+      status: "active",
+      questions: [],
+      notes: [],
+      managers: [],
+      allocator: "Current User"
+    }
+    
+    // Store in localStorage for persistence
+    const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
+    existingSessions.push(informalSession)
+    localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+    
+    // Store current session in sessionStorage
+    sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+    
+    showNotification("Informal Due Diligence session started")
+    
+    // Navigate to informal due diligence interface
+    // In a real implementation, this would navigate to a dedicated page
+    console.log("Informal DD session created:", informalSession)
+    
+  } catch (error) {
+    console.error("Error starting informal due diligence:", error)
+    showNotification("Error starting informal due diligence - please try again")
+  }
+}
+
+const handleUseTemplate = () => {
     if (!useTemplateForm.ddqName.trim() || useTemplateForm.selectedManagers.length === 0 || !useTemplateForm.dueDate) {
       showNotification("Please fill in all required fields")
       return
@@ -2198,7 +2299,7 @@ export default function AllocatorDueDiligenceHubPage() {
               {
                 label: "Start Informal Due Diligence",
                 onClick: () => {
-                  showNotification("Informal Due Diligence feature coming soon")
+                  handleStartInformalDueDiligence()
                 },
               },
             ]}

@@ -247,6 +247,24 @@ export default function DataRoomProfilePage() {
 
   const handleMessageSent = async (messageData: any) => {
     try {
+      // Store message in localStorage for persistence
+      const message = {
+        id: `msg-${Date.now()}`,
+        from: "Current User",
+        to: selectedParticipant?.name || "Unknown",
+        subject: messageData.subject || "Data Room Inquiry",
+        content: messageData.content,
+        timestamp: new Date().toISOString(),
+        dataRoomId: dataRoomId,
+        dataRoomName: dataRoomName,
+        status: "sent"
+      }
+      
+      // Get existing messages
+      const existingMessages = JSON.parse(localStorage.getItem('data-room-messages') || '[]')
+      existingMessages.push(message)
+      localStorage.setItem('data-room-messages', JSON.stringify(existingMessages))
+      
       // Simulate sending message
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -258,6 +276,7 @@ export default function DataRoomProfilePage() {
       setShowMessageModal(false)
       setSelectedParticipant(null)
     } catch (error) {
+      console.error("Error sending message:", error)
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",

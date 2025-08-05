@@ -3,7 +3,7 @@
 // Force dynamic rendering to prevent SSR issues
 export const dynamic = 'force-dynamic'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Screen } from "@/components/Screen"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,6 +32,48 @@ export default function DDQResponsePage() {
   const [showResponseBank, setShowResponseBank] = useState(false)
 
   // Mock DDQ data from manager's perspective
+  // Load draft on component mount
+  useEffect(() => {
+    const loadDraft = () => {
+      try {
+        // Try to load from sessionStorage first (most recent)
+        const sessionDraft = sessionStorage.getItem(`ddq-session-${ddqData.id}`)
+        if (sessionDraft) {
+          const parsed = JSON.parse(sessionDraft)
+          setDdqData(parsed)
+          showNotification("Draft loaded from session")
+          return
+        }
+        
+        // Fall back to localStorage
+        const localDraft = localStorage.getItem(`ddq-draft-${ddqData.id}`)
+        if (localDraft) {
+          const parsed = JSON.parse(localDraft)
+          setDdqData(parsed.data)
+          showNotification("Draft loaded from storage")
+        }
+      } catch (error) {
+        console.error("Error loading draft:", error)
+      }
+    }
+    
+    loadDraft()
+  }, [])
+
+  // Auto-save functionality
+  useEffect(() => {
+    const autoSave = () => {
+      try {
+        sessionStorage.setItem(`ddq-session-${ddqData.id}`, JSON.stringify(ddqData))
+      } catch (error) {
+        console.error("Auto-save error:", error)
+      }
+    }
+    
+    const timeoutId = setTimeout(autoSave, 30000) // Auto-save every 30 seconds
+    return () => clearTimeout(timeoutId)
+  }, [ddqData])
+
   const [ddqData, setDdqData] = useState({
     id: "ddq-1",
     templateName: "Vestira Infrastructure Fund DDQ",
@@ -199,7 +241,24 @@ export default function DDQResponsePage() {
   }
 
   const handleSave = () => {
-    showNotification("DDQ responses saved as draft")
+    try {
+      // Save to localStorage with timestamp
+      const draftData = {
+        ddqId: ddqData.id,
+        data: ddqData,
+        savedAt: new Date().toISOString(),
+        version: "1.0"
+      }
+      localStorage.setItem(`ddq-draft-${ddqData.id}`, JSON.stringify(draftData))
+      
+      // Also save to sessionStorage for immediate recovery
+      sessionStorage.setItem(`ddq-session-${ddqData.id}`, JSON.stringify(ddqData))
+      
+      showNotification("DDQ responses saved as draft")
+    } catch (error) {
+      console.error("Error saving draft:", error)
+      showNotification("Error saving draft - please try again")
+    }
   }
 
   const handleSubmit = () => {
