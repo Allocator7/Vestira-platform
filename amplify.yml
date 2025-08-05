@@ -18,8 +18,8 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - .next/cache/**/*
       - node_modules/**/*
+      - .next/cache/**/*
   customHeaders:
     - pattern: '**/*'
       headers:

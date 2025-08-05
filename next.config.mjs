@@ -21,13 +21,6 @@ const nextConfig = {
   },
   // AWS Amplify deployment settings
   trailingSlash: false,
-  // Enable static export for Amplify
-  output: 'export',
-  // Disable server-side features for static export
-  experimental: {
-    ...nextConfig.experimental,
-    appDir: true,
-  },
 }
 
 export default nextConfig
