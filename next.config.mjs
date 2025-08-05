@@ -19,6 +19,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Fix SSR issues for AWS deployment
+  output: 'standalone',
+  trailingSlash: false,
 }
 
 export default nextConfig
