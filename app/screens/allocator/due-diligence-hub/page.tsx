@@ -1299,6 +1299,7 @@ export default function AllocatorDueDiligenceHubPage() {
         sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
         return updatedQuestions
       })
+      showNotification("Question added to DDQ")
     } else {
       // Add to template questions
       handleAddQuestionToTemplate(questionWithId)
@@ -1854,15 +1855,17 @@ const handleUseTemplate = () => {
                           </SelectContent>
                         </Select>
                         {createDDQForm.selectedTemplate && (
-                          <div className="mt-2 flex gap-2">
+                          <div className="mt-2 space-y-2">
                             <Button 
                               variant="outline" 
                               size="sm" 
+                              className="w-full"
                               onClick={() => {
                                 const selectedTemplate = [...vestiraTemplates, ...customTemplates].find(t => t.id === createDDQForm.selectedTemplate)
                                 if (selectedTemplate) {
                                   const questions = generateTemplateQuestions(selectedTemplate)
-                                  // Store questions for the current DDQ session
+                                  // Update state and store questions for the current DDQ session
+                                  setCurrentDDQQuestions(questions)
                                   localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
                                   sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
                                   showNotification(`Pulled ${questions.length} questions from ${selectedTemplate.name}`)
@@ -1875,6 +1878,7 @@ const handleUseTemplate = () => {
                             <Button 
                               variant="outline" 
                               size="sm" 
+                              className="w-full"
                               onClick={() => {
                                 setIsQuestionSelectorForDDQ(true)
                                 setShowQuestionSelector(true)
@@ -1888,6 +1892,29 @@ const handleUseTemplate = () => {
                       </div>
                     )}
                   </div>
+                  
+                  {/* Show current DDQ questions if any */}
+                  {currentDDQQuestions.length > 0 && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-medium text-blue-900">Current DDQ Questions ({currentDDQQuestions.length})</h5>
+                        <Badge variant="outline" className="text-blue-700">DDQ in Progress</Badge>
+                      </div>
+                      <div className="space-y-2">
+                        {currentDDQQuestions.slice(0, 3).map((question, index) => (
+                          <div key={question.id} className="text-sm text-blue-800">
+                            {index + 1}. {question.question.substring(0, 80)}...
+                          </div>
+                        ))}
+                        {currentDDQQuestions.length > 3 && (
+                          <div className="text-sm text-blue-600">
+                            +{currentDDQQuestions.length - 3} more questions...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="mt-4">
                     <Label htmlFor="description">Description</Label>
                     <Textarea
@@ -3219,6 +3246,24 @@ const handleUseTemplate = () => {
                           onCheckedChange={(checked) => {
                             if (checked) {
                               handleSelectQuestion(question)
+                            } else {
+                              // Remove question when unchecked
+                              const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
+                              setSelectedQuestionsInSelector(prev => prev.filter(key => key !== questionKey))
+                              
+                              if (isQuestionSelectorForDDQ) {
+                                setCurrentDDQQuestions(prev => {
+                                  const updatedQuestions = prev.filter(q => q.question !== question.question)
+                                  localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                  sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                  return updatedQuestions
+                                })
+                              } else {
+                                setNewTemplate(prev => ({
+                                  ...prev,
+                                  questions: prev.questions.filter(q => q.question !== question.question)
+                                }))
+                              }
                             }
                           }}
                           className="mt-1"
