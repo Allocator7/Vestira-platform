@@ -35,15 +35,13 @@ interface LoginStep {
 
 export default function LoginPage() {
   const router = useRouter()
+  const { setUserRole } = useApp()
+  const { login: sessionLogin } = useSession()
   const [currentStep, setCurrentStep] = useState<LoginStep>({ step: "credentials" })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-
-  // Safely get context functions with fallbacks
-  const { setUserRole } = useApp() || {}
-  const { login: sessionLogin } = useSession() || {}
 
   // Check for URL parameters for success messages
   React.useEffect(() => {
@@ -82,38 +80,21 @@ export default function LoginPage() {
 
   // Handle demo button clicks with proper role setting
   const handleDemoLogin = async (role: "allocator" | "manager" | "consultant" | "industry-group") => {
-    console.log(`=== DEMO LOGIN START ===`)
-    console.log(`Demo login clicked for role: ${role}`)
-
     try {
       setIsLoading(true)
       setError("")
 
-      // Store role in localStorage first
-      try {
-        localStorage.setItem("currentUserRole", role)
-        localStorage.setItem("userRole", role)
-        localStorage.setItem("demoMode", "true")
-      } catch (e) {
-        console.warn("Could not save to localStorage:", e)
-      }
+      // Set role in contexts
+      setUserRole(role)
+      sessionLogin(role)
 
-      // Set role in contexts if available
-      if (setUserRole) {
-        setUserRole(role)
-      }
-      
-      if (sessionLogin) {
-        sessionLogin(role)
-      }
+      // Store role in localStorage
+      localStorage.setItem("currentUserRole", role)
+      localStorage.setItem("userRole", role)
+      localStorage.setItem("demoMode", "true")
 
       // Navigate to the correct dashboard
-      const targetPath = `/screens/${role}/home`
-      console.log(`Navigating to: ${targetPath}`)
-      
-      router.push(targetPath)
-
-      console.log(`=== DEMO LOGIN SUCCESS ===`)
+      router.push(`/screens/${role}/home`)
     } catch (error) {
       console.error("Demo login error:", error)
       setError(`Failed to login as ${role}. Please try again.`)
@@ -186,22 +167,13 @@ export default function LoginPage() {
     try {
       setSuccess("Login successful! Redirecting...")
 
-      // Store in localStorage
-      try {
-        localStorage.setItem("userRole", profile.role)
-        localStorage.setItem("currentUserRole", profile.role)
-      } catch (e) {
-        console.warn("Could not save to localStorage in completeLogin:", e)
-      }
+      // Set user role in contexts
+      setUserRole(profile.role)
+      sessionLogin(profile.role)
 
-      // Set user role in contexts if available
-      if (setUserRole) {
-        setUserRole(profile.role)
-      }
-      
-      if (sessionLogin) {
-        sessionLogin(profile.role)
-      }
+      // Store in localStorage
+      localStorage.setItem("userRole", profile.role)
+      localStorage.setItem("currentUserRole", profile.role)
 
       // Navigate directly
       setTimeout(() => {
