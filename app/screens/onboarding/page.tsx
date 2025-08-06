@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ArrowLeft, Building, Users, UserCheck, CheckCircle } from "lucide-react"
 import Link from "next/link"
 
@@ -47,6 +48,28 @@ interface OnboardingData {
   email: string
   title: string
 
+  // Asset Classes and Strategies (Self-Reported Data)
+  assetClasses: string[]
+  strategies: string[]
+  investmentHorizon: string
+  typicalInvestmentSize: string
+  geographicFocus: string[]
+  sectorFocus: string[]
+  esgPreferences: string[]
+  
+  // Professional Network
+  networkSize: string
+  keyRelationships: string[]
+  industryAffiliations: string[]
+  
+  // Platform Preferences
+  communicationPreferences: string[]
+  notificationSettings: {
+    email: boolean
+    push: boolean
+    sms: boolean
+  }
+  
   // Verification
   submitted: boolean
 }
@@ -81,6 +104,94 @@ const consultantSubTypes = {
   other: "Other",
 }
 
+// Asset Classes and Strategies Data
+const assetClasses = [
+  "Private Equity",
+  "Venture Capital",
+  "Real Estate",
+  "Infrastructure",
+  "Private Credit",
+  "Hedge Funds",
+  "Public Equity",
+  "Fixed Income",
+  "Commodities",
+  "Cryptocurrency",
+  "Art & Collectibles",
+  "Other Alternatives"
+]
+
+const strategies = [
+  "Buyout",
+  "Growth Equity",
+  "Venture Capital",
+  "Distressed",
+  "Mezzanine",
+  "Real Estate",
+  "Infrastructure",
+  "Hedge Fund",
+  "Long/Short",
+  "Market Neutral",
+  "Global Macro",
+  "Event Driven",
+  "Multi-Strategy",
+  "Fund of Funds",
+  "Direct Investment",
+  "Co-Investment"
+]
+
+const investmentHorizons = [
+  "Short-term (1-3 years)",
+  "Medium-term (3-7 years)",
+  "Long-term (7-15 years)",
+  "Very long-term (15+ years)"
+]
+
+const investmentSizes = [
+  "Under $1M",
+  "$1M - $10M",
+  "$10M - $50M",
+  "$50M - $100M",
+  "$100M - $500M",
+  "$500M - $1B",
+  "Over $1B"
+]
+
+const geographicRegions = [
+  "North America",
+  "Europe",
+  "Asia Pacific",
+  "Latin America",
+  "Middle East",
+  "Africa",
+  "Global"
+]
+
+const sectors = [
+  "Technology",
+  "Healthcare",
+  "Financial Services",
+  "Consumer",
+  "Industrial",
+  "Energy",
+  "Real Estate",
+  "Infrastructure",
+  "Materials",
+  "Telecommunications",
+  "Utilities",
+  "Other"
+]
+
+const esgPreferences = [
+  "ESG Integration",
+  "Impact Investing",
+  "Sustainability Focus",
+  "Climate Action",
+  "Social Responsibility",
+  "Governance Focus",
+  "Traditional Approach",
+  "Not Applicable"
+]
+
 export default function OnboardingPage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
@@ -97,6 +208,22 @@ export default function OnboardingPage() {
     lastName: "",
     email: "",
     title: "",
+    assetClasses: [],
+    strategies: [],
+    investmentHorizon: "",
+    typicalInvestmentSize: "",
+    geographicFocus: [],
+    sectorFocus: [],
+    esgPreferences: [],
+    networkSize: "",
+    keyRelationships: [],
+    industryAffiliations: [],
+    communicationPreferences: [],
+    notificationSettings: {
+      email: true,
+      push: false,
+      sms: false,
+    },
     submitted: false,
   })
 
@@ -135,6 +262,50 @@ export default function OnboardingPage() {
   const getSubTypeLabel = (subType: string) => {
     const options = getSubTypeOptions()
     return options[subType as keyof typeof options] || subType
+  }
+
+  // Helper functions for enhanced onboarding
+  const toggleArrayItem = (array: string[], item: string) => {
+    if (array.includes(item)) {
+      return array.filter(i => i !== item)
+    } else {
+      return [...array, item]
+    }
+  }
+
+  const handleAssetClassToggle = (assetClass: string) => {
+    setData(prev => ({
+      ...prev,
+      assetClasses: toggleArrayItem(prev.assetClasses, assetClass)
+    }))
+  }
+
+  const handleStrategyToggle = (strategy: string) => {
+    setData(prev => ({
+      ...prev,
+      strategies: toggleArrayItem(prev.strategies, strategy)
+    }))
+  }
+
+  const handleGeographicFocusToggle = (region: string) => {
+    setData(prev => ({
+      ...prev,
+      geographicFocus: toggleArrayItem(prev.geographicFocus, region)
+    }))
+  }
+
+  const handleSectorFocusToggle = (sector: string) => {
+    setData(prev => ({
+      ...prev,
+      sectorFocus: toggleArrayItem(prev.sectorFocus, sector)
+    }))
+  }
+
+  const handleEsgPreferenceToggle = (preference: string) => {
+    setData(prev => ({
+      ...prev,
+      esgPreferences: toggleArrayItem(prev.esgPreferences, preference)
+    }))
   }
 
   if (step === 6) {
@@ -204,7 +375,7 @@ export default function OnboardingPage() {
           {/* Progress Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              {[1, 2, 3, 4, 5].map((stepNum) => (
+              {[1, 2, 3, 4, 5, 6].map((stepNum) => (
                 <div key={stepNum} className="flex items-center">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -215,14 +386,14 @@ export default function OnboardingPage() {
                   >
                     {stepNum}
                   </div>
-                  {stepNum < 5 && (
+                  {stepNum < 6 && (
                     <div className={`w-16 h-0.5 mx-2 ${stepNum < step ? "bg-electric-blue" : "bg-gray-200"}`} />
                   )}
                 </div>
               ))}
             </div>
             <div className="text-sm text-base-gray text-center">
-              Step {step} of 5:{" "}
+              Step {step} of 6:{" "}
               {step === 1
                 ? "Select Firm Type"
                 : step === 2
@@ -231,7 +402,9 @@ export default function OnboardingPage() {
                     ? "Firm Information"
                     : step === 4
                       ? "Personal Information"
-                      : "Review & Submit"}
+                      : step === 5
+                        ? "Investment Profile"
+                        : "Review & Submit"}
             </div>
           </div>
 
@@ -497,8 +670,182 @@ export default function OnboardingPage() {
             </Card>
           )}
 
-          {/* Step 5: Review & Submit */}
+          {/* Step 5: Investment Profile */}
           {step === 5 && (
+            <Card className="border-0 shadow-lg">
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-deep-brand">Investment Profile</CardTitle>
+                <CardDescription className="text-base-gray">
+                  Help us understand your investment focus and preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="max-w-4xl mx-auto space-y-8">
+                  {/* Asset Classes */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-deep-brand">Asset Classes</h3>
+                    <p className="text-sm text-base-gray">Select all asset classes you invest in or are interested in</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {assetClasses.map((assetClass) => (
+                        <button
+                          key={assetClass}
+                          type="button"
+                          onClick={() => handleAssetClassToggle(assetClass)}
+                          className={`p-3 text-sm rounded-lg border-2 transition-all duration-200 ${
+                            data.assetClasses.includes(assetClass)
+                              ? "border-electric-blue bg-electric-blue/10 text-electric-blue"
+                              : "border-gray-200 hover:border-electric-blue/50"
+                          }`}
+                        >
+                          {assetClass}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Strategies */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-deep-brand">Investment Strategies</h3>
+                    <p className="text-sm text-base-gray">Select strategies that align with your investment approach</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {strategies.map((strategy) => (
+                        <button
+                          key={strategy}
+                          type="button"
+                          onClick={() => handleStrategyToggle(strategy)}
+                          className={`p-3 text-sm rounded-lg border-2 transition-all duration-200 ${
+                            data.strategies.includes(strategy)
+                              ? "border-electric-blue bg-electric-blue/10 text-electric-blue"
+                              : "border-gray-200 hover:border-electric-blue/50"
+                          }`}
+                        >
+                          {strategy}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Investment Horizon and Size */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="investmentHorizon">Typical Investment Horizon</Label>
+                      <Select value={data.investmentHorizon} onValueChange={(value) => setData(prev => ({ ...prev, investmentHorizon: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select investment horizon" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {investmentHorizons.map((horizon) => (
+                            <SelectItem key={horizon} value={horizon}>{horizon}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="investmentSize">Typical Investment Size</Label>
+                      <Select value={data.typicalInvestmentSize} onValueChange={(value) => setData(prev => ({ ...prev, typicalInvestmentSize: value }))}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select investment size" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {investmentSizes.map((size) => (
+                            <SelectItem key={size} value={size}>{size}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  {/* Geographic Focus */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-deep-brand">Geographic Focus</h3>
+                    <p className="text-sm text-base-gray">Select regions where you invest or are interested in investing</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {geographicRegions.map((region) => (
+                        <button
+                          key={region}
+                          type="button"
+                          onClick={() => handleGeographicFocusToggle(region)}
+                          className={`p-3 text-sm rounded-lg border-2 transition-all duration-200 ${
+                            data.geographicFocus.includes(region)
+                              ? "border-electric-blue bg-electric-blue/10 text-electric-blue"
+                              : "border-gray-200 hover:border-electric-blue/50"
+                          }`}
+                        >
+                          {region}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Sector Focus */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-deep-brand">Sector Focus</h3>
+                    <p className="text-sm text-base-gray">Select sectors you invest in or are interested in</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {sectors.map((sector) => (
+                        <button
+                          key={sector}
+                          type="button"
+                          onClick={() => handleSectorFocusToggle(sector)}
+                          className={`p-3 text-sm rounded-lg border-2 transition-all duration-200 ${
+                            data.sectorFocus.includes(sector)
+                              ? "border-electric-blue bg-electric-blue/10 text-electric-blue"
+                              : "border-gray-200 hover:border-electric-blue/50"
+                          }`}
+                        >
+                          {sector}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* ESG Preferences */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-deep-brand">ESG & Sustainability Preferences</h3>
+                    <p className="text-sm text-base-gray">Select your approach to ESG and sustainability</p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {esgPreferences.map((preference) => (
+                        <button
+                          key={preference}
+                          type="button"
+                          onClick={() => handleEsgPreferenceToggle(preference)}
+                          className={`p-3 text-sm rounded-lg border-2 transition-all duration-200 ${
+                            data.esgPreferences.includes(preference)
+                              ? "border-electric-blue bg-electric-blue/10 text-electric-blue"
+                              : "border-gray-200 hover:border-electric-blue/50"
+                          }`}
+                        >
+                          {preference}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setStep(4)}
+                      className="border-base-gray text-base-gray hover:bg-canvas-neutral"
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setStep(6)}
+                      className="bg-electric-blue hover:bg-electric-blue/90 text-white"
+                      disabled={data.assetClasses.length === 0 && data.strategies.length === 0}
+                    >
+                      Continue
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Step 6: Review & Submit */}
+          {step === 6 && (
             <Card className="border-0 shadow-lg">
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl font-bold text-deep-brand">Review Your Application</CardTitle>
@@ -569,6 +916,91 @@ export default function OnboardingPage() {
                     </div>
                   </div>
 
+                  {/* Investment Profile */}
+                  <div className="bg-canvas-neutral/50 rounded-lg p-6">
+                    <h3 className="font-semibold text-deep-brand mb-4">Investment Profile</h3>
+                    <div className="space-y-4 text-sm">
+                      {data.assetClasses.length > 0 && (
+                        <div>
+                          <span className="text-base-gray">Asset Classes:</span>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {data.assetClasses.map((assetClass) => (
+                              <Badge key={assetClass} variant="secondary" className="text-xs">
+                                {assetClass}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {data.strategies.length > 0 && (
+                        <div>
+                          <span className="text-base-gray">Strategies:</span>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {data.strategies.map((strategy) => (
+                              <Badge key={strategy} variant="secondary" className="text-xs">
+                                {strategy}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {data.investmentHorizon && (
+                        <div>
+                          <span className="text-base-gray">Investment Horizon:</span>
+                          <p className="font-medium text-deep-brand">{data.investmentHorizon}</p>
+                        </div>
+                      )}
+                      
+                      {data.typicalInvestmentSize && (
+                        <div>
+                          <span className="text-base-gray">Typical Investment Size:</span>
+                          <p className="font-medium text-deep-brand">{data.typicalInvestmentSize}</p>
+                        </div>
+                      )}
+                      
+                      {data.geographicFocus.length > 0 && (
+                        <div>
+                          <span className="text-base-gray">Geographic Focus:</span>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {data.geographicFocus.map((region) => (
+                              <Badge key={region} variant="outline" className="text-xs">
+                                {region}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {data.sectorFocus.length > 0 && (
+                        <div>
+                          <span className="text-base-gray">Sector Focus:</span>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {data.sectorFocus.map((sector) => (
+                              <Badge key={sector} variant="outline" className="text-xs">
+                                {sector}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {data.esgPreferences.length > 0 && (
+                        <div>
+                          <span className="text-base-gray">ESG Preferences:</span>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {data.esgPreferences.map((preference) => (
+                              <Badge key={preference} variant="outline" className="text-xs">
+                                {preference}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="bg-electric-blue/5 border border-electric-blue/20 rounded-lg p-4">
                     <p className="text-sm text-deep-brand">
                       <strong>Next Steps:</strong> After submission, our team will verify your firm affiliation and
@@ -579,7 +1011,7 @@ export default function OnboardingPage() {
                   <div className="flex justify-between">
                     <Button
                       variant="outline"
-                      onClick={() => setStep(4)}
+                      onClick={() => setStep(5)}
                       className="border-base-gray text-base-gray hover:bg-canvas-neutral"
                     >
                       Back
