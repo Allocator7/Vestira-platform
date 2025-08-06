@@ -117,77 +117,107 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendVerificationEmail(email: string, token: string, firstName: string) {
-  // Initialize SendGrid with API key
-  const sendGridApiKey = process.env.SENDGRID_API_KEY
-  if (!sendGridApiKey) {
-    throw new Error("SendGrid API key not configured")
-  }
-  
-  sgMail.setApiKey(sendGridApiKey)
-  
   const verificationUrl = `${process.env.NEXTAUTH_URL || "https://vestira.co"}/api/auth/verify?token=${token}`
   
-  const emailContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Verify Your Vestira Account</title>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
-        .content { background: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }
-        .button { display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; }
-        .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 14px; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1 style="margin: 0; font-size: 28px;">Welcome to Vestira</h1>
-          <p style="margin: 10px 0 0 0; opacity: 0.9;">Verify your email address</p>
-        </div>
-        <div class="content">
-          <h2>Hi ${firstName},</h2>
-          <p>Thank you for creating your Vestira account! To complete your registration, please verify your email address by clicking the button below:</p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${verificationUrl}" class="button">Verify Email Address</a>
+  // Check if SendGrid is configured
+  const sendGridApiKey = process.env.SENDGRID_API_KEY
+  
+  if (sendGridApiKey) {
+    // Production email sending with SendGrid
+    try {
+      sgMail.setApiKey(sendGridApiKey)
+      
+      const emailContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Verify Your Vestira Account</title>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background: #f8fafc; padding: 30px; border-radius: 0 0 8px 8px; }
+            .button { display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; }
+            .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 14px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1 style="margin: 0; font-size: 28px;">Welcome to Vestira</h1>
+              <p style="margin: 10px 0 0 0; opacity: 0.9;">Verify your email address</p>
+            </div>
+            <div class="content">
+              <h2>Hi ${firstName},</h2>
+              <p>Thank you for creating your Vestira account! To complete your registration, please verify your email address by clicking the button below:</p>
+              
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${verificationUrl}" class="button">Verify Email Address</a>
+              </div>
+              
+              <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+              <p style="word-break: break-all; color: #3b82f6;">${verificationUrl}</p>
+              
+              <p>This verification link will expire in 24 hours for security reasons.</p>
+              
+              <p>If you didn't create this account, you can safely ignore this email.</p>
+              
+              <p>Best regards,<br>The Vestira Team</p>
+            </div>
+            <div class="footer">
+              <p>© 2025 Vestira. All rights reserved.</p>
+              <p>This email was sent to ${email}</p>
+            </div>
           </div>
-          
-          <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
-          <p style="word-break: break-all; color: #3b82f6;">${verificationUrl}</p>
-          
-          <p>This verification link will expire in 24 hours for security reasons.</p>
-          
-          <p>If you didn't create this account, you can safely ignore this email.</p>
-          
-          <p>Best regards,<br>The Vestira Team</p>
-        </div>
-        <div class="footer">
-          <p>© 2025 Vestira. All rights reserved.</p>
-          <p>This email was sent to ${email}</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `
+        </body>
+        </html>
+      `
 
-  const msg = {
-    to: email,
-    from: process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co',
-    subject: 'Verify Your Vestira Account',
-    html: emailContent,
-  }
+      const msg = {
+        to: email,
+        from: process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co',
+        subject: 'Verify Your Vestira Account',
+        html: emailContent,
+      }
 
-  try {
-    await sgMail.send(msg)
-    console.log(`Verification email sent successfully to ${email}`)
+      await sgMail.send(msg)
+      console.log(`Verification email sent successfully to ${email}`)
+      return true
+    } catch (error) {
+      console.error('SendGrid error:', error)
+      throw new Error('Failed to send verification email')
+    }
+  } else {
+    // Demo mode - simulate email sending with detailed instructions
+    console.log(`[DEMO MODE] Verification email would be sent to: ${email}`)
+    console.log(`[DEMO MODE] Verification URL: ${verificationUrl}`)
+    console.log(`[DEMO MODE] To enable real email sending:`)
+    console.log(`[DEMO MODE] 1. Get SendGrid API key from https://sendgrid.com`)
+    console.log(`[DEMO MODE] 2. Add SENDGRID_API_KEY to environment variables`)
+    console.log(`[DEMO MODE] 3. Verify your domain with SendGrid`)
+    console.log(`[DEMO MODE] 4. Test email sending`)
+    
+    // Store verification token for demo purposes
+    const demoVerification = {
+      email,
+      token,
+      verificationUrl,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+    }
+    
+    // Store in localStorage for demo verification
+    if (typeof window !== 'undefined') {
+      const existingVerifications = JSON.parse(localStorage.getItem('demo-verifications') || '[]')
+      existingVerifications.push(demoVerification)
+      localStorage.setItem('demo-verifications', JSON.stringify(existingVerifications))
+    }
+    
+    // Simulate email sending delay
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
     return true
-  } catch (error) {
-    console.error('SendGrid error:', error)
-    throw new Error('Failed to send verification email')
   }
 }

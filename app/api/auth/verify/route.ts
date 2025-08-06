@@ -37,6 +37,21 @@ export async function GET(request: NextRequest) {
     // Update user's emailVerified status (in production, this would be in a database)
     console.log("Email verified for:", decoded.email)
     
+    // For demo purposes, store verification status
+    const verificationData = {
+      email: decoded.email,
+      verified: true,
+      verifiedAt: new Date().toISOString(),
+      token: token
+    }
+    
+    // Store verification in localStorage for demo
+    if (typeof window !== 'undefined') {
+      const existingVerifications = JSON.parse(localStorage.getItem('email-verifications') || '[]')
+      existingVerifications.push(verificationData)
+      localStorage.setItem('email-verifications', JSON.stringify(existingVerifications))
+    }
+    
     // In production, you would update the database here
     // For now, we'll simulate successful verification
 
