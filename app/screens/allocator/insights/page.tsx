@@ -490,15 +490,7 @@ function AllocatorInsightsPage() {
               <Upload className="h-4 w-4" />
               Upload Insight
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1 bg-transparent"
-              onClick={() => setShowExportDialog(true)}
-            >
-              <Download className="h-4 w-4" />
-              <span>Export</span>
-            </Button>
+            {/* Export button removed as per feedback - users should download individual pieces instead */}
             <Button
               variant="outline"
               size="sm"
