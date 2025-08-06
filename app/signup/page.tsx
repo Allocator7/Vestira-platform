@@ -32,7 +32,7 @@ interface SignupData {
   confirmPassword: string
 
   // Organization Information
-  organizationType: "allocator" | "manager" | "consultant" | ""
+  organizationType: "allocator" | "manager" | "consultant" | "industry-group" | ""
   organizationName: string
   organizationSize: string
   aum: string
@@ -136,17 +136,41 @@ export default function SignupPage() {
     setError("")
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          organizationType: formData.organizationType,
+          organizationName: formData.organizationName,
+          jobTitle: formData.jobTitle,
+          department: formData.department,
+          phoneNumber: formData.phoneNumber,
+          aum: formData.aum,
+          organizationSize: formData.organizationSize,
+          hearAboutUs: formData.hearAboutUs,
+          specificNeeds: formData.specificNeeds,
+        }),
+      })
 
-      // Mock successful signup
-      setSuccess("Account created successfully! Please check your email to verify your account.")
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create account")
+      }
+
+      setSuccess(data.message || "Account created successfully! Please check your email to verify your account.")
 
       setTimeout(() => {
         router.push("/login?signup=success")
       }, 3000)
-    } catch (err) {
-      setError("Failed to create account. Please try again.")
+    } catch (err: any) {
+      setError(err.message || "Failed to create account. Please try again.")
     } finally {
       setIsLoading(false)
     }
@@ -167,6 +191,8 @@ export default function SignupPage() {
         return <Users className="h-5 w-5 text-green-600" />
       case "consultant":
         return <Shield className="h-5 w-5 text-purple-600" />
+      case "industry-group":
+        return <Zap className="h-5 w-5 text-orange-600" />
       default:
         return <Zap className="h-5 w-5 text-gray-400" />
     }
@@ -392,7 +418,7 @@ export default function SignupPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="organizationType">I am a/an *</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       <Button
                         type="button"
                         variant={formData.organizationType === "allocator" ? "default" : "outline"}
@@ -468,6 +494,32 @@ export default function SignupPage() {
                         </div>
                         <span className={formData.organizationType === "consultant" ? "text-white" : "text-deep-brand"}>
                           Consultant
+                        </span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant={formData.organizationType === "industry-group" ? "default" : "outline"}
+                        className={`h-auto py-4 flex flex-col items-center justify-center gap-2 ${
+                          formData.organizationType === "industry-group"
+                            ? "bg-orange-600 hover:bg-orange-700"
+                            : "hover:bg-orange-50 hover:border-orange-300"
+                        }`}
+                        onClick={() => updateFormData("organizationType", "industry-group")}
+                      >
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            formData.organizationType === "industry-group" ? "bg-orange-500" : "bg-orange-100"
+                          }`}
+                        >
+                          <Zap
+                            className={`h-5 w-5 ${
+                              formData.organizationType === "industry-group" ? "text-white" : "text-orange-600"
+                            }`}
+                          />
+                        </div>
+                        <span className={formData.organizationType === "industry-group" ? "text-white" : "text-deep-brand"}>
+                          Industry Group
                         </span>
                       </Button>
                     </div>

@@ -43,6 +43,19 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
+  // Check for URL parameters for success messages
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const verified = urlParams.get("verified")
+    const signup = urlParams.get("signup")
+    
+    if (verified === "true") {
+      setSuccess("Email verified successfully! You can now log in to your account.")
+    } else if (signup === "success") {
+      setSuccess("Account created successfully! Please check your email to verify your account.")
+    }
+  }, [])
+
   // Form states
   const [credentials, setCredentials] = useState({
     email: "",
