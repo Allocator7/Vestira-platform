@@ -353,7 +353,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 export function useApp() {
   const context = useContext(AppContext)
   if (context === undefined) {
-    throw new Error("useApp must be used within an AppProvider")
+    // Return a fallback context instead of throwing
+    console.warn("useApp called outside of AppProvider, returning fallback")
+    return {
+      userRole: null,
+      setUserRole: () => console.warn("setUserRole called outside of AppProvider"),
+      currentPersonProfile: null,
+      setCurrentPersonProfile: () => console.warn("setCurrentPersonProfile called outside of AppProvider"),
+      currentFirmProfile: null,
+      setCurrentFirmProfile: () => console.warn("setCurrentFirmProfile called outside of AppProvider"),
+      notifications: [],
+      addNotification: () => console.warn("addNotification called outside of AppProvider"),
+      markNotificationAsRead: () => console.warn("markNotificationAsRead called outside of AppProvider"),
+      markAllNotificationsAsRead: () => console.warn("markAllNotificationsAsRead called outside of AppProvider"),
+      clearNotifications: () => console.warn("clearNotifications called outside of AppProvider"),
+      unreadCount: 0,
+      unreadMessageCounts: { allocator: 0, manager: 0, consultant: 0, "industry-group": 0 },
+      updateUnreadMessageCount: () => console.warn("updateUnreadMessageCount called outside of AppProvider"),
+      isNavOpen: false,
+      setIsNavOpen: () => console.warn("setIsNavOpen called outside of AppProvider"),
+      currentDataRoom: null,
+      setCurrentDataRoom: () => console.warn("setCurrentDataRoom called outside of AppProvider"),
+      recentlyViewed: [],
+      addToRecentlyViewed: () => console.warn("addToRecentlyViewed called outside of AppProvider"),
+      isLoading: false,
+      setIsLoading: () => console.warn("setIsLoading called outside of AppProvider"),
+      error: null,
+      setError: () => console.warn("setError called outside of AppProvider"),
+      clearError: () => console.warn("clearError called outside of AppProvider"),
+    }
   }
   return context
 }

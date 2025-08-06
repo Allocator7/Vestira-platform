@@ -23,7 +23,18 @@ const SessionContext = createContext<SessionContextType | undefined>(undefined)
 export function useSession() {
   const context = useContext(SessionContext)
   if (context === undefined) {
-    throw new Error("useSession must be used within a SessionProvider")
+    // Return a fallback context instead of throwing
+    console.warn("useSession called outside of SessionProvider, returning fallback")
+    return {
+      userRole: null,
+      userRoles: [],
+      isLoading: false,
+      login: () => console.warn("Login called outside of SessionProvider"),
+      switchRole: () => console.warn("SwitchRole called outside of SessionProvider"),
+      logout: () => console.warn("Logout called outside of SessionProvider"),
+      isAuthenticated: false,
+      user: null,
+    }
   }
   return context
 }
