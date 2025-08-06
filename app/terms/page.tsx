@@ -8,6 +8,16 @@ export default function TermsPage() {
   const router = useRouter()
 
   const handleBack = () => {
+    // Check if we came from signup process
+    if (typeof window !== 'undefined') {
+      const signupState = sessionStorage.getItem('signup-state')
+      if (signupState) {
+        // Return to signup with preserved state
+        router.push('/signup')
+        return
+      }
+    }
+    
     // Check if there's a previous page in history
     if (window.history.length > 1) {
       router.back()

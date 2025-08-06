@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -61,6 +61,44 @@ export default function SignupPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
+  // Track signup state for navigation
+  const saveSignupState = (step: number, data: SignupData) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('signup-state', JSON.stringify({
+        step,
+        data,
+        timestamp: Date.now()
+      }))
+    }
+  }
+
+  const loadSignupState = () => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('signup-state')
+      if (saved) {
+        const state = JSON.parse(saved)
+        // Only restore if within last 30 minutes
+        if (Date.now() - state.timestamp < 30 * 60 * 1000) {
+          setCurrentStep(state.step)
+          setFormData(state.data)
+          return true
+        }
+      }
+    }
+    return false
+  }
+
+  const clearSignupState = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('signup-state')
+    }
+  }
+
+  // Load signup state on component mount
+  useEffect(() => {
+    loadSignupState()
+  }, [])
+
   const [formData, setFormData] = useState<SignupData>({
     firstName: "",
     lastName: "",
@@ -120,13 +158,17 @@ export default function SignupPage() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(currentStep + 1)
+      const nextStep = currentStep + 1
+      setCurrentStep(nextStep)
+      saveSignupState(nextStep, formData)
     }
   }
 
   const handleBack = () => {
-    setCurrentStep(currentStep - 1)
+    const prevStep = currentStep - 1
+    setCurrentStep(prevStep)
     setErrors({})
+    saveSignupState(prevStep, formData)
   }
 
   const handleSubmit = async () => {
@@ -165,6 +207,7 @@ export default function SignupPage() {
       }
 
       setSuccess(data.message || "Account created successfully! Please check your email to verify your account.")
+      clearSignupState() // Clear signup state after successful submission
 
       setTimeout(() => {
         router.push("/login?signup=success")
@@ -177,7 +220,9 @@ export default function SignupPage() {
   }
 
   const updateFormData = (field: keyof SignupData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    const updatedData = { ...formData, [field]: value }
+    setFormData(updatedData)
+    saveSignupState(currentStep, updatedData)
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }))
     }
