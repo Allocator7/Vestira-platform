@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "../../components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
 import { useApp } from "../../context/AppContext"
 import { useSession } from "../../context/SessionContext"
+
 import {
   Eye,
   EyeOff,
@@ -84,9 +85,14 @@ export default function LoginPage() {
       setIsLoading(true)
       setError("")
 
-      // Set role in contexts
-      setUserRole(role)
-      sessionLogin(role)
+      // Set role in contexts with error handling
+      try {
+        setUserRole(role)
+        sessionLogin(role)
+      } catch (contextError) {
+        console.warn("Context error during login:", contextError)
+        // Continue with localStorage fallback
+      }
 
       // Store role in localStorage
       localStorage.setItem("currentUserRole", role)
@@ -167,9 +173,14 @@ export default function LoginPage() {
     try {
       setSuccess("Login successful! Redirecting...")
 
-      // Set user role in contexts
-      setUserRole(profile.role)
-      sessionLogin(profile.role)
+      // Set user role in contexts with error handling
+      try {
+        setUserRole(profile.role)
+        sessionLogin(profile.role)
+      } catch (contextError) {
+        console.warn("Context error during login completion:", contextError)
+        // Continue with localStorage fallback
+      }
 
       // Store in localStorage
       localStorage.setItem("userRole", profile.role)

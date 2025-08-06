@@ -10,6 +10,7 @@ import { NotificationContainer } from "@/components/NotificationContainer"
 import { KeyboardShortcuts } from "@/components/KeyboardShortcuts"
 import { ErrorBoundary } from "@/components/ErrorBoundary"
 
+
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   // Mock session to prevent NextAuth from making API calls
   const mockSession = {
