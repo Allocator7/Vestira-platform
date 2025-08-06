@@ -3,155 +3,25 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import { Label } from "../../components/ui/label"
-import { Checkbox } from "../../components/ui/checkbox"
-import { Alert, AlertDescription } from "../../components/ui/alert"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
-import {
-  Eye,
-  EyeOff,
-  Shield,
-  Smartphone,
-  Mail,
-  Key,
-  AlertCircle,
-  CheckCircle,
-  Building,
-  Users,
-  Briefcase,
-  Globe,
-} from "lucide-react"
-
-interface LoginStep {
-  step: "credentials" | "mfa" | "device-trust"
-  data?: any
-}
 
 export default function LoginPage() {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState<LoginStep>({ step: "credentials" })
-  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
 
-  // Form states
-  const [credentials, setCredentials] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  })
-
-  const [mfaData, setMfaData] = useState({
-    method: "totp" as "totp" | "sms" | "email" | "backup-codes",
-    code: "",
-    rememberDevice: false,
-  })
-
-  const [userProfile, setUserProfile] = useState<any>(null)
-
-  // Handle demo button clicks
-  const handleDemoLogin = async (role: "allocator" | "manager" | "consultant" | "industry-group") => {
+  const handleDemoLogin = async (role: string) => {
     try {
       setIsLoading(true)
-      setError("")
-
-      // Store role in localStorage
+      
+      // Simple localStorage access
       if (typeof window !== 'undefined') {
-        localStorage.setItem("currentUserRole", role)
         localStorage.setItem("userRole", role)
-        localStorage.setItem("demoMode", "true")
+        localStorage.setItem("currentUserRole", role)
       }
 
-      // Navigate to the correct dashboard
+      // Navigate to dashboard
       router.push(`/screens/${role}/home`)
     } catch (error) {
-      console.error("Demo login error:", error)
-      setError(`Failed to login as ${role}. Please try again.`)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleCredentialsSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Mock user profile
-      const profile = {
-        id: "user-1",
-        email: credentials.email,
-        role: "allocator" as const,
-        name: "Demo User",
-        verified: true,
-      }
-
-      setUserProfile(profile)
-      setCurrentStep({ step: "mfa" })
-    } catch (err) {
-      setError("Invalid credentials. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleMFASubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      // Simulate MFA verification
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      if (mfaData.code === "123456") {
-        await completeLogin(userProfile, true)
-      } else {
-        setError("Invalid verification code")
-      }
-    } catch (err) {
-      setError("MFA verification failed. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const completeLogin = async (profile: any, mfaVerified = false) => {
-    try {
-      setSuccess("Login successful! Redirecting...")
-
-      // Store in localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem("userRole", profile.role)
-        localStorage.setItem("currentUserRole", profile.role)
-      }
-
-      // Navigate directly
-      setTimeout(() => {
-        router.push(`/screens/${profile.role}/home`)
-      }, 800)
-    } catch (err) {
-      console.error("Login completion error:", err)
-      setError("Login completion failed")
-    }
-  }
-
-  const resendMFACode = async () => {
-    setIsLoading(true)
-    try {
-      // Simulate resending code
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      setSuccess("Verification code sent!")
-      setTimeout(() => setSuccess(""), 3000)
-    } catch (err) {
-      setError("Failed to resend code")
+      console.error("Login error:", error)
     } finally {
       setIsLoading(false)
     }
@@ -159,313 +29,94 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-      {/* Left side - Branding and info */}
-      <div className="bg-deep-brand md:w-1/2 p-8 flex flex-col justify-between relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/placeholder.svg?height=1080&width=1080')] opacity-10"></div>
-
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-deep-brand/90 to-deep-brand"></div>
-
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center">
-              <span className="text-deep-brand font-bold text-2xl">V</span>
-            </div>
-            <span className="text-white text-2xl font-bold">vestira</span>
-          </div>
-
-          <h1 className="text-4xl font-bold text-white mb-4">Welcome to the future of institutional investment</h1>
-          <p className="text-white/80 text-lg mb-8">
-            Secure, compliant, and efficient document management for investment professionals.
-          </p>
-
-          <div className="space-y-6">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-electric-blue/20 flex items-center justify-center mt-1">
-                <Shield className="h-5 w-5 text-electric-blue" />
-              </div>
-              <div>
-                <h3 className="text-white font-medium text-lg">Enterprise Security</h3>
-                <p className="text-white/70">SOC2 compliant platform with advanced encryption</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-electric-blue/20 flex items-center justify-center mt-1">
-                <Users className="h-5 w-5 text-electric-blue" />
-              </div>
-              <div>
-                <h3 className="text-white font-medium text-lg">Streamlined Collaboration</h3>
-                <p className="text-white/70">Connect with allocators and managers seamlessly</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-full bg-electric-blue/20 flex items-center justify-center mt-1">
-                <Building className="h-5 w-5 text-electric-blue" />
-              </div>
-              <div>
-                <h3 className="text-white font-medium text-lg">Intelligent Data Rooms</h3>
-                <p className="text-white/70">Organize and share documents with granular permissions</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10">
-          <p className="text-white/60 text-sm">
-            © 2024 Vestira. All rights reserved.{" "}
-            <Link href="/terms" className="hover:underline">
-              Terms
-            </Link>{" "}
-            •{" "}
-            <Link href="/privacy" className="hover:underline">
-              Privacy
-            </Link>
-          </p>
+      {/* Left side */}
+      <div className="bg-blue-600 md:w-1/2 p-8 flex flex-col justify-center">
+        <div className="text-white">
+          <h1 className="text-4xl font-bold mb-4">Vestira</h1>
+          <p className="text-xl">Investment Management Platform</p>
         </div>
       </div>
 
-      {/* Right side - Login form */}
+      {/* Right side */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center md:text-left">
-            <h2 className="text-3xl font-bold text-deep-brand">Sign In</h2>
-            <p className="text-base-gray mt-2">Access your secure Vestira dashboard</p>
+        <div className="w-full max-w-md space-y-6">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-900">Sign In</h2>
+            <p className="text-gray-600 mt-2">Access your dashboard</p>
           </div>
 
-          {/* Demo Views - Explore Platform Features */}
-          <div className="mb-4">
-            <p className="text-sm text-base-gray text-center mb-3">
-              Explore platform features with sample data
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            {/* Allocator Demo Button */}
+          {/* Demo Buttons */}
+          <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => handleDemoLogin("allocator")}
               disabled={isLoading}
-              className="border-2 border-gray-200 rounded-lg p-4 hover:bg-blue-50 hover:border-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
+              className="p-4 border-2 border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-400 transition-colors"
             >
-              <div className="absolute top-2 right-2">
-                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Building className="h-6 w-6 text-blue-600" />
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-blue-600 font-bold">A</span>
                 </div>
-                <span className="font-medium text-deep-brand">Sample Allocator</span>
+                <span className="font-medium">Allocator</span>
               </div>
             </button>
 
-            {/* Manager Demo Button */}
             <button
               onClick={() => handleDemoLogin("manager")}
               disabled={isLoading}
-              className="border-2 border-gray-200 rounded-lg p-4 hover:bg-green-50 hover:border-green-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
+              className="p-4 border-2 border-gray-200 rounded-lg hover:bg-green-50 hover:border-green-400 transition-colors"
             >
-              <div className="absolute top-2 right-2">
-                <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                  <Users className="h-6 w-6 text-green-600" />
+              <div className="text-center">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-green-600 font-bold">M</span>
                 </div>
-                <span className="font-medium text-deep-brand">Sample Manager</span>
+                <span className="font-medium">Manager</span>
               </div>
             </button>
 
-            {/* Consultant Demo Button */}
             <button
               onClick={() => handleDemoLogin("consultant")}
               disabled={isLoading}
-              className="border-2 border-gray-200 rounded-lg p-4 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
+              className="p-4 border-2 border-gray-200 rounded-lg hover:bg-purple-50 hover:border-purple-400 transition-colors"
             >
-              <div className="absolute top-2 right-2">
-                <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
-                  <Briefcase className="h-6 w-6 text-purple-600" />
+              <div className="text-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-purple-600 font-bold">C</span>
                 </div>
-                <span className="font-medium text-deep-brand">Sample Consultant</span>
+                <span className="font-medium">Consultant</span>
               </div>
             </button>
 
-            {/* NEW: Industry Group Demo Button */}
             <button
               onClick={() => handleDemoLogin("industry-group")}
               disabled={isLoading}
-              className="border-2 border-gray-200 rounded-lg p-4 hover:bg-orange-50 hover:border-orange-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
+              className="p-4 border-2 border-gray-200 rounded-lg hover:bg-orange-50 hover:border-orange-400 transition-colors"
             >
-              <div className="absolute top-2 right-2">
-                <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
-              </div>
-              <div className="flex flex-col items-center gap-2">
-                <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
-                  <Globe className="h-6 w-6 text-orange-600" />
+              <div className="text-center">
+                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <span className="text-orange-600 font-bold">I</span>
                 </div>
-                <span className="font-medium text-deep-brand text-sm">Sample Industry Group</span>
+                <span className="font-medium">Industry Group</span>
               </div>
             </button>
           </div>
 
           {isLoading && (
             <div className="text-center">
-              <div className="inline-flex items-center gap-2 text-base-gray">
-                <svg
-                  className="animate-spin h-4 w-4"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
+              <div className="inline-flex items-center gap-2 text-gray-600">
+                <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-blue-600 rounded-full"></div>
                 Loading...
               </div>
             </div>
           )}
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
-
-          <Tabs defaultValue="credentials" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="credentials">Sign In</TabsTrigger>
-              <TabsTrigger value="demo">Demo Access</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="credentials" className="space-y-6">
-              <form onSubmit={handleCredentialsSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-deep-brand">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={credentials.email}
-                    onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
-                    required
-                    className="h-12"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="password" className="text-deep-brand">
-                      Password
-                    </Label>
-                    <Link href="/forgot-password" className="text-sm text-electric-blue hover:underline">
-                      Forgot password?
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={credentials.password}
-                      onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
-                      required
-                      className="h-12"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="remember"
-                    checked={credentials.rememberMe}
-                    onCheckedChange={(checked) => setCredentials({ ...credentials, rememberMe: !!checked })}
-                  />
-                  <Label htmlFor="remember" className="text-sm text-deep-brand">
-                    Remember me for 30 days
-                  </Label>
-                </div>
-
-                <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <svg
-                        className="animate-spin h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Signing in...
-                    </div>
-                  ) : (
-                    "Sign In"
-                  )}
-                </Button>
-              </form>
-
-              <div className="text-center">
-                <p className="text-base-gray">
-                  Don't have an account?{" "}
-                  <Link href="/signup" className="text-electric-blue font-medium hover:underline">
-                    Create an account
-                  </Link>
-                </p>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="demo" className="space-y-6">
-              <div className="text-center">
-                <p className="text-base-gray mb-4">
-                  Click any demo button above to explore the platform with sample data.
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="text-center">
+            <p className="text-gray-600">
+              Don't have an account?{" "}
+              <Link href="/signup" className="text-blue-600 hover:underline">
+                Create an account
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
