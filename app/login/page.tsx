@@ -35,7 +35,6 @@ interface LoginStep {
 
 export default function LoginPage() {
   const router = useRouter()
-  const [isContextReady, setIsContextReady] = useState(false)
   const [currentStep, setCurrentStep] = useState<LoginStep>({ step: "credentials" })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -45,41 +44,6 @@ export default function LoginPage() {
   // Safely get context functions with fallbacks
   const { setUserRole } = useApp() || {}
   const { login: sessionLogin } = useSession() || {}
-
-  // Check if contexts are ready
-  React.useEffect(() => {
-    const checkContexts = () => {
-      try {
-        // Give contexts time to initialize
-        setTimeout(() => {
-          setIsContextReady(true)
-        }, 100)
-      } catch (error) {
-        console.warn("Context initialization error:", error)
-        setIsContextReady(true) // Still proceed
-      }
-    }
-    
-    checkContexts()
-  }, [])
-
-  // Fallback for context issues
-  if (!isContextReady) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Loading...</h1>
-          <p className="text-gray-600 mb-4">Please wait while we initialize the application.</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    )
-  }
 
   // Check for URL parameters for success messages
   React.useEffect(() => {
@@ -123,58 +87,31 @@ export default function LoginPage() {
 
     try {
       setIsLoading(true)
-
-      // Clear any existing state that might conflict
       setError("")
-      
-      // Safely clear localStorage
-      try {
-        localStorage.removeItem("userRole")
-        localStorage.removeItem("currentUserRole")
-      } catch (e) {
-        console.warn("Could not clear localStorage:", e)
-      }
 
-      // Add a small delay to ensure cleanup
-      await new Promise((resolve) => setTimeout(resolve, 50))
-
-      // Set role in both contexts
-      console.log(`Setting role in App context: ${role}`)
-      if (setUserRole) {
-        setUserRole(role)
-      } else {
-        console.warn("setUserRole not available, using localStorage fallback")
-      }
-
-      console.log(`Setting role in Session context: ${role}`)
-      if (sessionLogin) {
-        sessionLogin(role)
-      } else {
-        console.warn("sessionLogin not available, using localStorage fallback")
-      }
-
-      // Store role in localStorage for persistence
+      // Store role in localStorage first
       try {
         localStorage.setItem("currentUserRole", role)
         localStorage.setItem("userRole", role)
         localStorage.setItem("demoMode", "true")
-
-        console.log(
-          `LocalStorage after setting: userRole=${localStorage.getItem("userRole")}, currentUserRole=${localStorage.getItem("currentUserRole")}`,
-        )
       } catch (e) {
         console.warn("Could not save to localStorage:", e)
       }
 
-      // Add delay to ensure context updates
-      await new Promise((resolve) => setTimeout(resolve, 300))
+      // Set role in contexts if available
+      if (setUserRole) {
+        setUserRole(role)
+      }
+      
+      if (sessionLogin) {
+        sessionLogin(role)
+      }
 
-      // Navigate to the correct dashboard with explicit path
+      // Navigate to the correct dashboard
       const targetPath = `/screens/${role}/home`
       console.log(`Navigating to: ${targetPath}`)
-
-      // Use replace instead of push to avoid back button issues
-      await router.replace(targetPath)
+      
+      router.push(targetPath)
 
       console.log(`=== DEMO LOGIN SUCCESS ===`)
     } catch (error) {
@@ -249,25 +186,21 @@ export default function LoginPage() {
     try {
       setSuccess("Login successful! Redirecting...")
 
-      // Set user role in both contexts
-      if (setUserRole) {
-        setUserRole(profile.role)
-      } else {
-        console.warn("setUserRole not available in completeLogin")
-      }
-      
-      if (sessionLogin) {
-        sessionLogin(profile.role)
-      } else {
-        console.warn("sessionLogin not available in completeLogin")
-      }
-
-      // Store in localStorage as fallback
+      // Store in localStorage
       try {
         localStorage.setItem("userRole", profile.role)
         localStorage.setItem("currentUserRole", profile.role)
       } catch (e) {
         console.warn("Could not save to localStorage in completeLogin:", e)
+      }
+
+      // Set user role in contexts if available
+      if (setUserRole) {
+        setUserRole(profile.role)
+      }
+      
+      if (sessionLogin) {
+        sessionLogin(profile.role)
       }
 
       // Navigate directly

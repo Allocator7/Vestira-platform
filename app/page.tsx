@@ -24,11 +24,8 @@ export default function HomePage() {
         // Wait a bit to ensure everything is loaded
         await new Promise(resolve => setTimeout(resolve, 100))
 
-        if (roleToUse && ["allocator", "manager", "consultant", "industry-group"].includes(roleToUse)) {
-          router.push(`/screens/${roleToUse}/home`)
-        } else {
-          router.push("/login")
-        }
+        // Always redirect to login page for now
+        router.push("/login")
       } catch (err) {
         console.error("Error initializing app:", err)
         setError(true)
