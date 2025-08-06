@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "../../components/ui/button"
@@ -39,16 +39,20 @@ export default function LoginPage() {
 
   // Check for URL parameters on component mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const verified = urlParams.get('verified')
-      const signup = urlParams.get('signup')
-      
-      if (verified === 'true') {
-        setSuccess("Email verified successfully! You can now log in to your account.")
-      } else if (signup === 'success') {
-        setSuccess("Account created successfully! Please check your email to verify your account.")
+    try {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const verified = urlParams.get('verified')
+        const signup = urlParams.get('signup')
+        
+        if (verified === 'true') {
+          setSuccess("Email verified successfully! You can now log in to your account.")
+        } else if (signup === 'success') {
+          setSuccess("Account created successfully! Please check your email to verify your account.")
+        }
       }
+    } catch (error) {
+      console.error("Error parsing URL parameters:", error)
     }
   }, [])
 
