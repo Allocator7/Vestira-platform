@@ -302,7 +302,7 @@ export default function LoginPage() {
                     <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                       <Building className="h-6 w-6 text-blue-600" />
                     </div>
-                    <span className="font-medium text-deep-brand">Allocator</span>
+                    <span className="font-medium text-deep-brand">Sample Allocator</span>
                   </div>
                 </button>
 
@@ -319,7 +319,7 @@ export default function LoginPage() {
                     <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
                       <Users className="h-6 w-6 text-green-600" />
                     </div>
-                    <span className="font-medium text-deep-brand">Manager</span>
+                    <span className="font-medium text-deep-brand">Sample Manager</span>
                   </div>
                 </button>
 
@@ -336,7 +336,7 @@ export default function LoginPage() {
                     <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
                       <Briefcase className="h-6 w-6 text-purple-600" />
                     </div>
-                    <span className="font-medium text-deep-brand">Consultant</span>
+                    <span className="font-medium text-deep-brand">Sample Consultant</span>
                   </div>
                 </button>
 
@@ -353,7 +353,7 @@ export default function LoginPage() {
                     <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
                       <Globe className="h-6 w-6 text-orange-600" />
                     </div>
-                    <span className="font-medium text-deep-brand text-sm">Industry Group</span>
+                    <span className="font-medium text-deep-brand text-sm">Sample Industry Group</span>
                   </div>
                 </button>
               </div>

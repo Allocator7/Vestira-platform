@@ -50,9 +50,33 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     console.log(`SessionContext: Setting session for role: ${role}`)
     setUserRole(role)
 
+    // Set up multi-role users for demo
+    let roles: UserRole[] = [role]
+    
+    // Demo multi-role users
+    if (role === "allocator") {
+      // Some allocators might also be managers
+      if (Math.random() > 0.7) { // 30% chance
+        roles = ["allocator", "manager"]
+      }
+    } else if (role === "manager") {
+      // Some managers might also be consultants
+      if (Math.random() > 0.8) { // 20% chance
+        roles = ["manager", "consultant"]
+      }
+    } else if (role === "consultant") {
+      // Some consultants might also be industry group members
+      if (Math.random() > 0.9) { // 10% chance
+        roles = ["consultant", "industry-group"]
+      }
+    }
+    
+    setUserRoles(roles)
+
     // Store in localStorage for persistence
     try {
       localStorage.setItem("userRole", role)
+      localStorage.setItem("userRoles", JSON.stringify(roles))
       localStorage.setItem("isAuthenticated", "true")
     } catch (e) {
       console.warn("Could not save to localStorage:", e)
