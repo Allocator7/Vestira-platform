@@ -289,7 +289,8 @@ function AllocatorInsightsPage() {
     engagement: [],
   })
   const [showFilterDropdown, setShowFilterDropdown] = useState(false)
-  const [showExportDialog, setShowExportDialog] = useState(false)
+  // Export dialog removed as per feedback
+  // const [showExportDialog, setShowExportDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [selectedInsight, setSelectedInsight] = useState<any | null>(null)
   const [filteredInsights, setFilteredInsights] = useState(allInsights)
@@ -829,33 +830,7 @@ function AllocatorInsightsPage() {
       {/* Click outside to close dropdown */}
       {showFilterDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowFilterDropdown(false)} />}
 
-      {/* Export Dialog */}
-      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Export Insights</DialogTitle>
-            <DialogDescription>Choose a format to export the current insights</DialogDescription>
-          </DialogHeader>
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <Button onClick={() => handleExport("PDF")} className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export as PDF
-            </Button>
-            <Button onClick={() => handleExport("Excel")} className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export as Excel
-            </Button>
-            <Button onClick={() => handleExport("CSV")} className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export as CSV
-            </Button>
-            <Button onClick={() => handleExport("Image")} className="flex items-center gap-2">
-              <Download className="h-4 w-4" />
-              Export as Images
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Export Dialog removed as per feedback - users should download individual pieces instead */}
 
       {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

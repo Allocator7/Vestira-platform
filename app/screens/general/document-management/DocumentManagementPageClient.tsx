@@ -338,9 +338,27 @@ export default function DocumentManagementPageClient() {
       // Simulate file preparation and download process
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Create a blob URL for the download (simulated)
-      const blob = new Blob([`Document: ${document.title}\nContent: ${document.description}`], {
-        type: "text/plain",
+      // Create a more realistic document content based on the document type
+      let documentContent = ""
+      const timestamp = new Date().toISOString()
+      
+      switch (document.classification) {
+        case "Restricted Documents":
+          documentContent = `RESTRICTED DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis is a restricted document with confidential information. Please handle with appropriate care.\n\nGenerated: ${timestamp}`
+          break
+        case "Client-Specific Documents":
+          documentContent = `CLIENT-SPECIFIC DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis document contains client-specific information and should be handled according to client confidentiality requirements.\n\nGenerated: ${timestamp}`
+          break
+        case "Internal Documents":
+          documentContent = `INTERNAL DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis is an internal document for organizational use only.\n\nGenerated: ${timestamp}`
+          break
+        default:
+          documentContent = `DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nGenerated: ${timestamp}`
+      }
+
+      // Create a blob URL for the download
+      const blob = new Blob([documentContent], {
+        type: "text/plain;charset=utf-8",
       })
       const url = window.URL.createObjectURL(blob)
 
@@ -348,6 +366,7 @@ export default function DocumentManagementPageClient() {
       const link = document.createElement("a")
       link.href = url
       link.download = `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`
+      link.style.display = "none"
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -357,9 +376,10 @@ export default function DocumentManagementPageClient() {
 
       notify({
         title: "Download Complete",
-        description: `${document.title} has been downloaded successfully.`,
+        description: `${document.title} has been downloaded successfully. Check your downloads folder.`,
       })
     } catch (error) {
+      console.error("Download error:", error)
       notify({
         title: "Download Failed",
         description: "There was an error downloading the document. Please try again.",

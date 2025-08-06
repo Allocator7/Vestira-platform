@@ -263,6 +263,56 @@ export function UploadInsightModal({ open, onOpenChange, userRole }: UploadInsig
                 <p className="text-xs text-gray-500 mt-1">PDF, DOC, DOCX, PPT, PPTX (max 10MB)</p>
               </label>
             </div>
+            
+            {/* Show uploaded file with preview/download options */}
+            {formData.file && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg border">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <Upload className="h-5 w-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm text-deep-brand">{formData.file.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {(formData.file.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const url = URL.createObjectURL(formData.file!)
+                        const link = document.createElement('a')
+                        link.href = url
+                        link.download = formData.file!.name
+                        document.body.appendChild(link)
+                        link.click()
+                        document.body.removeChild(link)
+                        URL.revokeObjectURL(url)
+                      }}
+                    >
+                      Download
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const url = URL.createObjectURL(formData.file!)
+                        window.open(url, '_blank')
+                        URL.revokeObjectURL(url)
+                      }}
+                    >
+                      Preview
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
