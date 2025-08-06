@@ -7,8 +7,10 @@ type UserRole = "allocator" | "manager" | "consultant" | "industry-group" | null
 
 interface SessionContextType {
   userRole: UserRole
+  userRoles: UserRole[] // Multiple roles for users who have dual roles
   isLoading: boolean
   login: (role: "allocator" | "manager" | "consultant" | "industry-group") => void
+  switchRole: (role: UserRole) => void
   logout: () => void
   isAuthenticated: boolean
   user: any
@@ -29,6 +31,7 @@ export function useSession() {
 // Export the provider component
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole>(null)
+  const [userRoles, setUserRoles] = useState<UserRole[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
   // Login function
@@ -39,6 +42,14 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     // Store in localStorage for persistence
     localStorage.setItem("userRole", role)
     localStorage.setItem("isAuthenticated", "true")
+  }
+
+  // Switch role function for multi-role users
+  const switchRole = (role: UserRole) => {
+    if (role && userRoles.includes(role)) {
+      setUserRole(role)
+      localStorage.setItem("userRole", role)
+    }
   }
 
   // Logout function
@@ -52,8 +63,10 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   // Provide context value - always authenticated for demo
   const value = {
     userRole,
+    userRoles,
     isLoading,
     login,
+    switchRole,
     logout,
     isAuthenticated: true, // Always authenticated for demo
     user: { name: "Demo User" },

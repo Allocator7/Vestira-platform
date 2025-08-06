@@ -13,6 +13,7 @@ import { EventRegistrationModal } from "@/components/events/EventRegistrationMod
 import { EventDetailsModal } from "@/components/events/EventDetailsModal"
 import { EventCertificateModal } from "@/components/events/EventCertificateModal"
 import { EventCalendar } from "@/components/events/EventCalendar"
+import { CreateEventButton } from "@/components/events/CreateEventButton"
 
 export default function ConsultantEventsCenter() {
   const { toast } = useToast()
@@ -156,6 +157,7 @@ export default function ConsultantEventsCenter() {
           <h1 className="text-3xl font-bold text-gray-900">Events Center</h1>
           <p className="text-gray-600 mt-1">Professional development and industry networking events</p>
         </div>
+        <CreateEventButton />
       </div>
 
       <Tabs defaultValue="browse" className="space-y-6">
