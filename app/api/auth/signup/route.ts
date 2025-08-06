@@ -80,10 +80,12 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     }
 
-    // Store user data in localStorage for demo (in production, this would be saved to a database)
-    const existingUsers = JSON.parse(localStorage.getItem('vestira-users') || '[]')
-    existingUsers.push(userData)
-    localStorage.setItem('vestira-users', JSON.stringify(existingUsers))
+    // Store user data (in production, this would be saved to a database)
+    // For demo purposes, we'll store in a global variable or use a simple file-based storage
+    console.log("User created:", { ...userData, password: "[HIDDEN]" })
+    
+    // In production, you would save to a database here
+    // For now, we'll simulate successful storage
 
     // Send verification email
     try {

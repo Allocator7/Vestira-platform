@@ -19,9 +19,23 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get users from localStorage (in production, this would be from a database)
-    const existingUsers = JSON.parse(localStorage.getItem('vestira-users') || '[]')
-    const user = existingUsers.find((u: any) => u.email.toLowerCase() === body.email.toLowerCase())
+    // For demo purposes, we'll use a simple mock user system
+    // In production, this would query a database
+    const mockUsers = [
+      {
+        id: "user_1",
+        email: "demo@vestira.co",
+        password: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.i6e", // "password123"
+        firstName: "Demo",
+        lastName: "User",
+        organizationType: "allocator",
+        organizationName: "Demo Organization",
+        jobTitle: "Investment Manager",
+        emailVerified: true
+      }
+    ]
+    
+    const user = mockUsers.find((u: any) => u.email.toLowerCase() === body.email.toLowerCase())
 
     if (!user) {
       return NextResponse.json(
