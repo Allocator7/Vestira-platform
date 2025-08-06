@@ -56,6 +56,10 @@ export function UploadInsightModal({ open, onOpenChange, userRole }: UploadInsig
     const file = e.target.files?.[0]
     if (file) {
       setFormData({ ...formData, file })
+      // Force re-render to ensure file display updates
+      setTimeout(() => {
+        setFormData(prev => ({ ...prev, file }))
+      }, 100)
     }
   }
 

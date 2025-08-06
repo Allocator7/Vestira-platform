@@ -257,10 +257,10 @@ export default function DDQResponsePage() {
       // Also save to sessionStorage for immediate recovery
       sessionStorage.setItem(`ddq-session-${ddqData.id}`, JSON.stringify(ddqData))
       
-      // Force save completion before showing notification
+      // Force save completion before showing notification - increased timeout for reliability
       setTimeout(() => {
         showNotification("DDQ responses saved as draft successfully")
-      }, 100)
+      }, 200)
       
     } catch (error) {
       console.error("Error saving draft:", error)
