@@ -37,6 +37,21 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
+  // Check for URL parameters on component mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const verified = urlParams.get('verified')
+      const signup = urlParams.get('signup')
+      
+      if (verified === 'true') {
+        setSuccess("Email verified successfully! You can now log in to your account.")
+      } else if (signup === 'success') {
+        setSuccess("Account created successfully! Please check your email to verify your account.")
+      }
+    }
+  }, [])
+
   // Form states
   const [credentials, setCredentials] = useState({
     email: "",
@@ -81,22 +96,44 @@ export default function LoginPage() {
     setError("")
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Real API call to login endpoint
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+        }),
+      })
 
-      // Mock user profile
-      const profile = {
-        id: "user-1",
-        email: credentials.email,
-        role: "allocator" as const,
-        name: "Demo User",
-        verified: true,
+      const data = await response.json()
+
+      if (!response.ok) {
+        setError(data.error || "Login failed. Please try again.")
+        return
       }
 
-      setUserProfile(profile)
-      setCurrentStep({ step: "mfa" })
+      // Store user data and token
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("userToken", data.token)
+        localStorage.setItem("userData", JSON.stringify(data.user))
+        localStorage.setItem("userRole", data.user.organizationType)
+        localStorage.setItem("currentUserRole", data.user.organizationType)
+        localStorage.setItem("isAuthenticated", "true")
+      }
+
+      setSuccess("Login successful! Redirecting...")
+      
+      // Navigate to dashboard
+      setTimeout(() => {
+        router.push(`/screens/${data.user.organizationType}/home`)
+      }, 800)
+
     } catch (err) {
-      setError("Invalid credentials. Please try again.")
+      console.error("Login error:", err)
+      setError("Login failed. Please try again.")
     } finally {
       setIsLoading(false)
     }

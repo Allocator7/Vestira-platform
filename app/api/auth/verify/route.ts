@@ -34,12 +34,20 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // In production, you would update the user's emailVerified status in the database
-    // For now, we'll simulate the verification
-    console.log("Email verified for:", decoded.email)
+    // Update user's emailVerified status in localStorage (in production, this would be in a database)
+    const existingUsers = JSON.parse(localStorage.getItem('vestira-users') || '[]')
+    const userIndex = existingUsers.findIndex((user: any) => user.email === decoded.email)
+    
+    if (userIndex !== -1) {
+      existingUsers[userIndex].emailVerified = true
+      existingUsers[userIndex].verificationToken = null
+      existingUsers[userIndex].updatedAt = new Date().toISOString()
+      localStorage.setItem('vestira-users', JSON.stringify(existingUsers))
+      console.log("Email verified for:", decoded.email)
+    }
 
     // Redirect to login page with success message
-    const loginUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/login?verified=true`
+    const loginUrl = `${process.env.NEXTAUTH_URL || "https://vestira.co"}/login?verified=true`
     
     return NextResponse.redirect(loginUrl)
 

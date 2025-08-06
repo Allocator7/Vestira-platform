@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { hash } from "bcryptjs"
 import { sign } from "jsonwebtoken"
+import sgMail from "@sendgrid/mail"
 
 interface SignupRequest {
   firstName: string
@@ -79,17 +80,20 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     }
 
-    // Store user data (in production, this would be saved to a database)
-    // For now, we'll simulate storing the user
-    console.log("User created:", { ...userData, password: "[HIDDEN]" })
+    // Store user data in localStorage for demo (in production, this would be saved to a database)
+    const existingUsers = JSON.parse(localStorage.getItem('vestira-users') || '[]')
+    existingUsers.push(userData)
+    localStorage.setItem('vestira-users', JSON.stringify(existingUsers))
 
     // Send verification email
     try {
       await sendVerificationEmail(body.email, verificationToken, body.firstName)
     } catch (emailError) {
       console.error("Failed to send verification email:", emailError)
-      // In production, you might want to handle this differently
-      // For now, we'll still create the account but log the email failure
+      return NextResponse.json(
+        { error: "Account created but verification email failed to send. Please contact support." },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json(
@@ -111,7 +115,15 @@ export async function POST(request: NextRequest) {
 }
 
 async function sendVerificationEmail(email: string, token: string, firstName: string) {
-  const verificationUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/api/auth/verify?token=${token}`
+  // Initialize SendGrid with API key
+  const sendGridApiKey = process.env.SENDGRID_API_KEY
+  if (!sendGridApiKey) {
+    throw new Error("SendGrid API key not configured")
+  }
+  
+  sgMail.setApiKey(sendGridApiKey)
+  
+  const verificationUrl = `${process.env.NEXTAUTH_URL || "https://vestira.co"}/api/auth/verify?token=${token}`
   
   const emailContent = `
     <!DOCTYPE html>
@@ -161,13 +173,19 @@ async function sendVerificationEmail(email: string, token: string, firstName: st
     </html>
   `
 
-  // In production, you would use a proper email service like SendGrid, AWS SES, or Resend
-  // For now, we'll simulate sending the email
-  console.log("Verification email would be sent to:", email)
-  console.log("Verification URL:", verificationUrl)
-  
-  // Simulate email sending delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  return true
+  const msg = {
+    to: email,
+    from: process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co',
+    subject: 'Verify Your Vestira Account',
+    html: emailContent,
+  }
+
+  try {
+    await sgMail.send(msg)
+    console.log(`Verification email sent successfully to ${email}`)
+    return true
+  } catch (error) {
+    console.error('SendGrid error:', error)
+    throw new Error('Failed to send verification email')
+  }
 }
