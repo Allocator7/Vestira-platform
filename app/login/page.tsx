@@ -300,14 +300,22 @@ export default function LoginPage() {
                 <p className="text-base-gray mt-2">Access your secure Vestira dashboard</p>
               </div>
 
-              {/* DEMO BUTTONS - UPDATED to include Industry Group */}
+              {/* Demo Views - Explore Platform Features */}
+              <div className="mb-4">
+                <p className="text-sm text-base-gray text-center mb-3">
+                  Explore platform features with sample data
+                </p>
+              </div>
               <div className="grid grid-cols-2 gap-3 mb-6">
                 {/* Allocator Demo Button */}
                 <button
                   onClick={() => handleDemoLogin("allocator")}
                   disabled={isLoading}
-                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-blue-50 hover:border-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-blue-50 hover:border-blue-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
                 >
+                  <div className="absolute top-2 right-2">
+                    <span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
+                  </div>
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
                       <Building className="h-6 w-6 text-blue-600" />
@@ -320,8 +328,11 @@ export default function LoginPage() {
                 <button
                   onClick={() => handleDemoLogin("manager")}
                   disabled={isLoading}
-                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-green-50 hover:border-green-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-green-50 hover:border-green-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
                 >
+                  <div className="absolute top-2 right-2">
+                    <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
+                  </div>
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
                       <Users className="h-6 w-6 text-green-600" />
@@ -334,8 +345,11 @@ export default function LoginPage() {
                 <button
                   onClick={() => handleDemoLogin("consultant")}
                   disabled={isLoading}
-                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-purple-50 hover:border-purple-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
                 >
+                  <div className="absolute top-2 right-2">
+                    <span className="bg-purple-100 text-purple-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
+                  </div>
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
                       <Briefcase className="h-6 w-6 text-purple-600" />
@@ -348,8 +362,11 @@ export default function LoginPage() {
                 <button
                   onClick={() => handleDemoLogin("industry-group")}
                   disabled={isLoading}
-                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-orange-50 hover:border-orange-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="border-2 border-gray-200 rounded-lg p-4 hover:bg-orange-50 hover:border-orange-400 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed relative"
                 >
+                  <div className="absolute top-2 right-2">
+                    <span className="bg-orange-100 text-orange-700 text-xs px-2 py-1 rounded-full font-medium">Demo</span>
+                  </div>
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
                       <Globe className="h-6 w-6 text-orange-600" />
