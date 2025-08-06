@@ -43,18 +43,41 @@ export default function LoginPage() {
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
 
+  // Fallback for context issues
+  if (!setUserRole || !sessionLogin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
+          <h1 className="text-xl font-semibold text-gray-900 mb-2">Loading...</h1>
+          <p className="text-gray-600 mb-4">Please wait while we initialize the application.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // Check for URL parameters for success messages
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search)
-      const verified = urlParams.get("verified")
-      const signup = urlParams.get("signup")
-      
-      if (verified === "true") {
-        setSuccess("Email verified successfully! You can now log in to your account.")
-      } else if (signup === "success") {
-        setSuccess("Account created successfully! Please check your email to verify your account.")
+    try {
+      if (typeof window !== 'undefined') {
+        const urlParams = new URLSearchParams(window.location.search)
+        const verified = urlParams.get("verified")
+        const signup = urlParams.get("signup")
+        
+        if (verified === "true") {
+          setSuccess("Email verified successfully! You can now log in to your account.")
+        } else if (signup === "success") {
+          setSuccess("Account created successfully! Please check your email to verify your account.")
+        }
       }
+    } catch (error) {
+      console.error("Error checking URL parameters:", error)
+      // Don't set error state to avoid breaking the page
     }
   }, [])
 
@@ -83,8 +106,14 @@ export default function LoginPage() {
 
       // Clear any existing state that might conflict
       setError("")
-      localStorage.removeItem("userRole")
-      localStorage.removeItem("currentUserRole")
+      
+      // Safely clear localStorage
+      try {
+        localStorage.removeItem("userRole")
+        localStorage.removeItem("currentUserRole")
+      } catch (e) {
+        console.warn("Could not clear localStorage:", e)
+      }
 
       // Add a small delay to ensure cleanup
       await new Promise((resolve) => setTimeout(resolve, 50))
@@ -99,13 +128,17 @@ export default function LoginPage() {
       sessionLogin(role)
 
       // Store role in localStorage for persistence
-      localStorage.setItem("currentUserRole", role)
-      localStorage.setItem("userRole", role)
-      localStorage.setItem("demoMode", "true")
+      try {
+        localStorage.setItem("currentUserRole", role)
+        localStorage.setItem("userRole", role)
+        localStorage.setItem("demoMode", "true")
 
-      console.log(
-        `LocalStorage after setting: userRole=${localStorage.getItem("userRole")}, currentUserRole=${localStorage.getItem("currentUserRole")}`,
-      )
+        console.log(
+          `LocalStorage after setting: userRole=${localStorage.getItem("userRole")}, currentUserRole=${localStorage.getItem("currentUserRole")}`,
+        )
+      } catch (e) {
+        console.warn("Could not save to localStorage:", e)
+      }
 
       // Add delay to ensure context updates
       await new Promise((resolve) => setTimeout(resolve, 300))
@@ -120,7 +153,7 @@ export default function LoginPage() {
       console.log(`=== DEMO LOGIN SUCCESS ===`)
     } catch (error) {
       console.error("Demo login error:", error)
-      setError(`Failed to login as ${role}`)
+      setError(`Failed to login as ${role}. Please try again.`)
     } finally {
       setIsLoading(false)
     }

@@ -40,8 +40,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     setUserRole(role)
 
     // Store in localStorage for persistence
-    localStorage.setItem("userRole", role)
-    localStorage.setItem("isAuthenticated", "true")
+    try {
+      localStorage.setItem("userRole", role)
+      localStorage.setItem("isAuthenticated", "true")
+    } catch (e) {
+      console.warn("Could not save to localStorage:", e)
+    }
   }
 
   // Switch role function for multi-role users
@@ -56,8 +60,12 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     console.log("SessionContext: Logging out")
     setUserRole(null)
-    localStorage.removeItem("userRole")
-    localStorage.removeItem("isAuthenticated")
+    try {
+      localStorage.removeItem("userRole")
+      localStorage.removeItem("isAuthenticated")
+    } catch (e) {
+      console.warn("Could not clear localStorage:", e)
+    }
   }
 
   // Provide context value - always authenticated for demo
