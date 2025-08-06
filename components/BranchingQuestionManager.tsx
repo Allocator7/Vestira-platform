@@ -335,8 +335,19 @@ export function BranchingQuestionManager({
               </div>
 
               {/* Answer Section */}
-              {canAnswerQuestions && branch.status === "pending" && (
+              {canAnswerQuestions && (branch.status === "pending" || branch.status === "clarification_needed") && (
                 <div className="border-t pt-3">
+                  {branch.status === "clarification_needed" && (
+                    <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-4 w-4 text-red-600" />
+                        <span className="text-sm font-medium text-red-800">Clarification Required</span>
+                      </div>
+                      <p className="text-xs text-red-700 mt-1">
+                        This question requires your response to proceed with the DDQ.
+                      </p>
+                    </div>
+                  )}
                   <Label className="text-sm font-medium text-gray-700 mb-2 block">Your Response *</Label>
                   {branch.type === "long_text" ? (
                     <div className="space-y-2">
@@ -380,19 +391,42 @@ export function BranchingQuestionManager({
                       </div>
                     </RadioGroup>
                   ) : branch.type === "multiple_choice" && branch.options ? (
-                    <Select onValueChange={(value) => handleAnswerBranch(branch.id, value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an option or N/A..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {branch.options.map((option, index) => (
-                          <SelectItem key={index} value={option}>
-                            {option}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="N/A">N/A</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-2">
+                      <Select 
+                        value={branch.answer || ""} 
+                        onValueChange={(value) => {
+                          // Update the branch answer in real-time
+                          const updatedBranches = branches.map(b => 
+                            b.id === branch.id ? { ...b, answer: value } : b
+                          )
+                          onUpdateBranches(updatedBranches)
+                          handleAnswerBranch(branch.id, value)
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an option or N/A..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {branch.options.map((option, index) => (
+                            <SelectItem key={index} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="N/A">N/A</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          if (branch.answer && branch.answer.trim()) {
+                            handleAnswerBranch(branch.id, branch.answer)
+                          }
+                        }}
+                        disabled={!branch.answer || branch.answer.trim() === ''}
+                      >
+                        Submit Answer
+                      </Button>
+                    </div>
                   ) : (
                     <div className="space-y-2">
                       <Input
