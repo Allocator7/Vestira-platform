@@ -1,14 +1,23 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useApp } from "@/context/AppContext"
 
 export function KeyboardShortcuts() {
   const router = useRouter()
   const { userRole, setIsNavOpen, isNavOpen } = useApp()
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Only run after mounting and in browser environment
+    if (!mounted || typeof window === 'undefined' || typeof document === 'undefined') {
+      return
+    }
     const handleKeyDown = (event: KeyboardEvent) => {
       // Only handle shortcuts when not in input fields
       if (
@@ -106,7 +115,7 @@ export function KeyboardShortcuts() {
 
     document.addEventListener("keydown", handleKeyDown)
     return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [router, userRole, setIsNavOpen, isNavOpen])
+  }, [mounted, router, userRole, setIsNavOpen, isNavOpen])
 
   return null
 }

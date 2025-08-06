@@ -19,10 +19,15 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
   const [isHighContrast, setIsHighContrast] = useState(false)
   const [isReducedMotion, setIsReducedMotion] = useState(false)
   const [fontSize, setFontSize] = useState<"normal" | "large" | "larger">("normal")
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    // Only run in browser environment
-    if (typeof window === 'undefined') {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Only run after mounting and in browser environment
+    if (!mounted || typeof window === 'undefined') {
       return
     }
 
@@ -40,11 +45,11 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     } catch (error) {
       console.warn("Error initializing accessibility preferences:", error)
     }
-  }, [])
+  }, [mounted])
 
   useEffect(() => {
-    // Only run in browser environment
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
+    // Only run after mounting and in browser environment
+    if (!mounted || typeof window === 'undefined' || typeof document === 'undefined') {
       return
     }
 
@@ -73,7 +78,7 @@ export function AccessibilityProvider({ children }: { children: React.ReactNode 
     } catch (error) {
       console.warn("Error applying accessibility preferences:", error)
     }
-  }, [isHighContrast, isReducedMotion, fontSize])
+  }, [mounted, isHighContrast, isReducedMotion, fontSize])
 
   const toggleHighContrast = () => setIsHighContrast(!isHighContrast)
   const toggleReducedMotion = () => setIsReducedMotion(!isReducedMotion)

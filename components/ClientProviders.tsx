@@ -8,7 +8,6 @@ import { AccessibilityProvider } from "@/components/AccessibilityProvider"
 import { InteractionProvider } from "@/components/InteractionProvider"
 import { NotificationContainer } from "@/components/NotificationContainer"
 import { KeyboardShortcuts } from "@/components/KeyboardShortcuts"
-import { ErrorBoundary } from "@/components/ErrorBoundary"
 
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
@@ -19,20 +18,18 @@ export function ClientProviders({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ErrorBoundary>
-      <SessionProvider session={mockSession} refetchInterval={0} refetchOnWindowFocus={false}>
-        <CustomSessionProvider>
-          <AccessibilityProvider>
-            <InteractionProvider>
-              <AppProvider>
-                {children}
-                <NotificationContainer />
-                <KeyboardShortcuts />
-              </AppProvider>
-            </InteractionProvider>
-          </AccessibilityProvider>
-        </CustomSessionProvider>
-      </SessionProvider>
-    </ErrorBoundary>
+    <SessionProvider session={mockSession} refetchInterval={0} refetchOnWindowFocus={false}>
+      <CustomSessionProvider>
+        <AccessibilityProvider>
+          <InteractionProvider>
+            <AppProvider>
+              {children}
+              <NotificationContainer />
+              <KeyboardShortcuts />
+            </AppProvider>
+          </InteractionProvider>
+        </AccessibilityProvider>
+      </CustomSessionProvider>
+    </SessionProvider>
   )
 }
