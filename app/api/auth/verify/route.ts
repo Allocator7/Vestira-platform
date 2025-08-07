@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verify } from "jsonwebtoken"
-import { findUserByEmail, updateUser, findVerificationByToken, removeVerification } from "@/lib/database"
+import { findUserByEmail, updateUser, findVerificationByToken, removeVerification } from "@/lib/database-memory"
 
 export const dynamic = 'force-dynamic'
 
