@@ -203,7 +203,11 @@ export default function SignupPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to create account")
+        throw new Error(data.error || data.details || "Failed to create account")
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || data.details || "Failed to create account")
       }
 
       setSuccess(data.message || "Account created successfully! Please check your email to verify your account.")
