@@ -51,11 +51,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate verification token
+    console.log("NEXTAUTH_SECRET exists:", !!process.env.NEXTAUTH_SECRET)
+    console.log("NEXTAUTH_SECRET length:", process.env.NEXTAUTH_SECRET?.length || 0)
+    
     const verificationToken = sign(
       { email: body.email, type: "email-verification" },
-      process.env.NEXTAUTH_SECRET || "fallback-secret",
+      process.env.NEXTAUTH_SECRET || "your-super-secret-nextauth-key-change-this-in-production",
       { expiresIn: "24h" }
     )
+    console.log("Verification token generated successfully")
 
     // Create user in database
     const userData = {
@@ -76,22 +80,34 @@ export async function POST(request: NextRequest) {
 
     // Create user in database
     console.log("Attempting to create user in database...")
-    const newUser = await createUser(userData)
-    console.log("User created in database:", { ...newUser, password: "[HIDDEN]" })
-    
-    // Debug: Check if user was actually saved
-    const { getUsers } = await import("@/lib/database")
-    const allUsers = getUsers()
-    console.log("All users after creation:", allUsers.map(u => ({ id: u.id, email: u.email, emailVerified: u.emailVerified })))
+    try {
+      const newUser = await createUser(userData)
+      console.log("User created in database:", { ...newUser, password: "[HIDDEN]" })
+      
+      // Debug: Check if user was actually saved
+      const { getUsers } = await import("@/lib/database")
+      const allUsers = getUsers()
+      console.log("All users after creation:", allUsers.map(u => ({ id: u.id, email: u.email, emailVerified: u.emailVerified })))
+    } catch (userError) {
+      console.error("Error creating user:", userError)
+      throw userError
+    }
 
     // Save verification token to database
-    const verificationData = {
-      email: body.email,
-      token: verificationToken,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+    console.log("Saving verification token to database...")
+    try {
+      const verificationData = {
+        email: body.email,
+        token: verificationToken,
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+      }
+      saveVerification(verificationData)
+      console.log("Verification token saved successfully")
+    } catch (verificationError) {
+      console.error("Error saving verification token:", verificationError)
+      throw verificationError
     }
-    saveVerification(verificationData)
     
     // Send verification email
     let emailSent = false
@@ -145,8 +161,16 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error("Signup error:", error)
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace',
+      name: error instanceof Error ? error.name : 'Unknown error type'
+    })
     return NextResponse.json(
-      { error: "Failed to create account. Please try again." },
+      { 
+        error: "Failed to create account. Please try again.",
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     )
   }
