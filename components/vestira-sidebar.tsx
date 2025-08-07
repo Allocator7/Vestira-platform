@@ -46,8 +46,15 @@ export function VestiraSidebar({
   userTitle,
   className,
 }: VestiraSidebarProps) {
-  const { userRole: contextUserRole, setUserRole, isNavOpen, unreadMessageCounts } = useApp()
+  const { userRole: contextUserRole, setUserRole, refreshRoleFromStorage, isNavOpen, unreadMessageCounts } = useApp()
   const userRole = propUserRole || contextUserRole || null
+
+  // Refresh role from storage when component mounts
+  useEffect(() => {
+    if (!userRole && typeof window !== 'undefined') {
+      refreshRoleFromStorage()
+    }
+  }, [userRole, refreshRoleFromStorage])
 
   const title =
     userTitle ||

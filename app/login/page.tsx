@@ -9,6 +9,7 @@ import { Label } from "../../components/ui/label"
 import { Checkbox } from "../../components/ui/checkbox"
 import { Alert, AlertDescription } from "../../components/ui/alert"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { useApp } from "../../context/AppContext"
 import {
   Eye,
   EyeOff,
@@ -31,6 +32,7 @@ interface LoginStep {
 
 export default function LoginPage() {
   const router = useRouter()
+  const { setUserRole, refreshRoleFromStorage } = useApp()
   const [currentStep, setCurrentStep] = useState<LoginStep>({ step: "credentials" })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -88,6 +90,14 @@ export default function LoginPage() {
         console.log("localStorage currentUserRole:", localStorage.getItem("currentUserRole"))
         console.log("localStorage userRole:", localStorage.getItem("userRole"))
       }
+
+      // Update AppContext immediately
+      setUserRole(role)
+      
+      // Also refresh from storage to ensure consistency
+      setTimeout(() => {
+        refreshRoleFromStorage()
+      }, 100)
 
       const targetPath = `/screens/${role}/home`
       console.log("Navigating to:", targetPath)

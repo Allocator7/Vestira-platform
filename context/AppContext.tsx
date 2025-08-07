@@ -78,6 +78,7 @@ interface UnreadCounts {
 interface AppContextType {
   userRole: UserRole
   setUserRole: (role: UserRole) => void
+  refreshRoleFromStorage: () => void
   currentPersonProfile: PersonProfile | null
   setCurrentPersonProfile: (profile: PersonProfile | null) => void
   currentFirmProfile: FirmProfile | null
@@ -201,6 +202,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }
+
+  // Function to refresh role from localStorage
+  const refreshRoleFromStorage = useCallback(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const storedRole = localStorage.getItem("userRole")
+        const currentUserRole = localStorage.getItem("currentUserRole")
+        const roleToUse = currentUserRole || storedRole
+
+        console.log("AppContext: Refreshing role from localStorage")
+        console.log("AppContext: currentUserRole from localStorage:", currentUserRole)
+        console.log("AppContext: userRole from localStorage:", storedRole)
+        console.log("AppContext: roleToUse:", roleToUse)
+
+        if (roleToUse && ["allocator", "manager", "consultant", "industry-group"].includes(roleToUse)) {
+          console.log("AppContext: Setting userRole to:", roleToUse)
+          setUserRoleState(roleToUse as UserRole)
+        }
+      } catch (e) {
+        console.error("Failed to read from localStorage:", e)
+      }
+    }
+  }, [])
 
   // Update unread message count for a specific role
   const updateUnreadMessageCount = useCallback((role: UserRole, count: number) => {
@@ -328,6 +352,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         userRole,
         setUserRole,
+        refreshRoleFromStorage,
         currentPersonProfile,
         setCurrentPersonProfile,
         currentFirmProfile,
@@ -366,6 +391,7 @@ export function useApp() {
     return {
       userRole: null,
       setUserRole: () => console.warn("setUserRole called outside of AppProvider"),
+      refreshRoleFromStorage: () => console.warn("refreshRoleFromStorage called outside of AppProvider"),
       currentPersonProfile: null,
       setCurrentPersonProfile: () => console.warn("setCurrentPersonProfile called outside of AppProvider"),
       currentFirmProfile: null,
