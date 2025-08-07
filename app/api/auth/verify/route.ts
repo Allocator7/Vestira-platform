@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verify } from "jsonwebtoken"
+import { findUserByEmail, updateUser, findVerificationByToken, removeVerification } from "@/lib/database"
 
 export const dynamic = 'force-dynamic'
 
@@ -34,35 +35,24 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Update user's emailVerified status (in production, this would be in a database)
+    // Update user's emailVerified status in database
     console.log("Email verified for:", decoded.email)
     
-    // Update the user in global storage
-    if (global.demoUsers) {
-      const userIndex = global.demoUsers.findIndex((user: any) => user.email === decoded.email)
-      if (userIndex !== -1) {
-        global.demoUsers[userIndex].emailVerified = true
-        console.log("User email verified in global storage")
-      }
+    // Find user in database
+    const user = findUserByEmail(decoded.email)
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      )
     }
     
-    // For demo purposes, store verification status
-    const verificationData = {
-      email: decoded.email,
-      verified: true,
-      verifiedAt: new Date().toISOString(),
-      token: token
-    }
+    // Update user's email verification status
+    const updatedUser = updateUser(user.id, { emailVerified: true })
+    console.log("User email verified in database:", updatedUser.email)
     
-    // Store verification in localStorage for demo
-    if (typeof window !== 'undefined') {
-      const existingVerifications = JSON.parse(localStorage.getItem('email-verifications') || '[]')
-      existingVerifications.push(verificationData)
-      localStorage.setItem('email-verifications', JSON.stringify(existingVerifications))
-    }
-    
-    // In production, you would update the database here
-    // For now, we'll simulate successful verification
+    // Remove verification token from database
+    removeVerification(token)
 
     // Redirect to login page with success message
     const loginUrl = `${process.env.NEXTAUTH_URL || "https://vestira.co"}/login?verified=true`

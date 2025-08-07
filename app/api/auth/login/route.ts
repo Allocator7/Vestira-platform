@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
-import { compare } from "bcryptjs"
 import { sign } from "jsonwebtoken"
+import { findUserByEmail, verifyPassword } from "@/lib/database"
 
 interface LoginRequest {
   email: string
@@ -19,12 +19,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get users from global storage (created during signup)
-    const users = global.demoUsers || []
+    // Find user in database
+    let user = findUserByEmail(body.email)
     
-    // Also include the demo user for testing
-    const mockUsers = [
-      {
+    // If user not found, check for demo user
+    if (!user) {
+      const demoUser = {
         id: "user_1",
         email: "demo@vestira.co",
         password: "$2a$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewdBPj4J/HS.i6e", // "password123"
@@ -35,12 +35,37 @@ export async function POST(request: NextRequest) {
         jobTitle: "Investment Manager",
         emailVerified: true
       }
-    ]
-    
-    // Combine actual users with demo user
-    const allUsers = [...users, ...mockUsers]
-    
-    const user = allUsers.find((u: any) => u.email.toLowerCase() === body.email.toLowerCase())
+      
+      // Check if it's the demo user
+      if (body.email.toLowerCase() === demoUser.email.toLowerCase()) {
+        // For demo user, check password directly
+        const bcrypt = require('bcryptjs')
+        const isPasswordValid = await bcrypt.compare(body.password, demoUser.password)
+        if (isPasswordValid) {
+          user = demoUser
+        } else {
+          return NextResponse.json(
+            { error: "Invalid email or password" },
+            { status: 401 }
+          )
+        }
+      } else {
+        return NextResponse.json(
+          { error: "Invalid email or password" },
+          { status: 401 }
+        )
+      }
+    } else {
+      // Verify password for real user
+      const verifiedUser = await verifyPassword(body.email, body.password)
+      if (!verifiedUser) {
+        return NextResponse.json(
+          { error: "Invalid email or password" },
+          { status: 401 }
+        )
+      }
+      user = verifiedUser
+    }
 
     if (!user) {
       return NextResponse.json(
