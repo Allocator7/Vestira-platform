@@ -47,7 +47,7 @@ export function VestiraSidebar({
   className,
 }: VestiraSidebarProps) {
   const { userRole: contextUserRole, setUserRole, isNavOpen, unreadMessageCounts } = useApp()
-  const userRole = propUserRole || contextUserRole || "allocator"
+  const userRole = propUserRole || contextUserRole || null
 
   const title =
     userTitle ||
@@ -221,8 +221,10 @@ export function VestiraSidebar({
       case "industry-group":
         return industryGroupNavItems
       case "allocator":
-      default:
         return allocatorNavItems
+      default:
+        // If no role is set, return empty array to prevent rendering
+        return []
     }
   }
 

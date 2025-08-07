@@ -77,15 +77,23 @@ export default function LoginPage() {
       setIsLoading(true)
       setError("")
 
+      console.log("Demo login clicked for role:", role)
+
       // Store role in localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem("currentUserRole", role)
         localStorage.setItem("userRole", role)
         localStorage.setItem("demoMode", "true")
+        console.log("Stored role in localStorage:", role)
+        console.log("localStorage currentUserRole:", localStorage.getItem("currentUserRole"))
+        console.log("localStorage userRole:", localStorage.getItem("userRole"))
       }
 
+      const targetPath = `/screens/${role}/home`
+      console.log("Navigating to:", targetPath)
+
       // Navigate to the correct dashboard
-      router.push(`/screens/${role}/home`)
+      router.push(targetPath)
     } catch (error) {
       console.error("Demo login error:", error)
       setError(`Failed to login as ${role}. Please try again.`)

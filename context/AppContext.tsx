@@ -167,8 +167,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Prioritize currentUserRole (set by demo login) over userRole
         const roleToUse = currentUserRole || storedRole
 
+        console.log("AppContext: Initializing from localStorage")
+        console.log("AppContext: currentUserRole from localStorage:", currentUserRole)
+        console.log("AppContext: userRole from localStorage:", storedRole)
+        console.log("AppContext: roleToUse:", roleToUse)
+
         if (roleToUse && ["allocator", "manager", "consultant", "industry-group"].includes(roleToUse)) {
+          console.log("AppContext: Setting userRole to:", roleToUse)
           setUserRoleState(roleToUse as UserRole)
+        } else {
+          console.log("AppContext: No valid role found, keeping as null")
         }
         // Remove the else clause that was defaulting to "allocator"
       } catch (e) {
