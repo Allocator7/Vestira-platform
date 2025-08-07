@@ -209,9 +209,14 @@ export default function SignupPage() {
       setSuccess(data.message || "Account created successfully! Please check your email to verify your account.")
       clearSignupState() // Clear signup state after successful submission
 
+      // If manual verification is needed, show the verification URL
+      if (data.manualVerification && data.verificationUrl) {
+        setSuccess(`${data.message}\n\nIf you don't receive an email, you can verify your account by clicking this link: ${data.verificationUrl}`)
+      }
+
       setTimeout(() => {
         router.push("/login?signup=success")
-      }, 3000)
+      }, 5000) // Give more time to read the verification URL
     } catch (err: any) {
       setError(err.message || "Failed to create account. Please try again.")
     } finally {

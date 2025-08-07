@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     }
     saveVerification(verificationData)
     
-    // Send verification email
+        // Send verification email
     try {
       console.log("Attempting to send verification email to:", body.email)
       console.log("SendGrid API Key configured:", !!process.env.SENDGRID_API_KEY)
@@ -99,14 +99,23 @@ export async function POST(request: NextRequest) {
       }
     } catch (emailError) {
       console.error("Failed to send verification email:", emailError)
-      
+      console.error("Email error details:", {
+        message: emailError instanceof Error ? emailError.message : 'Unknown error',
+        stack: emailError instanceof Error ? emailError.stack : 'No stack trace',
+        email: body.email,
+        apiKeyExists: !!process.env.SENDGRID_API_KEY,
+        fromEmail: process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co'
+      })
+
       // Return success but with a warning about email
       return NextResponse.json(
-        { 
+        {
           success: true,
-          message: "Account created successfully! However, the verification email failed to send. Please contact support to verify your account.",
-          warning: "Email delivery failed",
-          verificationUrl: `${process.env.NEXTAUTH_URL || "https://vestira.co"}/api/auth/verify?token=${verificationToken}`
+          message: "Account created successfully! Please check your email to verify your account. If you don't receive an email, you can verify your account using the link below.",
+          warning: "Email delivery may have failed due to domain verification",
+          error: emailError instanceof Error ? emailError.message : "Unknown error",
+          verificationUrl: `${process.env.NEXTAUTH_URL || "https://vestira.co"}/api/auth/verify?token=${verificationToken}`,
+          manualVerification: true
         },
         { status: 200 }
       )
@@ -198,12 +207,17 @@ async function sendVerificationEmail(email: string, token: string, firstName: st
         </html>
       `
 
+      // Try to use verified sender email
+      const fromEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co'
+      
       const msg = {
         to: email,
-        from: process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co',
+        from: fromEmail,
         subject: 'Verify Your Vestira Account',
         html: emailContent,
       }
+      
+      console.log("Sending email with from address:", fromEmail)
 
       console.log("Attempting to send email with SendGrid...")
       console.log("Message object:", JSON.stringify(msg, null, 2))
