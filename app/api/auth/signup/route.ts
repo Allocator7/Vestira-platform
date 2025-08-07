@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       console.log("User created in database:", { ...newUser, password: "[HIDDEN]" })
       
       // Debug: Check if user was actually saved
-      const { getUsers } = await import("@/lib/database")
+      const { getUsers } = await import("@/lib/database-persistent")
       const allUsers = getUsers()
       console.log("All users after creation:", allUsers.map(u => ({ id: u.id, email: u.email, emailVerified: u.emailVerified })))
     } catch (userError) {
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: true, 
-          message: "Account created successfully. Please check your email to verify your account.",
+          message: "Account created! Please check your email to verify your account.",
           userId: newUser.id
         },
         { status: 201 }
@@ -149,8 +149,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: true,
-          message: "Account created successfully! Please check your email to verify your account. If you don't receive an email, you can verify your account using the link below.",
-          warning: "Email delivery may have failed due to domain verification",
+          message: "Account created! Please check your email to verify your account.",
+          warning: "Email delivery may have failed. Please contact support if you don't receive an email.",
           error: "SendGrid API key not configured",
           verificationUrl: `${process.env.NEXTAUTH_URL || "https://vestira.co"}/api/auth/verify?token=${verificationToken}`,
           manualVerification: true

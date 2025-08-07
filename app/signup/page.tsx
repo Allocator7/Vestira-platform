@@ -210,12 +210,12 @@ export default function SignupPage() {
         throw new Error(data.error || data.details || "Failed to create account")
       }
 
-      setSuccess(data.message || "Account created successfully! Please check your email to verify your account.")
+      setSuccess(data.message || "Account created! Please check your email to verify your account.")
       clearSignupState() // Clear signup state after successful submission
 
       // If manual verification is needed, show the verification URL
       if (data.manualVerification && data.verificationUrl) {
-        setSuccess(`Account created successfully! Please check your email to verify your account.\n\nIf you don't receive an email, you can verify your account by clicking this link: ${data.verificationUrl}`)
+        setSuccess(`Account created! Please check your email to verify your account.\n\nIf you don't receive an email, you can verify your account by clicking this link: ${data.verificationUrl}`)
       }
 
       setTimeout(() => {
