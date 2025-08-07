@@ -52,16 +52,24 @@ export const saveUsers = (users: any[]) => {
 
 // Create new user
 export const createUser = async (userData: any) => {
+  console.log("=== CREATE USER CALLED ===")
+  console.log("User data:", { ...userData, password: "[HIDDEN]" })
+  
   const users = getUsers()
+  console.log("Current users count:", users.length)
   
   // Check if user already exists
   const existingUser = users.find(user => user.email.toLowerCase() === userData.email.toLowerCase())
   if (existingUser) {
+    console.log("User already exists:", existingUser.email)
     throw new Error('User with this email already exists')
   }
   
+  console.log("User does not exist, creating new user...")
+  
   // Hash password
   const hashedPassword = await hash(userData.password, 12)
+  console.log("Password hashed successfully")
   
   // Create user object
   const newUser = {
@@ -73,9 +81,13 @@ export const createUser = async (userData: any) => {
     updatedAt: new Date().toISOString(),
   }
   
+  console.log("New user object created:", { ...newUser, password: "[HIDDEN]" })
+  
   // Add to database
   users.push(newUser)
+  console.log("User added to users array, saving to database...")
   saveUsers(users)
+  console.log("User saved to database successfully")
   
   return { ...newUser, password: undefined } // Don't return password
 }

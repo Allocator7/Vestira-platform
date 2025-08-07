@@ -21,7 +21,9 @@ interface SignupRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log("=== SIGNUP API CALLED ===")
     const body: SignupRequest = await request.json()
+    console.log("Signup request body:", { ...body, password: "[HIDDEN]" })
 
     // Validate required fields
     if (!body.firstName || !body.lastName || !body.email || !body.password || !body.organizationType || !body.organizationName || !body.jobTitle) {
@@ -73,8 +75,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user in database
+    console.log("Attempting to create user in database...")
     const newUser = await createUser(userData)
     console.log("User created in database:", { ...newUser, password: "[HIDDEN]" })
+    
+    // Debug: Check if user was actually saved
+    const { getUsers } = await import("@/lib/database")
+    const allUsers = getUsers()
+    console.log("All users after creation:", allUsers.map(u => ({ id: u.id, email: u.email, emailVerified: u.emailVerified })))
 
     // Save verification token to database
     const verificationData = {
@@ -85,7 +93,8 @@ export async function POST(request: NextRequest) {
     }
     saveVerification(verificationData)
     
-        // Send verification email
+    // Send verification email
+    let emailSent = false
     try {
       console.log("Attempting to send verification email to:", body.email)
       console.log("SendGrid API Key configured:", !!process.env.SENDGRID_API_KEY)
@@ -97,6 +106,8 @@ export async function POST(request: NextRequest) {
       if (!emailResult) {
         throw new Error("Email sending returned false")
       }
+      
+      emailSent = true
     } catch (emailError) {
       console.error("Failed to send verification email:", emailError)
       console.error("Email error details:", {
@@ -106,29 +117,31 @@ export async function POST(request: NextRequest) {
         apiKeyExists: !!process.env.SENDGRID_API_KEY,
         fromEmail: process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co'
       })
+    }
 
-      // Return success but with a warning about email
+    // Return success response based on email status
+    if (emailSent) {
+      return NextResponse.json(
+        { 
+          success: true, 
+          message: "Account created successfully. Please check your email to verify your account.",
+          userId: newUser.id
+        },
+        { status: 201 }
+      )
+    } else {
       return NextResponse.json(
         {
           success: true,
           message: "Account created successfully! Please check your email to verify your account. If you don't receive an email, you can verify your account using the link below.",
           warning: "Email delivery may have failed due to domain verification",
-          error: emailError instanceof Error ? emailError.message : "Unknown error",
+          error: "SendGrid API key not configured",
           verificationUrl: `${process.env.NEXTAUTH_URL || "https://vestira.co"}/api/auth/verify?token=${verificationToken}`,
           manualVerification: true
         },
         { status: 200 }
       )
     }
-
-    return NextResponse.json(
-      { 
-        success: true, 
-        message: "Account created successfully. Please check your email to verify your account.",
-        userId: userData.id
-      },
-      { status: 201 }
-    )
 
   } catch (error) {
     console.error("Signup error:", error)

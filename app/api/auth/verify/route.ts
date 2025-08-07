@@ -39,8 +39,16 @@ export async function GET(request: NextRequest) {
     console.log("Email verified for:", decoded.email)
     
     // Find user in database
+    console.log("Looking for user with email:", decoded.email)
     const user = findUserByEmail(decoded.email)
+    console.log("User found:", user ? "Yes" : "No")
+    
     if (!user) {
+      // Debug: Check what users exist in database
+      const { getUsers } = await import("@/lib/database")
+      const allUsers = getUsers()
+      console.log("All users in database:", allUsers.map(u => ({ id: u.id, email: u.email, emailVerified: u.emailVerified })))
+      
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }

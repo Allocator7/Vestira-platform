@@ -1,0 +1,15 @@
+[
+  {
+    "id": "user_1754584498363_b73vr3nlb",
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "test@example.com",
+    "password": "$2b$12$UmXNNNgqB2Bvq54kORYWGewr3Aw6qUfg3Fmy/AUea43anUE8k9C8q",
+    "organizationType": "allocator",
+    "organizationName": "Test Org",
+    "jobTitle": "Test Job",
+    "emailVerified": false,
+    "createdAt": "2025-08-07T16:34:58.363Z",
+    "updatedAt": "2025-08-07T16:34:58.363Z"
+  }
+]
