@@ -87,12 +87,28 @@ export async function POST(request: NextRequest) {
     
     // Send verification email
     try {
-      await sendVerificationEmail(body.email, verificationToken, body.firstName)
+      console.log("Attempting to send verification email to:", body.email)
+      console.log("SendGrid API Key configured:", !!process.env.SENDGRID_API_KEY)
+      console.log("From email:", process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co')
+      
+      const emailResult = await sendVerificationEmail(body.email, verificationToken, body.firstName)
+      console.log("Email send result:", emailResult)
+      
+      if (!emailResult) {
+        throw new Error("Email sending returned false")
+      }
     } catch (emailError) {
       console.error("Failed to send verification email:", emailError)
+      
+      // Return success but with a warning about email
       return NextResponse.json(
-        { error: "Account created but verification email failed to send. Please contact support." },
-        { status: 500 }
+        { 
+          success: true,
+          message: "Account created successfully! However, the verification email failed to send. Please contact support to verify your account.",
+          warning: "Email delivery failed",
+          verificationUrl: `${process.env.NEXTAUTH_URL || "https://vestira.co"}/api/auth/verify?token=${verificationToken}`
+        },
+        { status: 200 }
       )
     }
 
@@ -188,43 +204,9 @@ async function sendVerificationEmail(email: string, token: string, firstName: st
       throw new Error('Failed to send verification email')
     }
   } else {
-    // Production email sending - this should work with your SendGrid API key
-    console.log(`[PRODUCTION] Attempting to send verification email to: ${email}`)
-    console.log(`[PRODUCTION] Verification URL: ${verificationUrl}`)
-    
-    // Try to send the email anyway - it might work if domain is verified
-    try {
-      const msg = {
-        to: email,
-        from: process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co',
-        subject: 'Verify Your Vestira Account',
-        html: emailContent,
-      }
-      
-      await sgMail.send(msg)
-      console.log(`[PRODUCTION] Email sent successfully to ${email}`)
-      return true
-    } catch (error) {
-      console.error('[PRODUCTION] SendGrid error:', error)
-      
-      // If email fails, we'll still create the account but notify the user
-      console.log(`[PRODUCTION] Email failed, but account created. User can verify via: ${verificationUrl}`)
-      
-      // Store verification for manual verification
-      const verificationData = {
-        email,
-        token,
-        verificationUrl,
-        createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
-      }
-      
-      if (!global.pendingVerifications) {
-        global.pendingVerifications = []
-      }
-      global.pendingVerifications.push(verificationData)
-      
-      return true // Return true so account creation succeeds
-    }
+    // SendGrid API key not configured
+    console.log(`[ERROR] SendGrid API key not configured`)
+    console.log(`[ERROR] Please add SENDGRID_API_KEY to your environment variables`)
+    throw new Error('SendGrid API key not configured')
   }
 }
