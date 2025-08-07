@@ -136,6 +136,15 @@ async function sendVerificationEmail(email: string, token: string, firstName: st
   // Check if SendGrid is configured
   const sendGridApiKey = process.env.SENDGRID_API_KEY
   
+  console.log("=== SENDGRID DEBUG INFO ===")
+  console.log("SendGrid API Key exists:", !!sendGridApiKey)
+  console.log("SendGrid API Key length:", sendGridApiKey ? sendGridApiKey.length : 0)
+  console.log("SendGrid API Key starts with SG.:", sendGridApiKey ? sendGridApiKey.startsWith('SG.') : false)
+  console.log("From email:", process.env.SENDGRID_FROM_EMAIL || 'noreply@vestira.co')
+  console.log("To email:", email)
+  console.log("Verification URL:", verificationUrl)
+  console.log("==========================")
+  
   if (sendGridApiKey) {
     // Production email sending with SendGrid
     try {
@@ -196,17 +205,27 @@ async function sendVerificationEmail(email: string, token: string, firstName: st
         html: emailContent,
       }
 
+      console.log("Attempting to send email with SendGrid...")
+      console.log("Message object:", JSON.stringify(msg, null, 2))
+      
       await sgMail.send(msg)
       console.log(`Verification email sent successfully to ${email}`)
       return true
     } catch (error) {
-      console.error('SendGrid error:', error)
-      throw new Error('Failed to send verification email')
+      console.error('SendGrid error details:', error)
+      console.error('SendGrid error message:', error instanceof Error ? error.message : 'Unknown error')
+      console.error('SendGrid error stack:', error instanceof Error ? error.stack : 'No stack trace')
+      throw new Error(`Failed to send verification email: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }
   } else {
     // SendGrid API key not configured
     console.log(`[ERROR] SendGrid API key not configured`)
     console.log(`[ERROR] Please add SENDGRID_API_KEY to your environment variables`)
+    console.log(`[ERROR] Current environment variables:`, {
+      SENDGRID_API_KEY: process.env.SENDGRID_API_KEY ? 'EXISTS' : 'MISSING',
+      SENDGRID_FROM_EMAIL: process.env.SENDGRID_FROM_EMAIL,
+      NEXTAUTH_URL: process.env.NEXTAUTH_URL
+    })
     throw new Error('SendGrid API key not configured')
   }
 }
