@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { verify } from "jsonwebtoken"
-import { findUserByEmail, updateUser, findVerificationByToken, removeVerification } from "@/lib/database-memory"
+import { findUserByEmail, updateUser, findVerificationByToken, removeVerification } from "@/lib/database-persistent"
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     
     if (!user) {
       // Debug: Check what users exist in database
-      const { getUsers } = await import("@/lib/database-memory")
+      const { getUsers } = await import("@/lib/database-persistent")
       const allUsers = getUsers()
       console.log("All users in database:", allUsers.map(u => ({ id: u.id, email: u.email, emailVerified: u.emailVerified })))
       

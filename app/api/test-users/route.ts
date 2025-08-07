@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getUsers } from "@/lib/database-memory"
+import { getUsers } from "@/lib/database-persistent"
 
 export async function GET() {
   try {

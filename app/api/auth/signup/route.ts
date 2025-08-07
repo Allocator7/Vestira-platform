@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sign } from "jsonwebtoken"
 import sgMail from "@sendgrid/mail"
-import { createUser, saveVerification } from "@/lib/database-memory"
+import { createUser, saveVerification } from "@/lib/database-persistent"
 
 interface SignupRequest {
   firstName: string

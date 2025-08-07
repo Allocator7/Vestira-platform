@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sign } from "jsonwebtoken"
 import { compare } from "bcryptjs"
-import { findUserByEmail, verifyPassword } from "@/lib/database-memory"
+import { findUserByEmail, verifyPassword } from "@/lib/database-persistent"
 
 interface LoginRequest {
   email: string
