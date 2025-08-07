@@ -37,6 +37,15 @@ export async function GET(request: NextRequest) {
     // Update user's emailVerified status (in production, this would be in a database)
     console.log("Email verified for:", decoded.email)
     
+    // Update the user in global storage
+    if (global.demoUsers) {
+      const userIndex = global.demoUsers.findIndex((user: any) => user.email === decoded.email)
+      if (userIndex !== -1) {
+        global.demoUsers[userIndex].emailVerified = true
+        console.log("User email verified in global storage")
+      }
+    }
+    
     // For demo purposes, store verification status
     const verificationData = {
       email: decoded.email,

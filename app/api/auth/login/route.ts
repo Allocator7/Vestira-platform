@@ -19,8 +19,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For demo purposes, we'll use a simple mock user system
-    // In production, this would query a database
+    // Get users from global storage (created during signup)
+    const users = global.demoUsers || []
+    
+    // Also include the demo user for testing
     const mockUsers = [
       {
         id: "user_1",
@@ -35,7 +37,10 @@ export async function POST(request: NextRequest) {
       }
     ]
     
-    const user = mockUsers.find((u: any) => u.email.toLowerCase() === body.email.toLowerCase())
+    // Combine actual users with demo user
+    const allUsers = [...users, ...mockUsers]
+    
+    const user = allUsers.find((u: any) => u.email.toLowerCase() === body.email.toLowerCase())
 
     if (!user) {
       return NextResponse.json(

@@ -80,12 +80,22 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     }
 
-    // Store user data (in production, this would be saved to a database)
-    // For demo purposes, we'll store in a global variable or use a simple file-based storage
+    // Store user data for demo purposes
+    // In production, this would be saved to a database
     console.log("User created:", { ...userData, password: "[HIDDEN]" })
     
-    // In production, you would save to a database here
-    // For now, we'll simulate successful storage
+    // Store user in localStorage for demo purposes
+    if (typeof window !== 'undefined') {
+      const existingUsers = JSON.parse(localStorage.getItem('demo-users') || '[]')
+      existingUsers.push(userData)
+      localStorage.setItem('demo-users', JSON.stringify(existingUsers))
+    }
+    
+    // Also store in a global variable for server-side access
+    if (!global.demoUsers) {
+      global.demoUsers = []
+    }
+    global.demoUsers.push(userData)
 
     // Send verification email
     try {
@@ -207,6 +217,12 @@ async function sendVerificationEmail(email: string, token: string, firstName: st
       createdAt: new Date().toISOString(),
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
     }
+    
+    // Store in global storage for server-side access
+    if (!global.demoVerifications) {
+      global.demoVerifications = []
+    }
+    global.demoVerifications.push(demoVerification)
     
     // Store in localStorage for demo verification
     if (typeof window !== 'undefined') {
