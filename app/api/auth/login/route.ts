@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { sign } from "jsonwebtoken"
-import { findUserByEmail, verifyPassword } from "@/lib/database"
+import { compare } from "bcryptjs"
+import { findUserByEmail, verifyPassword } from "@/lib/database-memory"
 
 interface LoginRequest {
   email: string
@@ -78,15 +79,6 @@ export async function POST(request: NextRequest) {
     if (!user.emailVerified) {
       return NextResponse.json(
         { error: "Please verify your email address before logging in. Check your inbox for a verification link." },
-        { status: 401 }
-      )
-    }
-
-    // Verify password
-    const isPasswordValid = await compare(body.password, user.password)
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Invalid email or password" },
         { status: 401 }
       )
     }

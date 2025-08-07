@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     
     if (!user) {
       // Debug: Check what users exist in database
-      const { getUsers } = await import("@/lib/database")
+      const { getUsers } = await import("@/lib/database-memory")
       const allUsers = getUsers()
       console.log("All users in database:", allUsers.map(u => ({ id: u.id, email: u.email, emailVerified: u.emailVerified })))
       
