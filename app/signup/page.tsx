@@ -211,7 +211,7 @@ export default function SignupPage() {
 
       // If manual verification is needed, show the verification URL
       if (data.manualVerification && data.verificationUrl) {
-        setSuccess(`${data.message}\n\nIf you don't receive an email, you can verify your account by clicking this link: ${data.verificationUrl}`)
+        setSuccess(`Account created successfully! Please check your email to verify your account.\n\nIf you don't receive an email, you can verify your account by clicking this link: ${data.verificationUrl}`)
       }
 
       setTimeout(() => {
