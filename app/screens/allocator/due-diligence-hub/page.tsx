@@ -1227,8 +1227,14 @@ export default function AllocatorDueDiligenceHubPage() {
       
       showNotification("Informal Due Diligence session started")
       
-      // Navigate to the informal due diligence page
-      router.push('/allocator/informal-due-diligence')
+      // Navigate to the informal due diligence page with error handling
+      try {
+        router.push('/allocator/informal-due-diligence')
+      } catch (navigationError) {
+        console.error("Navigation error:", navigationError)
+        // Fallback: try window.location
+        window.location.href = '/allocator/informal-due-diligence'
+      }
       
     } catch (error) {
       console.error("Error starting informal due diligence:", error)
@@ -2075,13 +2081,21 @@ const handleUseTemplate = () => {
                               className="w-full"
                               onClick={() => {
                                 const selectedTemplate = [...vestiraTemplates, ...customTemplates].find(t => t.id === createDDQForm.selectedTemplate)
+                                console.log('Selected template ID:', createDDQForm.selectedTemplate)
+                                console.log('Available templates:', [...vestiraTemplates, ...customTemplates].map(t => ({ id: t.id, name: t.name })))
+                                console.log('Found template:', selectedTemplate)
+                                
                                 if (selectedTemplate) {
                                   const questions = generateTemplateQuestions(selectedTemplate)
+                                  console.log('Generated questions:', questions)
                                   // Update state and store questions for the current DDQ session
                                   setCurrentDDQQuestions(questions)
                                   localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
                                   sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
                                   showNotification(`Pulled ${questions.length} questions from ${selectedTemplate.name}`)
+                                } else {
+                                  console.error('Template not found for ID:', createDDQForm.selectedTemplate)
+                                  showNotification('Template not found. Please select a template first.')
                                 }
                               }}
                             >

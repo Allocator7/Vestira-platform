@@ -554,6 +554,7 @@ export default function AllocatorInbox() {
   }
 
   const archiveMessage = (id: number) => {
+    console.log('Archive message called for ID:', id)
     setMessages((prev) => prev.map((msg) => (msg.id === id ? { ...msg, archived: true } : msg)))
     showToast("Message archived")
   }

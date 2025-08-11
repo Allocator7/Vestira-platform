@@ -208,6 +208,7 @@ export default function AllocatorTeamManagementPage() {
   }
 
   const handleSendEmail = (member: (typeof teamMembersData)[0]) => {
+    console.log('Send email function called for member:', member.name)
     try {
       // In a real app, this would open an email client or send an email
       // For now, we'll simulate sending an email
@@ -217,6 +218,7 @@ export default function AllocatorTeamManagementPage() {
         title: "Email sent",
         description: `Email sent to ${member.name} (${member.email})`,
       })
+      console.log('Toast notification sent')
     } catch (error) {
       console.error("Error sending email:", error)
       toast({

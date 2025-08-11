@@ -10,6 +10,22 @@ import { Input } from "../../../../components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
 import { Search, Filter, Calendar, FileText, Download, Eye, Clock, Star, MoreHorizontal, X } from "lucide-react"
 import { Progress } from "../../../../components/ui/progress"
+import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
+import { 
+  Search as SearchIcon, 
+  Filter as FilterIcon, 
+  MoreVertical, 
+  FileText as FileIcon, 
+  Clock as ClockIcon, 
+  Calendar as CalendarIcon, 
+  Download as DownloadIcon, 
+  Bookmark,
+  BookmarkCheck,
+  MessageSquare,
+  Eye as EyeIcon,
+  User,
+  Building2
+} from "lucide-react"
 
 // Force dynamic rendering to prevent SSR issues
 export const dynamic = 'force-dynamic'
@@ -186,6 +202,10 @@ export default function AllocatorDataRoomsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    assetClasses: [],
+    strategies: []
+  })
 
   const showNotification = (message: string, type: "success" | "error" = "success") => {
     setNotification({ message, type })
@@ -354,6 +374,10 @@ export default function AllocatorDataRoomsPage() {
     showNotification("Data rooms list exported successfully!")
   }
 
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
+  }
+
   return (
     <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8 max-w-7xl">
       {/* Notification */}
@@ -516,15 +540,6 @@ export default function AllocatorDataRoomsPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Access Type Needed</label>
-                    <select className="w-full p-2 border rounded-md">
-                      <option value="full">Full Access</option>
-                      <option value="download">Download Access</option>
-                      <option value="extended">Extended Time Access</option>
-                      <option value="team">Team Access</option>
-                    </select>
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium mb-1">Reason for Request</label>
                     <textarea
                       className="w-full min-h-[120px] p-3 border rounded-md"
@@ -594,19 +609,12 @@ export default function AllocatorDataRoomsPage() {
             </div>
 
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Asset Class/Strategy</label>
-                  <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Asset Classes</option>
-                    <option value="Public Equities">Public Equities</option>
-                    <option value="Public Fixed Income">Public Fixed Income</option>
-                    <option value="Private Fixed Income">Private Fixed Income</option>
-                    <option value="Real Estate">Real Estate</option>
-                    <option value="Private Equity & Other Alternatives">Private Equity & Other Alternatives</option>
-                  </select>
-                </div>
-                {/* Removed duplicate status filter - status is already handled in main filter bar */}
+              <div className="mb-6">
+                <ComprehensiveFilters 
+                  onFiltersChange={handleFiltersChange} 
+                  initialFilters={filters} 
+                  showSectors={false}
+                />
               </div>
             )}
 
