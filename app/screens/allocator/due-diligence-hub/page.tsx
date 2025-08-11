@@ -1292,8 +1292,14 @@ export default function AllocatorDueDiligenceHubPage() {
       
       showNotification("Informal Due Diligence session started")
       
-      // Use window.location for more reliable navigation
-      window.location.href = '/allocator/informal-due-diligence'
+      // Use window.location for more reliable navigation with error handling
+      try {
+        window.location.href = '/allocator/informal-due-diligence'
+      } catch (navigationError) {
+        console.error("Navigation error:", navigationError)
+        // Fallback: try router.push
+        router.push('/allocator/informal-due-diligence')
+      }
       
     } catch (error) {
       console.error("Error starting informal due diligence:", error)

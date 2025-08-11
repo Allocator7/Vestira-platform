@@ -363,7 +363,7 @@ export default function InformalDueDiligencePage() {
     return (
       <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8 max-w-7xl">
         <div className="text-center">
-          <div className="animate-spin h-8 w-8 border-2 border-electric-blue border-t-transparent rounded-full mx-auto mb-4"></div>
+          <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
           <p>Loading session...</p>
         </div>
       </div>
@@ -379,31 +379,30 @@ export default function InformalDueDiligencePage() {
         </div>
       )}
 
-      <div className="container mx-auto py-6 px-4">
-        <div className="space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" onClick={() => router.back()}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Due Diligence Hub
-              </Button>
-              <div>
-                <h1 className="text-3xl font-bold text-deepBrand">Informal Due Diligence</h1>
-                <p className="text-baseGray">Session started {new Date(currentSession.createdAt).toLocaleDateString()}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" onClick={saveSession}>
-                <Save className="h-4 w-4 mr-2" />
-                Save Session
-              </Button>
-              <Button onClick={completeSession} className="bg-electric-blue hover:bg-electric-blue/90">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Complete Session
-              </Button>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" onClick={() => router.back()}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Due Diligence Hub
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Informal Due Diligence</h1>
+              <p className="text-gray-600">Session started {new Date(currentSession.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={saveSession}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Session
+            </Button>
+            <Button onClick={completeSession} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Complete Session
+            </Button>
+          </div>
+        </div>
 
           {/* Session Overview */}
           <Card>
