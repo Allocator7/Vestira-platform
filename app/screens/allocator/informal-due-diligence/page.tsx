@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Screen } from "@/components/Screen"
+// import { Screen } from "@/components/Screen"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -373,7 +373,7 @@ export default function InformalDueDiligencePage() {
   }
 
   return (
-    <Screen>
+    <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8 max-w-7xl">
       {/* Notification */}
       {notification && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
@@ -849,6 +849,6 @@ export default function InformalDueDiligencePage() {
           </div>
         </div>
       )}
-    </Screen>
+    </div>
   )
 }
