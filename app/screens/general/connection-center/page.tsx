@@ -1424,7 +1424,7 @@ export default function ConnectionCenterPage() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="strategy">Strategy/Fund (Optional)</Label>
+                <Label htmlFor="strategy">Purpose of Meeting (Optional)</Label>
                 <Input
                   id="strategy"
                   placeholder="e.g., Global Equity Fund, Fixed Income Strategy"
@@ -1486,7 +1486,7 @@ export default function ConnectionCenterPage() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="meetingStrategy">Strategy/Fund (Optional)</Label>
+                <Label htmlFor="meetingStrategy">Purpose of Meeting (Optional)</Label>
                 <Input
                   id="meetingStrategy"
                   placeholder="e.g., Global Equity Fund, Fixed Income Strategy"
@@ -1519,7 +1519,7 @@ export default function ConnectionCenterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="meetingNotes">Meeting Notes (Optional)</Label>
+                <Label htmlFor="meetingNotes">Additional Information (Optional)</Label>
                 <Textarea
                   id="meetingNotes"
                   placeholder="Add any notes or agenda items for the meeting..."
