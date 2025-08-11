@@ -1270,11 +1270,11 @@ export default function AllocatorDueDiligenceHubPage() {
       
       // Use window.location for more reliable navigation with error handling
       try {
-        window.location.href = '/allocator/informal-due-diligence'
+        window.location.href = '/screens/allocator/informal-due-diligence'
       } catch (navigationError) {
         console.error("Navigation error:", navigationError)
         // Fallback: try router.push
-        router.push('/allocator/informal-due-diligence')
+        router.push('/screens/allocator/informal-due-diligence')
       }
       
     } catch (error) {
