@@ -606,15 +606,7 @@ export default function AllocatorDataRoomsPage() {
                     <option value="Private Equity & Other Alternatives">Private Equity & Other Alternatives</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
-                  <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Statuses</option>
-                    <option value="active">Active</option>
-                    <option value="pending">Pending Access</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </div>
+                {/* Removed duplicate status filter - status is already handled in main filter bar */}
               </div>
             )}
 
