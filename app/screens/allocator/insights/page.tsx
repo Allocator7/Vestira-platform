@@ -798,33 +798,7 @@ function AllocatorInsightsPage() {
           </TabsContent>
         </Tabs>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Upcoming Industry Events</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <EventCard
-                title="Allocator Forum 2025"
-                date="June 15, 2025"
-                time="9:00 AM - 5:00 PM EST"
-                host="Institutional Investor Association"
-              />
-              <EventCard
-                title="Due Diligence Workshop"
-                date="June 22, 2025"
-                time="2:00 PM - 4:00 PM EST"
-                host="Investment Management Network"
-              />
-              <EventCard
-                title="Alternative Investments Summit"
-                date="July 8-9, 2025"
-                time="9:00 AM - 5:00 PM EST"
-                host="Private Markets Institute"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* Removed Upcoming Industry Events section - now using dedicated Events Center */}
       </div>
 
       {/* Click outside to close dropdown */}

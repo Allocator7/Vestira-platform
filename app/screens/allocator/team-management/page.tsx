@@ -117,6 +117,8 @@ export default function AllocatorTeamManagementPage() {
     role: "Viewer",
     department: "Research",
   })
+  // Mock current user - in real app this would come from auth context
+  const currentUser = { role: "Admin" }
 
   const { toast } = useToast()
 
@@ -203,6 +205,14 @@ export default function AllocatorTeamManagementPage() {
   const openEditDialog = (member: (typeof teamMembersData)[0]) => {
     setCurrentMember(member)
     setIsEditMemberOpen(true)
+  }
+
+  const handleSendEmail = (member: (typeof teamMembersData)[0]) => {
+    // In a real app, this would open an email client or send an email
+    toast({
+      title: "Email sent",
+      description: `Email sent to ${member.name} (${member.email})`,
+    })
   }
 
   return (
@@ -533,36 +543,41 @@ export default function AllocatorTeamManagementPage() {
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleSendEmail(member)}>
                                     <Mail className="mr-2 h-4 w-4" />
                                     Send Email
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    Permissions
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleToggleStatus(member.id)}>
-                                    <span className="flex items-center">
-                                      {member.status === "active" ? (
-                                        <>
-                                          <X className="mr-2 h-4 w-4" />
-                                          Deactivate
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Check className="mr-2 h-4 w-4" />
-                                          Activate
-                                        </>
-                                      )}
-                                    </span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-red-600"
-                                    onClick={() => handleDeleteMember(member.id)}
-                                  >
-                                    <Trash className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
+                                  {/* Admin-only actions */}
+                                  {currentUser.role === "Admin" && (
+                                    <>
+                                      <DropdownMenuItem>
+                                        <Shield className="mr-2 h-4 w-4" />
+                                        Permissions
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleToggleStatus(member.id)}>
+                                        <span className="flex items-center">
+                                          {member.status === "active" ? (
+                                            <>
+                                              <X className="mr-2 h-4 w-4" />
+                                              Deactivate
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Check className="mr-2 h-4 w-4" />
+                                              Activate
+                                            </>
+                                          )}
+                                        </span>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        className="text-red-600"
+                                        onClick={() => handleDeleteMember(member.id)}
+                                      >
+                                        <Trash className="mr-2 h-4 w-4" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </td>

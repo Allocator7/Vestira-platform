@@ -385,6 +385,8 @@ export default function AllocatorInbox() {
 
   // Form states
   const [composeTo, setComposeTo] = useState("")
+  const [composeCc, setComposeCc] = useState("")
+  const [composeBcc, setComposeBcc] = useState("")
   const [composeSubject, setComposeSubject] = useState("")
   const [composeMessage, setComposeMessage] = useState("")
   const [replyMessage, setReplyMessage] = useState("")
@@ -483,6 +485,8 @@ export default function AllocatorInbox() {
   function closeCompose() {
     setShowCompose(false)
     setComposeTo("")
+    setComposeCc("")
+    setComposeBcc("")
     setComposeSubject("")
     setComposeMessage("")
     setComposeAttachments([])
@@ -513,7 +517,10 @@ export default function AllocatorInbox() {
       showToast("Please fill in all required fields", "error")
       return
     }
-    showToast(`Message sent to ${composeTo}`)
+    const recipients = [composeTo]
+    if (composeCc.trim()) recipients.push(`CC: ${composeCc}`)
+    if (composeBcc.trim()) recipients.push(`BCC: ${composeBcc}`)
+    showToast(`Message sent to ${recipients.join(", ")}`)
     closeCompose()
   }
 
@@ -1023,6 +1030,24 @@ export default function AllocatorInbox() {
                 placeholder="Enter recipient email"
                 value={composeTo}
                 onChange={(e) => setComposeTo(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="compose-cc">CC</Label>
+              <Input
+                id="compose-cc"
+                placeholder="Enter CC recipients (optional)"
+                value={composeCc}
+                onChange={(e) => setComposeCc(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="compose-bcc">BCC</Label>
+              <Input
+                id="compose-bcc"
+                placeholder="Enter BCC recipients (optional)"
+                value={composeBcc}
+                onChange={(e) => setComposeBcc(e.target.value)}
               />
             </div>
             <div>

@@ -3172,7 +3172,7 @@ const handleUseTemplate = () => {
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => handleAddAllQuestions(template.id)}>
                               <FileText className="h-4 w-4 mr-1" />
-                              Add All Questions
+                              Add to Custom DDQ
                             </Button>
                             <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
                               Use Template
@@ -3228,7 +3228,7 @@ const handleUseTemplate = () => {
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => handleAddAllQuestions(template.id)}>
                               <FileText className="h-4 w-4 mr-1" />
-                              Add All Questions
+                              Add to Custom DDQ
                             </Button>
                             <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
                               Use Template

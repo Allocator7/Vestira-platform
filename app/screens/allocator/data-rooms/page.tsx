@@ -21,7 +21,6 @@ const dataRooms = [
     manager: "BlackRock",
     type: "Infrastructure",
     status: "Active",
-    accessLevel: "Full Access",
     lastUpdated: "2 hours ago",
     documentsCount: 127,
     deadline: "Dec 15, 2024",
@@ -35,7 +34,6 @@ const dataRooms = [
     manager: "Vanguard",
     type: "Real Estate",
     status: "Pending Access",
-    accessLevel: "Requested",
     lastUpdated: "1 day ago",
     documentsCount: 89,
     deadline: "Jan 30, 2025",
@@ -49,7 +47,6 @@ const dataRooms = [
     manager: "Wellington Management",
     type: "Growth Equity",
     status: "Active",
-    accessLevel: "Limited Access",
     lastUpdated: "3 days ago",
     documentsCount: 156,
     deadline: "Nov 20, 2024",
@@ -62,8 +59,7 @@ const dataRooms = [
     name: "Fidelity Private Credit Strategy",
     manager: "Fidelity",
     type: "Private Credit",
-    status: "Completed",
-    accessLevel: "Full Access",
+    status: "Closed",
     lastUpdated: "1 week ago",
     documentsCount: 203,
     deadline: "Completed",
@@ -79,25 +75,14 @@ const getStatusColor = (status: string) => {
       return "bg-green-100 text-green-800"
     case "Pending Access":
       return "bg-yellow-100 text-yellow-800"
-    case "Completed":
+    case "Closed":
       return "bg-electric-blue/10 text-electric-blue"
     default:
       return "bg-gray-100 text-gray-800"
   }
 }
 
-const getAccessColor = (access: string) => {
-  switch (access) {
-    case "Full Access":
-      return "bg-green-100 text-green-800"
-    case "Limited Access":
-      return "bg-yellow-100 text-yellow-800"
-    case "Requested":
-      return "bg-orange-100 text-orange-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
-}
+// Removed access level concept - allocators don't need to know about access levels
 
 // Custom Dropdown Component
 function CustomDropdown({ room, onViewDetails, onContactManager, onRequestAccess, onExportDocuments }: any) {
@@ -601,24 +586,38 @@ export default function AllocatorDataRoomsPage() {
                 />
               </div>
               <select className="vestira-input w-full md:w-48">
-                <option value="all">All Types</option>
+                <option value="all">All Asset Classes</option>
                 <option value="infrastructure">Infrastructure</option>
                 <option value="real-estate">Real Estate</option>
                 <option value="private-equity">Private Equity</option>
                 <option value="private-credit">Private Credit</option>
+                <option value="venture-capital">Venture Capital</option>
+                <option value="hedge-funds">Hedge Funds</option>
+                <option value="growth-equity">Growth Equity</option>
+                <option value="buyout">Buyout</option>
+                <option value="mezzanine">Mezzanine</option>
+                <option value="distressed">Distressed</option>
+                <option value="special-situations">Special Situations</option>
               </select>
             </div>
 
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
+                  <label className="block text-sm font-medium mb-1">Asset Class/Strategy</label>
                   <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Types</option>
+                    <option value="all">All Asset Classes</option>
                     <option value="infrastructure">Infrastructure</option>
                     <option value="real-estate">Real Estate</option>
                     <option value="private-equity">Private Equity</option>
                     <option value="private-credit">Private Credit</option>
+                    <option value="venture-capital">Venture Capital</option>
+                    <option value="hedge-funds">Hedge Funds</option>
+                    <option value="growth-equity">Growth Equity</option>
+                    <option value="buyout">Buyout</option>
+                    <option value="mezzanine">Mezzanine</option>
+                    <option value="distressed">Distressed</option>
+                    <option value="special-situations">Special Situations</option>
                   </select>
                 </div>
                 <div>
@@ -631,12 +630,12 @@ export default function AllocatorDataRoomsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Access Level</label>
+                  <label className="block text-sm font-medium mb-1">Status</label>
                   <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Access Levels</option>
-                    <option value="full">Full Access</option>
-                    <option value="limited">Limited Access</option>
-                    <option value="requested">Requested</option>
+                    <option value="all">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending Access</option>
+                    <option value="closed">Closed</option>
                   </select>
                 </div>
               </div>
@@ -660,7 +659,13 @@ export default function AllocatorDataRoomsPage() {
                   value="closed"
                   className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-700"
                 >
-                  Closed Data Rooms ({dataRooms.filter((r) => r.status === "Completed").length})
+                  Closed Data Rooms ({dataRooms.filter((r) => r.status === "Closed").length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="bookmarked"
+                  className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-700"
+                >
+                  Bookmarked ({bookmarkedRooms.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -670,7 +675,8 @@ export default function AllocatorDataRoomsPage() {
                     const matchesTab =
                       (activeTab === "active" && room.status === "Active") ||
                       (activeTab === "pending" && room.status === "Pending Access") ||
-                      (activeTab === "closed" && room.status === "Completed")
+                      (activeTab === "closed" && room.status === "Closed") ||
+                      (activeTab === "bookmarked" && bookmarkedRooms.includes(room.id))
 
                     if (!matchesTab) {
                       return null
@@ -695,7 +701,6 @@ export default function AllocatorDataRoomsPage() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge className={getStatusColor(room.status)}>{room.status}</Badge>
-                              <Badge className={getAccessColor(room.accessLevel)}>{room.accessLevel}</Badge>
                             </div>
                           </div>
 
@@ -772,7 +777,7 @@ export default function AllocatorDataRoomsPage() {
                                 onClick={() => handleEnterRoom(room)}
                               >
                                 <Eye className="h-4 w-4" />
-                                {room.accessLevel === "Requested" ? "Request Access" : "Enter Room"}
+                                {room.status === "Pending Access" ? "Request Access" : "Enter Room"}
                               </Button>
                               <CustomDropdown
                                 room={room}

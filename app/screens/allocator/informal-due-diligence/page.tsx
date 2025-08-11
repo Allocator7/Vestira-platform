@@ -45,6 +45,8 @@ interface InformalQuestion {
   category: string
   createdAt: string
   status: "pending" | "answered" | "follow_up"
+  type: "text" | "multiple_choice" | "yes_no"
+  options?: string[] // For multiple choice questions
 }
 
 interface InformalNote {
@@ -71,6 +73,8 @@ export default function InformalDueDiligencePage() {
   const [currentSession, setCurrentSession] = useState<InformalSession | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
   const [newQuestion, setNewQuestion] = useState("")
+  const [newQuestionType, setNewQuestionType] = useState<"text" | "multiple_choice" | "yes_no">("text")
+  const [newQuestionOptions, setNewQuestionOptions] = useState<string[]>(["", ""])
   const [newNote, setNewNote] = useState("")
   const [selectedManager, setSelectedManager] = useState<string>("")
   const [showManagerModal, setShowManagerModal] = useState(false)
@@ -223,7 +227,9 @@ export default function InformalDueDiligencePage() {
       question: newQuestion,
       category: "General",
       createdAt: new Date().toISOString(),
-      status: "pending"
+      status: "pending",
+      type: newQuestionType,
+      options: newQuestionType === "multiple_choice" ? newQuestionOptions.filter(opt => opt.trim()) : undefined
     }
 
     const updatedSession = {
@@ -233,6 +239,8 @@ export default function InformalDueDiligencePage() {
 
     setCurrentSession(updatedSession)
     setNewQuestion("")
+    setNewQuestionType("text")
+    setNewQuestionOptions(["", ""])
     saveSession()
     showNotification("Question added")
   }
@@ -472,17 +480,85 @@ export default function InformalDueDiligencePage() {
                 <CardContent>
                   <div className="space-y-4">
                     {/* Add Question */}
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Add a new question..."
-                        value={newQuestion}
-                        onChange={(e) => setNewQuestion(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && addQuestion()}
-                      />
-                      <Button onClick={addQuestion}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Add
-                      </Button>
+                    <div className="space-y-3">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Add a new question..."
+                          value={newQuestion}
+                          onChange={(e) => setNewQuestion(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && addQuestion()}
+                        />
+                        <Button onClick={addQuestion}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add
+                        </Button>
+                      </div>
+                      
+                      {/* Question Type Selector */}
+                      <div className="flex items-center gap-4">
+                        <Label className="text-sm font-medium">Question Type:</Label>
+                        <div className="flex gap-2">
+                          <Button
+                            variant={newQuestionType === "text" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setNewQuestionType("text")}
+                          >
+                            Text
+                          </Button>
+                          <Button
+                            variant={newQuestionType === "multiple_choice" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setNewQuestionType("multiple_choice")}
+                          >
+                            Multiple Choice
+                          </Button>
+                          <Button
+                            variant={newQuestionType === "yes_no" ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setNewQuestionType("yes_no")}
+                          >
+                            Yes/No
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Multiple Choice Options */}
+                      {newQuestionType === "multiple_choice" && (
+                        <div className="space-y-2">
+                          <Label className="text-sm font-medium">Options:</Label>
+                          {newQuestionOptions.map((option, index) => (
+                            <div key={index} className="flex gap-2">
+                              <Input
+                                placeholder={`Option ${index + 1}`}
+                                value={option}
+                                onChange={(e) => {
+                                  const newOptions = [...newQuestionOptions]
+                                  newOptions[index] = e.target.value
+                                  setNewQuestionOptions(newOptions)
+                                }}
+                              />
+                              {newQuestionOptions.length > 2 && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setNewQuestionOptions(newQuestionOptions.filter((_, i) => i !== index))
+                                  }}
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setNewQuestionOptions([...newQuestionOptions, ""])}
+                          >
+                            Add Option
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
                     {/* Questions List */}
@@ -492,7 +568,19 @@ export default function InformalDueDiligencePage() {
                           <CardContent className="p-4">
                             <div className="space-y-3">
                               <div className="flex items-center justify-between">
-                                <p className="font-medium">{question.question}</p>
+                                <div>
+                                  <p className="font-medium">{question.question}</p>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline" className="text-xs">
+                                      {question.type === "text" ? "Text" : question.type === "multiple_choice" ? "Multiple Choice" : "Yes/No"}
+                                    </Badge>
+                                    {question.options && question.options.length > 0 && (
+                                      <span className="text-xs text-gray-500">
+                                        {question.options.length} options
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                                 <Badge className={question.status === "answered" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
                                   {question.status}
                                 </Badge>
@@ -503,15 +591,54 @@ export default function InformalDueDiligencePage() {
                                 </div>
                               )}
                               {question.status === "pending" && (
-                                <div className="flex gap-2">
-                                  <Textarea
-                                    placeholder="Add your answer..."
-                                    rows={2}
-                                    onChange={(e) => answerQuestion(question.id, e.target.value)}
-                                  />
-                                  <Button size="sm" onClick={() => answerQuestion(question.id, "Answered")}>
-                                    Save
-                                  </Button>
+                                <div className="space-y-2">
+                                  {question.type === "text" && (
+                                    <div className="flex gap-2">
+                                      <Textarea
+                                        placeholder="Add your answer..."
+                                        rows={2}
+                                        onChange={(e) => answerQuestion(question.id, e.target.value)}
+                                      />
+                                      <Button size="sm" onClick={() => answerQuestion(question.id, "Answered")}>
+                                        Save
+                                      </Button>
+                                    </div>
+                                  )}
+                                  
+                                  {question.type === "multiple_choice" && question.options && (
+                                    <div className="space-y-2">
+                                      <Label className="text-sm font-medium">Select an option:</Label>
+                                      <div className="space-y-2">
+                                        {question.options.map((option, index) => (
+                                          <Button
+                                            key={index}
+                                            variant="outline"
+                                            className="w-full justify-start"
+                                            onClick={() => answerQuestion(question.id, option)}
+                                          >
+                                            {option}
+                                          </Button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                                  
+                                  {question.type === "yes_no" && (
+                                    <div className="flex gap-2">
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => answerQuestion(question.id, "Yes")}
+                                      >
+                                        Yes
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        onClick={() => answerQuestion(question.id, "No")}
+                                      >
+                                        No
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>

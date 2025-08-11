@@ -315,6 +315,7 @@ export default function ConnectionCenterPage() {
     "Global Consultant",
     "Investment Advisory",
     "Boutique Consultant",
+    "Insurance",
   ]
 
   const sizeOptions = ["Under $1B", "$1B - $5B", "$5B - $25B", "$25B - $100B", "Over $100B"]

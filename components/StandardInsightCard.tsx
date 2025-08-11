@@ -57,14 +57,6 @@ export default function StandardInsightCard({ insight, onReadMore }: StandardIns
             <TrendingUp className="h-3 w-3" />
             <span className="font-medium">{insight.likes}</span>
           </span>
-          <span className="flex items-center gap-1 text-xs text-base-gray">
-            <Users className="h-3 w-3" />
-            <span className="font-medium">{insight.shares}</span>
-          </span>
-          <span className="flex items-center gap-1 text-xs text-base-gray">
-            <BookOpen className="h-3 w-3" />
-            <span className="font-medium">{insight.bookmarks}</span>
-          </span>
         </div>
 
         {/* Tags */}
