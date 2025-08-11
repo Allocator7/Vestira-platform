@@ -757,7 +757,6 @@ export default function InformalDueDiligencePage() {
             </TabsContent>
           </Tabs>
         </div>
-      </div>
 
       {/* Manager Selection Modal */}
       {showManagerModal && (
