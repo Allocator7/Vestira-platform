@@ -586,12 +586,10 @@ export default function AllocatorDataRoomsPage() {
                 />
               </div>
               <select className="vestira-input w-full md:w-48">
-                <option value="all">All Asset Classes</option>
-                <option value="Public Equities">Public Equities</option>
-                <option value="Public Fixed Income">Public Fixed Income</option>
-                <option value="Private Fixed Income">Private Fixed Income</option>
-                <option value="Real Estate">Real Estate</option>
-                <option value="Private Equity & Other Alternatives">Private Equity & Other Alternatives</option>
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending Access</option>
+                <option value="closed">Closed</option>
               </select>
             </div>
 
