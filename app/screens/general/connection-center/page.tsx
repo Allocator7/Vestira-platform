@@ -40,6 +40,7 @@ export default function ConnectionCenterPage() {
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [sortBy, setSortBy] = useState("date")
   const [pendingView, setPendingView] = useState<"received" | "sent">("received")
+  const [connectionsState, setConnectionsState] = useState(connections)
 
   // New state variables
   const [userSearchQuery, setUserSearchQuery] = useState("")
@@ -93,6 +94,29 @@ export default function ConnectionCenterPage() {
     setMeetingNotes("")
     setMeetingSuccess(false)
     setIsMeetingModalOpen(true)
+  }
+
+  // Handle Accept/Decline connection requests
+  const handleAcceptConnection = (connectionId: number) => {
+    setConnectionsState(prev => 
+      prev.map(conn => 
+        conn.id === connectionId 
+          ? { ...conn, status: "connected", direction: undefined }
+          : conn
+      )
+    )
+  }
+
+  const handleDeclineConnection = (connectionId: number) => {
+    setConnectionsState(prev => 
+      prev.filter(conn => conn.id !== connectionId)
+    )
+  }
+
+  const handleCancelRequest = (connectionId: number) => {
+    setConnectionsState(prev => 
+      prev.filter(conn => conn.id !== connectionId)
+    )
   }
 
   // UPDATED: Route to personal profiles instead of organization profiles
@@ -323,8 +347,8 @@ export default function ConnectionCenterPage() {
   const categories = ["All", "Allocator", "Manager", "Consultant"]
 
   // Get unique values for filters
-  const locations = Array.from(new Set(connections.map((conn) => conn.location)))
-  const companyTypes = Array.from(new Set(connections.map((conn) => conn.category)))
+  const locations = Array.from(new Set(connectionsState.map((conn) => conn.location)))
+  const companyTypes = Array.from(new Set(connectionsState.map((conn) => conn.category)))
 
   // Count active filters
   const activeFilterCount =
@@ -349,7 +373,7 @@ export default function ConnectionCenterPage() {
   }
 
   // Filter connections based on search query and selected filters
-  const filteredConnections = connections.filter((connection) => {
+  const filteredConnections = connectionsState.filter((connection) => {
     // Filter by search query
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase()
@@ -480,9 +504,9 @@ export default function ConnectionCenterPage() {
   }
 
   // Count connections by type
-  const allocatorCount = connections.filter((c) => c.type === "allocator").length
-  const managerCount = connections.filter((c) => c.type === "manager").length
-  const consultantCount = connections.filter((c) => c.type === "consultant").length
+  const allocatorCount = connectionsState.filter((c) => c.type === "allocator").length
+  const managerCount = connectionsState.filter((c) => c.type === "manager").length
+  const consultantCount = connectionsState.filter((c) => c.type === "consultant").length
 
   const renderConnectionCard = (connection: any) => {
     const headerColor =
@@ -1106,11 +1130,16 @@ export default function ConnectionCenterPage() {
                                     variant="outline"
                                     size="sm"
                                     className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+                                    onClick={() => handleDeclineConnection(connection.id)}
                                   >
                                     <X className="h-3 w-3 mr-1" />
                                     Decline
                                   </Button>
-                                  <Button size="sm" className="bg-electric-blue hover:bg-electric-blue/90 text-white">
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-electric-blue hover:bg-electric-blue/90 text-white"
+                                    onClick={() => handleAcceptConnection(connection.id)}
+                                  >
                                     <Check className="h-3 w-3 mr-1" />
                                     Accept
                                   </Button>
@@ -1185,6 +1214,7 @@ export default function ConnectionCenterPage() {
                                     variant="outline"
                                     size="sm"
                                     className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+                                    onClick={() => handleCancelRequest(connection.id)}
                                   >
                                     <X className="h-3 w-3 mr-1" />
                                     Cancel
