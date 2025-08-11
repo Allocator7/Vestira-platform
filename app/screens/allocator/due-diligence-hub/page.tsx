@@ -231,7 +231,7 @@ export default function AllocatorDueDiligenceHubPage() {
       try {
         const parsedTemplates = JSON.parse(savedTemplates)
         // Update the customTemplates array with saved templates
-        customTemplates.push(...parsedTemplates)
+        setCustomTemplates(prev => [...prev, ...parsedTemplates])
       } catch (error) {
         console.error("Error loading custom templates:", error)
       }
@@ -843,7 +843,7 @@ export default function AllocatorDueDiligenceHubPage() {
   ]
 
   // Vestira Standard Templates - Featured prominently
-  const vestiraTemplates = [
+  const [vestiraTemplates, setVestiraTemplates] = useState([
     {
       id: "vestira-1",
       name: "Vestira Infrastructure Fund DDQ",
@@ -896,10 +896,10 @@ export default function AllocatorDueDiligenceHubPage() {
       usage: "Completed by 68% of Managers",
       compliance: "SOC 2 Compliant",
     },
-  ]
+  ])
 
   // Custom templates
-  const customTemplates = [
+  const [customTemplates, setCustomTemplates] = useState([
     {
       id: "custom-1",
       name: "ESG Assessment Questionnaire",
@@ -912,8 +912,9 @@ export default function AllocatorDueDiligenceHubPage() {
       isVestiraStandard: false,
       usage: "Custom template",
       compliance: "Internal Use",
+      questions: []
     },
-  ]
+  ])
 
   // Enhanced file upload handler for DDQ creation
   const handleDDQFileUpload = (event) => {
@@ -1227,7 +1228,7 @@ export default function AllocatorDueDiligenceHubPage() {
       showNotification("Informal Due Diligence session started")
       
       // Navigate to the informal due diligence page
-      router.push('/screens/allocator/informal-due-diligence')
+      router.push('/allocator/informal-due-diligence')
       
     } catch (error) {
       console.error("Error starting informal due diligence:", error)
@@ -1269,7 +1270,7 @@ export default function AllocatorDueDiligenceHubPage() {
     localStorage.setItem('custom-ddq-templates', JSON.stringify(existingTemplates))
 
     // Update custom templates state
-    customTemplates.push(customTemplate)
+          setCustomTemplates(prev => [...prev, customTemplate])
 
     setShowCreateTemplateModal(false)
     setNewTemplate({

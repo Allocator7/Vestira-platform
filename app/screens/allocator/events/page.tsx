@@ -117,7 +117,21 @@ export default function AllocatorEventsCenter() {
   ]
 
   const handleRegister = (event: any) => {
-    setRegistrationEvent(event)
+    // Navigate to external event website instead of opening registration modal
+    const eventUrls = {
+      1: "https://www.institutionalinvestor.com/events/dd-summit-2025",
+      2: "https://www.pensionfundinstitute.org/events/allocation-strategies-2025",
+      3: "https://www.analyticsinstitute.org/workshops/private-markets-2025",
+      4: "https://www.nonprofitinvestmentalliance.org/forum-2025"
+    }
+    
+    const eventUrl = eventUrls[event.id as keyof typeof eventUrls] || "https://www.example-events.com"
+    window.open(eventUrl, "_blank")
+    
+    toast({
+      title: "Redirecting to Event Website",
+      description: "You are being redirected to the event's official registration page.",
+    })
   }
 
   const handleViewDetails = (event: any) => {

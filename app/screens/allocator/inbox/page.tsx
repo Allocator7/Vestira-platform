@@ -1209,6 +1209,9 @@ export default function AllocatorInbox() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} />
     </div>
   )
 }

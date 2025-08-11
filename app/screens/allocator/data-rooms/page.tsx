@@ -250,7 +250,7 @@ export default function AllocatorDataRoomsPage() {
   }
 
   const handleEnterRoom = (room: any) => {
-    if (room.accessLevel === "Requested") {
+    if (room.status === "Pending Access") {
       showNotification("Access request is still pending approval", "error")
       return
     }
@@ -319,7 +319,7 @@ export default function AllocatorDataRoomsPage() {
       manager: room.manager,
       type: room.type,
       status: room.status,
-      accessLevel: room.accessLevel,
+              // Removed accessLevel - allocators don't need to know about access levels
       documents: room.documentsCount,
       lastUpdated: room.lastUpdated,
       deadline: room.deadline,
@@ -419,7 +419,7 @@ export default function AllocatorDataRoomsPage() {
                     </div>
                     <div>
                       <p className="font-medium">Access Level</p>
-                      <Badge className={getAccessColor(selectedRoom.accessLevel)}>{selectedRoom.accessLevel}</Badge>
+                                                    {/* Removed access level badge - allocators don't need to know about access levels */}
                     </div>
                     <div>
                       <p className="font-medium">Documents</p>
@@ -587,17 +587,11 @@ export default function AllocatorDataRoomsPage() {
               </div>
               <select className="vestira-input w-full md:w-48">
                 <option value="all">All Asset Classes</option>
-                <option value="infrastructure">Infrastructure</option>
-                <option value="real-estate">Real Estate</option>
-                <option value="private-equity">Private Equity</option>
-                <option value="private-credit">Private Credit</option>
-                <option value="venture-capital">Venture Capital</option>
-                <option value="hedge-funds">Hedge Funds</option>
-                <option value="growth-equity">Growth Equity</option>
-                <option value="buyout">Buyout</option>
-                <option value="mezzanine">Mezzanine</option>
-                <option value="distressed">Distressed</option>
-                <option value="special-situations">Special Situations</option>
+                <option value="Public Equities">Public Equities</option>
+                <option value="Public Fixed Income">Public Fixed Income</option>
+                <option value="Private Fixed Income">Private Fixed Income</option>
+                <option value="Real Estate">Real Estate</option>
+                <option value="Private Equity & Other Alternatives">Private Equity & Other Alternatives</option>
               </select>
             </div>
 
@@ -607,26 +601,11 @@ export default function AllocatorDataRoomsPage() {
                   <label className="block text-sm font-medium mb-1">Asset Class/Strategy</label>
                   <select className="w-full p-2 border rounded-md">
                     <option value="all">All Asset Classes</option>
-                    <option value="infrastructure">Infrastructure</option>
-                    <option value="real-estate">Real Estate</option>
-                    <option value="private-equity">Private Equity</option>
-                    <option value="private-credit">Private Credit</option>
-                    <option value="venture-capital">Venture Capital</option>
-                    <option value="hedge-funds">Hedge Funds</option>
-                    <option value="growth-equity">Growth Equity</option>
-                    <option value="buyout">Buyout</option>
-                    <option value="mezzanine">Mezzanine</option>
-                    <option value="distressed">Distressed</option>
-                    <option value="special-situations">Special Situations</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
-                  <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Statuses</option>
-                    <option value="active">Active</option>
-                    <option value="pending">Pending Access</option>
-                    <option value="completed">Completed</option>
+                    <option value="Public Equities">Public Equities</option>
+                    <option value="Public Fixed Income">Public Fixed Income</option>
+                    <option value="Private Fixed Income">Private Fixed Income</option>
+                    <option value="Real Estate">Real Estate</option>
+                    <option value="Private Equity & Other Alternatives">Private Equity & Other Alternatives</option>
                   </select>
                 </div>
                 <div>
