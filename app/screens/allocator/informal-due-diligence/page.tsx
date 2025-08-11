@@ -79,6 +79,7 @@ export default function InformalDueDiligencePage() {
   const [selectedManager, setSelectedManager] = useState<string>("")
   const [showManagerModal, setShowManagerModal] = useState(false)
   const [managerSearchQuery, setManagerSearchQuery] = useState("")
+  const [error, setError] = useState<string | null>(null)
 
   // Real manager data from the system
   const availableManagers = [
@@ -153,16 +154,22 @@ export default function InformalDueDiligencePage() {
   useEffect(() => {
     const loadCurrentSession = () => {
       try {
+        console.log("Loading informal due diligence session...")
         const sessionData = sessionStorage.getItem('current-informal-session')
+        console.log("Session data from storage:", sessionData)
+        
         if (sessionData) {
           const session = JSON.parse(sessionData)
+          console.log("Parsed session:", session)
           setCurrentSession(session)
         } else {
+          console.log("No session data found, creating new session...")
           // Create new session if none exists
           createNewSession()
         }
       } catch (error) {
         console.error("Error loading session:", error)
+        setError(`Error loading session: ${error}`)
         createNewSession()
       }
     }
@@ -357,6 +364,21 @@ export default function InformalDueDiligencePage() {
     setCurrentSession(updatedSession)
     saveSession()
     showNotification("Session completed")
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8 max-w-7xl">
+        <div className="text-center">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <strong>Error:</strong> {error}
+          </div>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   if (!currentSession) {
