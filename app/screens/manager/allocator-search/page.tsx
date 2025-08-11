@@ -223,7 +223,7 @@ export default function ManagerAllocatorSearchPage() {
   const router = useRouter()
 
   const handleViewProfile = (allocator: any) => {
-    router.push(`/screens/general/allocator-profile?id=${allocator.id}`)
+    router.push(`/screens/general/allocator-profile?id=${allocator.id}&firm=${encodeURIComponent(allocator.firmName)}`)
   }
 
   const handleSendMessage = (allocator: any, strategy?: string) => {
@@ -359,7 +359,7 @@ export default function ManagerAllocatorSearchPage() {
                     value={sortBy}
                     onChange={handleSortChange}
                     options={[
-                      { value: "aum", label: "Largest AUM" },
+                      { value: "aum", label: "Largest Total Assets" },
                       { value: "experience", label: "Most Experience" },
                       { value: "name", label: "Firm Name A-Z" },
                       { value: "bookmarked", label: "Bookmarked First" },
@@ -411,7 +411,7 @@ export default function ManagerAllocatorSearchPage() {
                           </h3>
                         </div>
                         <p className="text-sm mb-2" style={{ color: "#6D6A75" }}>
-                          {allocator.aum} AUM • Founded {allocator.founded}
+                          {allocator.aum} Total Assets • Founded {allocator.founded}
                         </p>
                         <p className="text-sm leading-relaxed max-w-2xl mb-3" style={{ color: "#6D6A75" }}>
                           {allocator.description}
