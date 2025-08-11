@@ -13,6 +13,7 @@ import { EventRegistrationModal } from "@/components/events/EventRegistrationMod
 import { EventDetailsModal } from "@/components/events/EventDetailsModal"
 import { EventCertificateModal } from "@/components/events/EventCertificateModal"
 import { EventCalendar } from "@/components/events/EventCalendar"
+import { CreateEventButton } from "@/components/events/CreateEventButton"
 
 export default function ManagerEventsCenter() {
   const { toast } = useToast()
@@ -40,7 +41,7 @@ export default function ManagerEventsCenter() {
       description:
         "Premier event for alternative investment professionals focusing on fundraising strategies and market trends.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Investment+Summit",
+      image: "/events/investment-summit.jpg",
     },
     {
       id: 2,
@@ -57,7 +58,7 @@ export default function ManagerEventsCenter() {
       rating: 4.6,
       description: "Hands-on workshop covering effective investor communication and relationship management.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=IR+Workshop",
+      image: "/events/ir-workshop.jpg",
     },
     {
       id: 3,
@@ -74,7 +75,7 @@ export default function ManagerEventsCenter() {
       rating: 4.9,
       description: "Exploring ESG integration strategies in private market investments.",
       isRegistered: true,
-      image: "/placeholder.svg?height=200&width=400&text=ESG+Symposium",
+      image: "/events/esg-symposium.jpg",
     },
   ]
 
@@ -135,6 +136,7 @@ export default function ManagerEventsCenter() {
           <h1 className="text-3xl font-bold text-gray-900">Events Center</h1>
           <p className="text-gray-600 mt-1">Discover and register for industry events and conferences</p>
         </div>
+        <CreateEventButton />
       </div>
 
       <Tabs defaultValue="browse" className="space-y-6">

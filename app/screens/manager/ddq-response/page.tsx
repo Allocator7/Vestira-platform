@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic'
+
+import { useState, useEffect } from "react"
 import { Screen } from "@/components/Screen"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +25,11 @@ import {
 import { BranchingQuestionManager } from "@/components/BranchingQuestionManager"
 import { useRouter } from "next/navigation"
 import { ResponseBankManager } from "@/components/ResponseBankManager"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export default function DDQResponsePage() {
   const router = useRouter()
@@ -29,6 +37,48 @@ export default function DDQResponsePage() {
   const [showResponseBank, setShowResponseBank] = useState(false)
 
   // Mock DDQ data from manager's perspective
+  // Load draft on component mount
+  useEffect(() => {
+    const loadDraft = () => {
+      try {
+        // Try to load from sessionStorage first (most recent)
+        const sessionDraft = sessionStorage.getItem(`ddq-session-${ddqData.id}`)
+        if (sessionDraft) {
+          const parsed = JSON.parse(sessionDraft)
+          setDdqData(parsed)
+          showNotification("Draft loaded from session")
+          return
+        }
+        
+        // Fall back to localStorage
+        const localDraft = localStorage.getItem(`ddq-draft-${ddqData.id}`)
+        if (localDraft) {
+          const parsed = JSON.parse(localDraft)
+          setDdqData(parsed.data)
+          showNotification("Draft loaded from storage")
+        }
+      } catch (error) {
+        console.error("Error loading draft:", error)
+      }
+    }
+    
+    loadDraft()
+  }, [])
+
+  // Auto-save functionality
+  useEffect(() => {
+    const autoSave = () => {
+      try {
+        sessionStorage.setItem(`ddq-session-${ddqData.id}`, JSON.stringify(ddqData))
+      } catch (error) {
+        console.error("Auto-save error:", error)
+      }
+    }
+    
+    const timeoutId = setTimeout(autoSave, 30000) // Auto-save every 30 seconds
+    return () => clearTimeout(timeoutId)
+  }, [ddqData])
+
   const [ddqData, setDdqData] = useState({
     id: "ddq-1",
     templateName: "Vestira Infrastructure Fund DDQ",
@@ -153,16 +203,14 @@ export default function DDQResponsePage() {
         type: "long_text",
         required: true,
         answeredAt: "2024-01-15T14:45:00Z",
-        branches: [],
       },
       {
         id: "q5",
         section: "ESG & Compliance",
         question: "Do you have formal ESG policies in place?",
-        answer: "Yes",
-        type: "yes_no",
+        type: "multiple_choice",
+        options: ["Yes, comprehensive policy", "Yes, basic policy", "In development", "No formal policy"],
         required: true,
-        answeredAt: "2024-01-16T10:00:00Z",
         branches: [
           {
             id: "branch-6",
@@ -196,16 +244,104 @@ export default function DDQResponsePage() {
   }
 
   const handleSave = () => {
-    showNotification("DDQ responses saved as draft")
+    try {
+      // Save to localStorage with timestamp
+      const draftData = {
+        ddqId: ddqData.id,
+        data: ddqData,
+        savedAt: new Date().toISOString(),
+        version: "1.0"
+      }
+      localStorage.setItem(`ddq-draft-${ddqData.id}`, JSON.stringify(draftData))
+      
+      // Also save to sessionStorage for immediate recovery
+      sessionStorage.setItem(`ddq-session-${ddqData.id}`, JSON.stringify(ddqData))
+      
+      // Force save completion before showing notification - increased timeout for reliability
+      setTimeout(() => {
+        showNotification("DDQ responses saved as draft successfully")
+      }, 200)
+      
+    } catch (error) {
+      console.error("Error saving draft:", error)
+      showNotification("Error saving draft - please try again")
+    }
+  }
+
+  // DDQ Completion Validation
+  const validateDDQCompletion = () => {
+    const incompleteQuestions = []
+    
+    // Check main questions
+    ddqData.questions.forEach((question) => {
+      if (question.required && (!question.answer || question.answer.trim() === '')) {
+        incompleteQuestions.push({
+          id: question.id,
+          question: question.question,
+          type: 'main'
+        })
+      }
+      
+      // Check branch questions
+      if (question.branches) {
+        question.branches.forEach((branch) => {
+          if (branch.required && (!branch.answer || branch.answer.trim() === '')) {
+            incompleteQuestions.push({
+              id: branch.id,
+              question: branch.question,
+              type: 'branch',
+              parentId: question.id
+            })
+          }
+        })
+      }
+    })
+    
+    return {
+      isValid: incompleteQuestions.length === 0,
+      incompleteQuestions,
+      message: incompleteQuestions.length > 0 
+        ? `Please complete ${incompleteQuestions.length} required question(s) before submitting. N/A is always an option for optional questions.`
+        : 'All required questions completed'
+    }
   }
 
   const handleSubmit = () => {
+    const validation = validateDDQCompletion()
+    
+    if (!validation.isValid) {
+      showNotification(validation.message)
+      return
+    }
+    
     setDdqData((prev) => ({ ...prev, status: "submitted" }))
     showNotification("DDQ submitted successfully")
   }
 
   const handleSendMessage = () => {
-    showNotification(`Message sent to ${ddqData.allocatorName}`)
+    try {
+      // Create message data
+      const message = {
+        id: `msg-${Date.now()}`,
+        from: "Manager",
+        to: ddqData.allocatorName,
+        subject: `DDQ Response - ${ddqData.templateName}`,
+        content: `I have questions regarding the DDQ response for ${ddqData.templateName}. Please contact me to discuss.`,
+        timestamp: new Date().toISOString(),
+        ddqId: ddqData.id,
+        status: "sent"
+      }
+      
+      // Store message in localStorage
+      const existingMessages = JSON.parse(localStorage.getItem('ddq-messages') || '[]')
+      existingMessages.push(message)
+      localStorage.setItem('ddq-messages', JSON.stringify(existingMessages))
+      
+      showNotification(`Message sent to ${ddqData.allocatorName}`)
+    } catch (error) {
+      console.error("Error sending message:", error)
+      showNotification("Error sending message - please try again")
+    }
   }
 
   const getStatusBadge = (status: string) => {
@@ -459,13 +595,170 @@ export default function DDQResponsePage() {
           )}
 
           {/* Questions and Branching Interface */}
-          <BranchingQuestionManager
-            questions={ddqData.questions}
-            onUpdateQuestions={handleUpdateQuestions}
-            currentUser="Sarah Chen"
-            userRole="manager"
-            readOnly={false}
-          />
+          <div className="space-y-6">
+            {ddqData.questions.map((question) => (
+              <Card key={question.id} className="border-l-4 border-l-blue-500">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-blue-600" />
+                      <span className="text-lg">{question.question}</span>
+                      {question.required && (
+                        <Badge variant="destructive" className="text-xs">Required</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {question.answer ? (
+                        <Badge className="bg-green-100 text-green-800">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Answered
+                        </Badge>
+                      ) : question.required ? (
+                        <Badge className="bg-red-100 text-red-800">
+                          <AlertTriangle className="h-3 w-3 mr-1" />
+                          Required
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-gray-100 text-gray-800">Optional</Badge>
+                      )}
+                    </div>
+                  </CardTitle>
+                  <div className="text-sm text-gray-600">
+                    <span className="font-medium">Section:</span> {question.section} • 
+                    <span className="font-medium ml-2">Type:</span> {question.type.replace('_', ' ')}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {/* Question Answer Input */}
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium text-gray-700 mb-2 block">
+                        Your Response {question.required && '*'}
+                      </Label>
+                      
+                      {question.type === "short_text" && (
+                        <Input
+                          placeholder="Enter your response or 'N/A' if not applicable..."
+                          value={question.answer || ""}
+                          onChange={(e) => {
+                            const updatedQuestions = ddqData.questions.map(q =>
+                              q.id === question.id ? { ...q, answer: e.target.value } : q
+                            )
+                            setDdqData(prev => ({ ...prev, questions: updatedQuestions }))
+                          }}
+                          className="w-full"
+                        />
+                      )}
+                      
+                      {question.type === "long_text" && (
+                        <Textarea
+                          placeholder="Enter your detailed response or 'N/A' if not applicable..."
+                          value={question.answer || ""}
+                          onChange={(e) => {
+                            const updatedQuestions = ddqData.questions.map(q =>
+                              q.id === question.id ? { ...q, answer: e.target.value } : q
+                            )
+                            setDdqData(prev => ({ ...prev, questions: updatedQuestions }))
+                          }}
+                          rows={4}
+                          className="w-full"
+                        />
+                      )}
+                      
+                      {question.type === "multiple_choice" && question.options && (
+                        <div className="space-y-2">
+                          <Select 
+                            value={question.answer || ""} 
+                            onValueChange={(value) => {
+                              const updatedQuestions = ddqData.questions.map(q =>
+                                q.id === question.id ? { ...q, answer: value } : q
+                              )
+                              setDdqData(prev => ({ ...prev, questions: updatedQuestions }))
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select an option or N/A..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {question.options.map((option, index) => (
+                                <SelectItem key={index} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                              <SelectItem value="N/A">N/A</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      
+                      {question.type === "yes_no" && (
+                        <RadioGroup 
+                          value={question.answer || ""} 
+                          onValueChange={(value) => {
+                            const updatedQuestions = ddqData.questions.map(q =>
+                              q.id === question.id ? { ...q, answer: value } : q
+                            )
+                            setDdqData(prev => ({ ...prev, questions: updatedQuestions }))
+                          }}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="Yes" id={`${question.id}-yes`} />
+                            <Label htmlFor={`${question.id}-yes`}>Yes</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="No" id={`${question.id}-no`} />
+                            <Label htmlFor={`${question.id}-no`}>No</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="N/A" id={`${question.id}-na`} />
+                            <Label htmlFor={`${question.id}-na`}>N/A</Label>
+                          </div>
+                        </RadioGroup>
+                      )}
+                      
+                      {question.type === "currency" && (
+                        <Input
+                          placeholder="Enter amount (e.g., $1,000,000)"
+                          value={question.answer || ""}
+                          onChange={(e) => {
+                            const updatedQuestions = ddqData.questions.map(q =>
+                              q.id === question.id ? { ...q, answer: e.target.value } : q
+                            )
+                            setDdqData(prev => ({ ...prev, questions: updatedQuestions }))
+                          }}
+                          className="w-full"
+                        />
+                      )}
+                    </div>
+                    
+                    {question.answer && (
+                      <div className="text-xs text-gray-500">
+                        Last updated: {question.answeredAt ? new Date(question.answeredAt).toLocaleString() : 'Just now'}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Branch Questions */}
+                  {question.branches && question.branches.length > 0 && (
+                    <div className="mt-6">
+                      <BranchingQuestionManager
+                        parentQuestion={question}
+                        branches={question.branches}
+                        onUpdateBranches={(updatedBranches) => {
+                          const updatedQuestions = ddqData.questions.map(q =>
+                            q.id === question.id ? { ...q, branches: updatedBranches } : q
+                          )
+                          setDdqData(prev => ({ ...prev, questions: updatedQuestions }))
+                        }}
+                        userRole="manager"
+                        currentUser="Sarah Chen"
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </Screen>

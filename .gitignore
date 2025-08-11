@@ -22,6 +22,14 @@ yarn-error.log*
 # vercel
 .vercel
 
+# AWS
+.aws-sam/
+.serverless/
+
+# Environment variables
+.env.local
+.env.production
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

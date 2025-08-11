@@ -90,6 +90,18 @@ export default function ConsultantDueDiligenceHubPage() {
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
   // Enhanced DDQ Creation Modal States
   const [showCreateDDQModal, setShowCreateDDQModal] = useState(false)
+  const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false)
+  const [showQuestionSelector, setShowQuestionSelector] = useState(false)
+  const [selectedQuestions, setSelectedQuestions] = useState([])
+  const [newTemplate, setNewTemplate] = useState({
+    name: "",
+    description: "",
+    category: "General",
+    questions: []
+  })
+  const [currentDDQQuestions, setCurrentDDQQuestions] = useState([])
+  const [isQuestionSelectorForDDQ, setIsQuestionSelectorForDDQ] = useState(false)
+  const [selectedQuestionsInSelector, setSelectedQuestionsInSelector] = useState([])
   const [ddqCreationMethod, setDdqCreationMethod] = useState("template") // "template" or "upload"
   const [createDDQForm, setCreateDDQForm] = useState({
     ddqName: "",
@@ -286,6 +298,65 @@ export default function ConsultantDueDiligenceHubPage() {
     "Distressed Debt",
     "Growth Equity",
   ]
+
+  // Vestira Standard Templates
+  const vestiraTemplates = [
+    {
+      id: "vestira-1",
+      name: "Vestira Infrastructure Fund DDQ",
+      description: "Comprehensive due diligence questionnaire for infrastructure investment strategies",
+      category: "Infrastructure",
+      questionCount: 127,
+      estimatedTime: "4-6 hours",
+      lastUpdated: "2024-01-15",
+      version: "3.2",
+      isVestiraStandard: true,
+      usage: "Completed by 89% of Managers",
+      compliance: "SOC 2 Compliant",
+    },
+    {
+      id: "vestira-2",
+      name: "Vestira Private Equity Fund DDQ",
+      description: "Standard due diligence questionnaire for private equity investments",
+      category: "Private Equity",
+      questionCount: 98,
+      estimatedTime: "3-5 hours",
+      lastUpdated: "2024-01-10",
+      version: "2.8",
+      isVestiraStandard: true,
+      usage: "Completed by 92% of Managers",
+      compliance: "SOC 2 Compliant",
+    },
+    {
+      id: "vestira-3",
+      name: "Vestira Real Estate Fund DDQ",
+      description: "Specialized questionnaire for real estate investment due diligence",
+      category: "Real Estate",
+      questionCount: 85,
+      estimatedTime: "3-4 hours",
+      lastUpdated: "2024-01-08",
+      version: "2.1",
+      isVestiraStandard: true,
+      usage: "Completed by 76% of Managers",
+      compliance: "SOC 2 Compliant",
+    },
+    {
+      id: "vestira-4",
+      name: "Vestira Credit Fund DDQ",
+      description: "Comprehensive due diligence for credit and fixed income strategies",
+      category: "Credit",
+      questionCount: 112,
+      estimatedTime: "4-5 hours",
+      lastUpdated: "2024-01-12",
+      version: "1.9",
+      isVestiraStandard: true,
+      usage: "Completed by 68% of Managers",
+      compliance: "SOC 2 Compliant",
+    },
+  ]
+
+  // Custom templates (initially empty, will be populated from localStorage)
+  const customTemplates: any[] = []
 
   const handleReviewDDQ = (ddqId: string) => {
     const ddq = activeDDQs.find((d) => d.id === ddqId)
@@ -533,6 +604,150 @@ export default function ConsultantDueDiligenceHubPage() {
       router.push(`/screens/consultant/due-diligence-hub/review/${ddqId}`)
       showNotification(`Continuing DDQ review: ${ddq.templateName} for ${ddq.clientName}`)
     }
+  }
+
+  // Template functions
+  const generateTemplateQuestions = (template: any) => {
+    const baseQuestions = [
+      {
+        id: `q-${Date.now()}-1`,
+        section: "Organization & Management",
+        question: "Describe your firm's organizational structure and key personnel.",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${Date.now()}-2`,
+        section: "Investment Strategy",
+        question: "What is your investment philosophy and approach?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${Date.now()}-3`,
+        section: "Risk Management",
+        question: "How do you identify and manage investment risks?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      }
+    ]
+    
+    return baseQuestions
+  }
+
+  const handleCreateCustomTemplate = () => {
+    setShowCreateTemplateModal(true)
+  }
+
+  const handleSaveCustomTemplate = () => {
+    if (!newTemplate.name.trim() || newTemplate.questions.length === 0) {
+      showNotification("Please provide a template name and add at least one question")
+      return
+    }
+
+    const customTemplate = {
+      id: `custom-${Date.now()}`,
+      name: newTemplate.name,
+      description: newTemplate.description,
+      category: newTemplate.category,
+      questionCount: newTemplate.questions.length,
+      estimatedTime: `${Math.ceil(newTemplate.questions.length / 10)}-${Math.ceil(newTemplate.questions.length / 8)} hours`,
+      lastUpdated: new Date().toISOString(),
+      version: "1.0",
+      isVestiraStandard: false,
+      usage: "Custom Template",
+      compliance: "Custom",
+      questions: newTemplate.questions,
+      createdBy: "Current User",
+      createdAt: new Date().toISOString()
+    }
+
+    // Save to localStorage
+    const existingTemplates = JSON.parse(localStorage.getItem('custom-ddq-templates') || '[]')
+    existingTemplates.push(customTemplate)
+    localStorage.setItem('custom-ddq-templates', JSON.stringify(existingTemplates))
+
+    // Update custom templates state
+    customTemplates.push(customTemplate)
+
+    setShowCreateTemplateModal(false)
+    setNewTemplate({
+      name: "",
+      description: "",
+      category: "General",
+      questions: []
+    })
+    showNotification("Custom template created successfully")
+  }
+
+  const handleAddQuestionToTemplate = (question: any) => {
+    setNewTemplate({
+      ...newTemplate,
+      questions: [...newTemplate.questions, question]
+    })
+    showNotification("Question added to template")
+  }
+
+  const handleRemoveQuestionFromTemplate = (questionId: string) => {
+    setNewTemplate({
+      ...newTemplate,
+      questions: newTemplate.questions.filter(q => q.id !== questionId)
+    })
+    showNotification("Question removed from template")
+  }
+
+  const handleOpenQuestionSelector = () => {
+    setIsQuestionSelectorForDDQ(false) // Ensure it's for template creation, not DDQ
+    setShowQuestionSelector(true)
+  }
+
+  const handleSelectQuestion = (question: any) => {
+    const questionWithId = {
+      ...question,
+      id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    }
+    
+    if (isQuestionSelectorForDDQ) {
+      // Add to current DDQ questions
+      setCurrentDDQQuestions(prev => {
+        const updatedQuestions = [...prev, questionWithId]
+        // Store in localStorage and sessionStorage
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        return updatedQuestions
+      })
+    } else {
+      // Add to template questions
+      handleAddQuestionToTemplate(questionWithId)
+    }
+    
+    // Track selected questions in selector using a unique identifier
+    const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
+    setSelectedQuestionsInSelector(prev => [...prev, questionKey])
+  }
+
+  // Get all available questions from both Vestira and custom templates
+  const getAllAvailableQuestions = () => {
+    const vestiraQuestions = vestiraTemplates.flatMap(template => 
+      generateTemplateQuestions(template).map(q => ({
+        ...q,
+        source: 'Vestira Template',
+        templateName: template.name
+      }))
+    )
+    
+    const customQuestions = customTemplates.flatMap(template => 
+      template.questions.map(q => ({
+        ...q,
+        source: 'Custom Template',
+        templateName: template.name
+      }))
+    )
+
+    return [...vestiraQuestions, ...customQuestions]
   }
 
   console.log("Consultant Due Diligence Hub rendered with", activeDDQs.length, "active DDQs")
@@ -961,10 +1176,24 @@ export default function ConsultantDueDiligenceHubPage() {
             <h1 className="text-2xl font-bold text-gray-900">Due Diligence Hub</h1>
             <p className="text-gray-600">Manage due diligence processes for your clients</p>
           </div>
-          <Button onClick={() => setShowCreateDDQModal(true)} className="bg-[#00B2FF] hover:bg-[#0099E6]">
-            <Plus className="h-4 w-4 mr-2" />
-            Create DDQ
-          </Button>
+          <CustomDropdown
+            trigger={
+              <Button className="bg-[#00B2FF] hover:bg-[#0099E6]">
+                <Plus className="h-4 w-4 mr-2" />
+                Launch Due Diligence
+              </Button>
+            }
+            items={[
+              {
+                label: "Create DDQ",
+                onClick: () => setShowCreateDDQModal(true),
+              },
+              {
+                label: "Create Custom Template",
+                onClick: handleCreateCustomTemplate,
+              },
+            ]}
+          />
         </div>
 
         {/* Tabs */}

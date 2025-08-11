@@ -36,7 +36,7 @@ export function NotificationContainer() {
     ;(window as any).addNotification = addNotification
   }, [addNotification])
 
-  if (!mounted) return null
+  if (!mounted || typeof document === 'undefined') return null
 
   return createPortal(
     <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full">

@@ -20,6 +20,13 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
     if (error.message?.includes("NEXT_REDIRECT") || error.message?.includes("Redirect")) {
       throw error // Re-throw redirect errors
     }
+    
+    // Don't catch localStorage errors as they're not critical
+    if (error.message?.includes("localStorage") || error.message?.includes("localStorage")) {
+      console.warn("localStorage error caught:", error)
+      return { hasError: false } // Don't show error for localStorage issues
+    }
+    
     return { hasError: true, error }
   }
 
@@ -28,6 +35,13 @@ export class ErrorBoundary extends React.Component<{ children: React.ReactNode }
     if (error.message?.includes("NEXT_REDIRECT") || error.message?.includes("Redirect")) {
       throw error // Re-throw redirect errors
     }
+    
+    // Don't log localStorage errors as they're not critical
+    if (error.message?.includes("localStorage") || error.message?.includes("localStorage")) {
+      console.warn("localStorage error caught:", error)
+      return // Don't log localStorage errors
+    }
+    
     console.error("Error caught by boundary:", error, errorInfo)
   }
 

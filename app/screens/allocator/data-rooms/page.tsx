@@ -11,6 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components
 import { Search, Filter, Calendar, FileText, Download, Eye, Clock, Star, MoreHorizontal, X } from "lucide-react"
 import { Progress } from "../../../../components/ui/progress"
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic'
+
 const dataRooms = [
   {
     id: 1,
@@ -442,8 +445,8 @@ export default function AllocatorDataRoomsPage() {
                       <p>{selectedRoom.lastUpdated}</p>
                     </div>
                     <div>
-                      <p className="font-medium">Due Date</p>
-                      <p>{selectedRoom.deadline}</p>
+                      <p className="font-medium">Next Close</p>
+                      <p>{selectedRoom.deadline === "Completed" ? "On-Going" : selectedRoom.deadline}</p>
                     </div>
                   </div>
 
@@ -707,7 +710,9 @@ export default function AllocatorDataRoomsPage() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-baseGray" />
-                              <span className="text-baseGray">Due: {room.deadline}</span>
+                              <span className="text-baseGray">
+                                {room.deadline === "Completed" ? "On-Going" : `Next Close: ${room.deadline}`}
+                              </span>
                             </div>
                           </div>
 

@@ -7,9 +7,19 @@ export default function ScreensPage() {
   const router = useRouter()
 
   useEffect(() => {
-    // Default redirect to allocator for now, but this shouldn't be hit
-    // if users are clicking the specific role buttons
-    router.push("/screens/allocator/home")
+    // Check if user has a stored role and redirect accordingly
+    if (typeof window !== 'undefined') {
+      const userRole = localStorage.getItem("currentUserRole") || localStorage.getItem("userRole")
+      if (userRole) {
+        router.push(`/screens/${userRole}/home`)
+      } else {
+        // Fallback to login if no role is stored
+        router.push("/login")
+      }
+    } else {
+      // Fallback to login if localStorage is not available
+      router.push("/login")
+    }
   }, [router])
 
   return (

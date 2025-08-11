@@ -183,7 +183,28 @@ export function InteractionProvider({ children }: { children: React.ReactNode })
 export function useInteraction() {
   const context = useContext(InteractionContext)
   if (!context) {
-    throw new Error("useInteraction must be used within InteractionProvider")
+    // Return a fallback context instead of throwing
+    console.warn("useInteraction called outside of InteractionProvider, returning fallback")
+    return {
+      globalLoading: false,
+      loadingStates: {},
+      focusedElement: null,
+      hoveredElements: new Set(),
+      reduceMotion: false,
+      activeElements: new Set(),
+      setGlobalLoading: () => console.warn("setGlobalLoading called outside of InteractionProvider"),
+      setElementLoading: () => console.warn("setElementLoading called outside of InteractionProvider"),
+      isElementLoading: () => false,
+      setFocusedElement: () => console.warn("setFocusedElement called outside of InteractionProvider"),
+      isFocused: () => false,
+      setElementHovered: () => console.warn("setElementHovered called outside of InteractionProvider"),
+      isElementHovered: () => false,
+      setElementActive: () => console.warn("setElementActive called outside of InteractionProvider"),
+      isElementActive: () => false,
+      setReduceMotion: () => console.warn("setReduceMotion called outside of InteractionProvider"),
+      resetAllStates: () => console.warn("resetAllStates called outside of InteractionProvider"),
+      getTransitionClass: () => "transition-all duration-200",
+    }
   }
   return context
 }
