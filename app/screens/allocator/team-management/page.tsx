@@ -23,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { Toaster } from "@/components/ui/toaster"
+import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 
 // Sample team members data for allocator
 const teamMembersData = [
@@ -121,6 +122,10 @@ export default function AllocatorTeamManagementPage() {
   // Mock current user - in real app this would come from auth context
   const currentUser = { role: "Admin" }
 
+  // Message modal state
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<(typeof teamMembersData)[0] | null>(null)
+
   const { toast } = useToast()
 
   // Filter team members based on search query, filters, and active tab
@@ -209,12 +214,8 @@ export default function AllocatorTeamManagementPage() {
   }
 
   const handleSendEmail = (member: (typeof teamMembersData)[0]) => {
-    // In a real app, this would open an email client or send an email
-    // For now, we'll simulate sending an email
-    toast({
-      title: "Email sent",
-      description: `Email sent to ${member.name} (${member.email})`,
-    })
+    setSelectedMember(member)
+    setIsMessageModalOpen(true)
   }
 
   return (
@@ -594,6 +595,21 @@ export default function AllocatorTeamManagementPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Send Message Modal */}
+      {selectedMember && (
+        <SendMessageModal
+          isOpen={isMessageModalOpen}
+          onClose={() => {
+            setIsMessageModalOpen(false)
+            setSelectedMember(null)
+          }}
+          recipientName={selectedMember.name}
+          recipientTitle={selectedMember.role}
+          organizationName="Vestira Platform"
+        />
+      )}
+      
       <Toaster />
     </div>
   )

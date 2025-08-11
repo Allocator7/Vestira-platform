@@ -361,14 +361,12 @@ export default function InformalDueDiligencePage() {
 
   if (!currentSession) {
     return (
-      <Screen>
-        <div className="container mx-auto py-6 px-4">
-          <div className="text-center">
-            <div className="animate-spin h-8 w-8 border-2 border-electric-blue border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p>Loading session...</p>
-          </div>
+      <div className="container mx-auto px-4 py-6 md:px-6 lg:px-8 max-w-7xl">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-2 border-electric-blue border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Loading session...</p>
         </div>
-      </Screen>
+      </div>
     )
   }
 
