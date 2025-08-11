@@ -1161,9 +1161,10 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Helper function to generate template questions
   const generateTemplateQuestions = (template: any) => {
+    const timestamp = Date.now()
     const baseQuestions = [
       {
-        id: `q-${Date.now()}-1`,
+        id: `q-${timestamp}-1`,
         section: "Organization & Management",
         question: "Describe your firm's organizational structure and key personnel.",
         type: "long_text",
@@ -1171,7 +1172,7 @@ export default function AllocatorDueDiligenceHubPage() {
         template: template.name
       },
       {
-        id: `q-${Date.now()}-2`,
+        id: `q-${timestamp}-2`,
         section: "Investment Strategy",
         question: "What is your investment philosophy and approach?",
         type: "long_text",
@@ -1179,29 +1180,93 @@ export default function AllocatorDueDiligenceHubPage() {
         template: template.name
       },
       {
-        id: `q-${Date.now()}-3`,
+        id: `q-${timestamp}-3`,
         section: "Risk Management",
         question: "How do you identify and manage investment risks?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${timestamp}-4`,
+        section: "Performance & Track Record",
+        question: "Please provide your firm's historical performance data and track record.",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${timestamp}-5`,
+        section: "Compliance & Governance",
+        question: "Describe your compliance framework and governance structure.",
         type: "long_text",
         required: true,
         template: template.name
       }
     ]
     
-    // Add more questions based on template category
+    // Add category-specific questions
     if (template.category === "Infrastructure") {
-      baseQuestions.push({
-        id: `q-${Date.now()}-4`,
-        section: "Infrastructure Focus",
-        question: "What types of infrastructure assets do you typically invest in?",
-        type: "long_text",
-        required: true,
-        template: template.name
-      })
+      baseQuestions.push(
+        {
+          id: `q-${timestamp}-6`,
+          section: "Infrastructure Focus",
+          question: "What types of infrastructure assets do you typically invest in?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        },
+        {
+          id: `q-${timestamp}-7`,
+          section: "Regulatory Environment",
+          question: "How do you navigate regulatory challenges in infrastructure investments?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        }
+      )
+    } else if (template.category === "Private Equity") {
+      baseQuestions.push(
+        {
+          id: `q-${timestamp}-6`,
+          section: "Deal Sourcing",
+          question: "Describe your deal sourcing strategy and network.",
+          type: "long_text",
+          required: true,
+          template: template.name
+        },
+        {
+          id: `q-${timestamp}-7`,
+          section: "Value Creation",
+          question: "What is your approach to value creation in portfolio companies?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        }
+      )
+    } else if (template.category === "Real Estate") {
+      baseQuestions.push(
+        {
+          id: `q-${timestamp}-6`,
+          section: "Property Types",
+          question: "What types of real estate assets do you focus on?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        },
+        {
+          id: `q-${timestamp}-7`,
+          section: "Geographic Focus",
+          question: "What are your target geographic markets?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        }
+      )
     }
     
-      return baseQuestions
-}
+    return baseQuestions
+  }
 
   const handleStartInformalDueDiligence = () => {
     try {
@@ -1227,14 +1292,8 @@ export default function AllocatorDueDiligenceHubPage() {
       
       showNotification("Informal Due Diligence session started")
       
-      // Navigate to the informal due diligence page with error handling
-      try {
-        router.push('/allocator/informal-due-diligence')
-      } catch (navigationError) {
-        console.error("Navigation error:", navigationError)
-        // Fallback: try window.location
-        window.location.href = '/allocator/informal-due-diligence'
-      }
+      // Use window.location for more reliable navigation
+      window.location.href = '/allocator/informal-due-diligence'
       
     } catch (error) {
       console.error("Error starting informal due diligence:", error)
@@ -2080,21 +2139,32 @@ const handleUseTemplate = () => {
                               size="sm" 
                               className="w-full"
                               onClick={() => {
+                                if (!createDDQForm.selectedTemplate) {
+                                  showNotification('Please select a template first.')
+                                  return
+                                }
+                                
                                 const selectedTemplate = [...vestiraTemplates, ...customTemplates].find(t => t.id === createDDQForm.selectedTemplate)
-                                console.log('Selected template ID:', createDDQForm.selectedTemplate)
-                                console.log('Available templates:', [...vestiraTemplates, ...customTemplates].map(t => ({ id: t.id, name: t.name })))
-                                console.log('Found template:', selectedTemplate)
                                 
                                 if (selectedTemplate) {
+                                  // Generate comprehensive questions based on template
                                   const questions = generateTemplateQuestions(selectedTemplate)
-                                  console.log('Generated questions:', questions)
-                                  // Update state and store questions for the current DDQ session
+                                  
+                                  // Update state immediately
                                   setCurrentDDQQuestions(questions)
+                                  
+                                  // Store in localStorage and sessionStorage
                                   localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
                                   sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
-                                  showNotification(`Pulled ${questions.length} questions from ${selectedTemplate.name}`)
+                                  
+                                  // Force a re-render by updating a timestamp
+                                  setCreateDDQForm(prev => ({
+                                    ...prev,
+                                    lastUpdated: Date.now()
+                                  }))
+                                  
+                                  showNotification(`Successfully pulled ${questions.length} questions from ${selectedTemplate.name}`)
                                 } else {
-                                  console.error('Template not found for ID:', createDDQForm.selectedTemplate)
                                   showNotification('Template not found. Please select a template first.')
                                 }
                               }}

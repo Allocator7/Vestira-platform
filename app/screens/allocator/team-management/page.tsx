@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
 
 // Sample team members data for allocator
 const teamMembersData = [
@@ -208,25 +209,12 @@ export default function AllocatorTeamManagementPage() {
   }
 
   const handleSendEmail = (member: (typeof teamMembersData)[0]) => {
-    console.log('Send email function called for member:', member.name)
-    try {
-      // In a real app, this would open an email client or send an email
-      // For now, we'll simulate sending an email
-      console.log(`Sending email to ${member.name} at ${member.email}`)
-      
-      toast({
-        title: "Email sent",
-        description: `Email sent to ${member.name} (${member.email})`,
-      })
-      console.log('Toast notification sent')
-    } catch (error) {
-      console.error("Error sending email:", error)
-      toast({
-        title: "Error",
-        description: "Failed to send email. Please try again.",
-        variant: "destructive",
-      })
-    }
+    // In a real app, this would open an email client or send an email
+    // For now, we'll simulate sending an email
+    toast({
+      title: "Email sent",
+      description: `Email sent to ${member.name} (${member.email})`,
+    })
   }
 
   return (
@@ -606,6 +594,7 @@ export default function AllocatorTeamManagementPage() {
           </CardContent>
         </Card>
       </div>
+      <Toaster />
     </div>
   )
 }
