@@ -441,10 +441,7 @@ export default function AllocatorDataRoomsPage() {
                       <p className="font-medium">Status</p>
                       <Badge className={getStatusColor(selectedRoom.status)}>{selectedRoom.status}</Badge>
                     </div>
-                    <div>
-                      <p className="font-medium">Access Level</p>
-                                                    {/* Removed access level badge - allocators don't need to know about access levels */}
-                    </div>
+                    {/* Access Level section removed - allocators don't need to know about access levels */}
                     <div>
                       <p className="font-medium">Documents</p>
                       <p>{selectedRoom.documentsCount} documents</p>
