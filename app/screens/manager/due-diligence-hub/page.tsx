@@ -26,6 +26,8 @@ import {
   List,
   Save,
   Send,
+  Upload,
+  Paperclip,
 } from "lucide-react"
 import { useApp } from "../../../../context/AppContext"
 import { useRouter, useSearchParams } from "next/navigation"
