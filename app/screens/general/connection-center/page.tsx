@@ -40,31 +40,45 @@ export default function ConnectionCenterPage() {
   const connections = [
     {
       id: 1,
-      name: "Foundation Investments",
-      contactPerson: "Sarah Johnson", // Added personal contact
-      contactPersonId: "sarah-johnson", // Added for routing
+      name: "Sovereign Wealth Fund",
+      contactPerson: "Sarah Chen", // Added personal contact
+      contactPersonId: "sarah-chen", // Added for routing
       type: "allocator",
       logo: "/FI_logo.png",
-      category: "Foundation",
-      location: "New York, NY",
-      aum: "$15B+",
-      focus: ["Private Equity", "Hedge Funds", "Real Estate"],
+      category: "Sovereign Wealth Fund",
+      location: "Singapore",
+      aum: "$320B+",
+      focus: ["Alternative Assets", "Global Markets", "Long-term"],
       status: "connected",
       lastInteraction: "May 10, 2025",
     },
     {
       id: 2,
-      name: "State Pension Fund",
-      contactPerson: "Michael Chen", // Added personal contact
-      contactPersonId: "michael-chen", // Added for routing
+      name: "Global Pension Alliance",
+      contactPerson: "Jennifer Park", // Added personal contact
+      contactPersonId: "jennifer-park", // Added for routing
       type: "allocator",
       logo: "/trp-symbol.png",
-      category: "Pension",
-      location: "Boston, MA",
-      aum: "$75B+",
-      focus: ["Fixed Income", "Public Equities", "Alternatives"],
+      category: "Pension Fund",
+      location: "Toronto, CA",
+      aum: "$180B+",
+      focus: ["Private Markets & Real Assets"],
       status: "connected",
       lastInteraction: "May 5, 2025",
+    },
+    {
+      id: 3,
+      name: "University Endowment Foundation",
+      contactPerson: "Alex Kim", // Added personal contact
+      contactPersonId: "alex-kim", // Added for routing
+      type: "allocator",
+      logo: "/trp-symbol.png",
+      category: "Endowment",
+      location: "Boston, MA",
+      aum: "$45B+",
+      focus: ["Alternative Investments"],
+      status: "connected",
+      lastInteraction: "May 3, 2025",
     },
     {
       id: 6,
