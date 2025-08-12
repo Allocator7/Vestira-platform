@@ -36,6 +36,100 @@ import { Separator } from "@/components/ui/separator"
 import { Send } from "lucide-react"
 
 export default function ConnectionCenterPage() {
+  // Sample connections data - UPDATED with personal contact information
+  const connections = [
+    {
+      id: 1,
+      name: "Foundation Investments",
+      contactPerson: "Sarah Johnson", // Added personal contact
+      contactPersonId: "sarah-johnson", // Added for routing
+      type: "allocator",
+      logo: "/FI_logo.png",
+      category: "Foundation",
+      location: "New York, NY",
+      aum: "$15B+",
+      focus: ["Private Equity", "Hedge Funds", "Real Estate"],
+      status: "connected",
+      lastInteraction: "May 10, 2025",
+    },
+    {
+      id: 2,
+      name: "State Pension Fund",
+      contactPerson: "Michael Chen", // Added personal contact
+      contactPersonId: "michael-chen", // Added for routing
+      type: "allocator",
+      logo: "/trp-symbol.png",
+      category: "Pension",
+      location: "Boston, MA",
+      aum: "$75B+",
+      focus: ["Fixed Income", "Public Equities", "Alternatives"],
+      status: "connected",
+      lastInteraction: "May 5, 2025",
+    },
+    {
+      id: 6,
+      name: "Quantum Capital Partners",
+      contactPerson: "James Wilson", // Added personal contact
+      contactPersonId: "james-wilson", // Added for routing
+      type: "manager",
+      logo: "/stylized-wm.png",
+      category: "Hedge Fund",
+      location: "New York, NY",
+      aum: "$2.5B+",
+      focus: ["Global Macro", "Fixed Income", "Currencies"],
+      status: "connected",
+      lastInteraction: "May 8, 2025",
+    },
+    {
+      id: 9,
+      name: "Cambridge Associates",
+      contactPerson: "David Kim", // Added personal contact
+      contactPersonId: "david-kim", // Added for routing
+      type: "consultant",
+      logo: "/abstract-profile.png",
+      category: "Investment Consultant",
+      location: "Boston, MA",
+      clientCount: "450+",
+      yearsInBusiness: 50,
+      services: ["Manager Selection", "Asset Allocation", "Portfolio Construction"],
+      specializations: ["Endowments", "Foundations", "Pensions"],
+      status: "connected",
+      lastInteraction: "May 7, 2025",
+    },
+    {
+      id: 14,
+      name: "Healthcare Investment Group",
+      contactPerson: "Lisa Rodriguez", // Added personal contact
+      contactPersonId: "lisa-rodriguez", // Added for routing
+      type: "manager",
+      logo: "/medical-resonance-image.png",
+      category: "Sector Specialist",
+      location: "Boston, MA",
+      aum: "$3.2B+",
+      focus: ["Healthcare", "Biotechnology", "Medical Devices"],
+      status: "pending",
+      direction: "incoming",
+      lastInteraction: "May 12, 2025",
+    },
+    {
+      id: 15,
+      name: "Strategic Advisory Partners",
+      contactPerson: "Emily Zhang", // Added personal contact
+      contactPersonId: "emily-zhang", // Added for routing
+      type: "consultant",
+      logo: "/abstract-profile.png",
+      category: "Boutique Consultant",
+      location: "Chicago, IL",
+      clientCount: "150+",
+      yearsInBusiness: 25,
+      services: ["Due Diligence", "Manager Selection", "Risk Assessment"],
+      specializations: ["Alternative Investments", "Private Markets", "ESG"],
+      status: "pending",
+      direction: "incoming",
+      lastInteraction: "May 11, 2025",
+    },
+  ]
+
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [sortBy, setSortBy] = useState("date")
@@ -150,100 +244,6 @@ export default function ConnectionCenterPage() {
       setMeetingSuccess(false)
     }, 1500)
   }
-
-  // Sample connections data - UPDATED with personal contact information
-  const connections = [
-    {
-      id: 1,
-      name: "Foundation Investments",
-      contactPerson: "Sarah Johnson", // Added personal contact
-      contactPersonId: "sarah-johnson", // Added for routing
-      type: "allocator",
-      logo: "/FI_logo.png",
-      category: "Foundation",
-      location: "New York, NY",
-      aum: "$15B+",
-      focus: ["Private Equity", "Hedge Funds", "Real Estate"],
-      status: "connected",
-      lastInteraction: "May 10, 2025",
-    },
-    {
-      id: 2,
-      name: "State Pension Fund",
-      contactPerson: "Michael Chen", // Added personal contact
-      contactPersonId: "michael-chen", // Added for routing
-      type: "allocator",
-      logo: "/trp-symbol.png",
-      category: "Pension",
-      location: "Boston, MA",
-      aum: "$75B+",
-      focus: ["Fixed Income", "Public Equities", "Alternatives"],
-      status: "connected",
-      lastInteraction: "May 5, 2025",
-    },
-    {
-      id: 6,
-      name: "Quantum Capital Partners",
-      contactPerson: "James Wilson", // Added personal contact
-      contactPersonId: "james-wilson", // Added for routing
-      type: "manager",
-      logo: "/stylized-wm.png",
-      category: "Hedge Fund",
-      location: "New York, NY",
-      aum: "$2.5B+",
-      focus: ["Global Macro", "Fixed Income", "Currencies"],
-      status: "connected",
-      lastInteraction: "May 8, 2025",
-    },
-    {
-      id: 9,
-      name: "Cambridge Associates",
-      contactPerson: "David Kim", // Added personal contact
-      contactPersonId: "david-kim", // Added for routing
-      type: "consultant",
-      logo: "/abstract-profile.png",
-      category: "Investment Consultant",
-      location: "Boston, MA",
-      clientCount: "450+",
-      yearsInBusiness: 50,
-      services: ["Manager Selection", "Asset Allocation", "Portfolio Construction"],
-      specializations: ["Endowments", "Foundations", "Pensions"],
-      status: "connected",
-      lastInteraction: "May 7, 2025",
-    },
-    {
-      id: 14,
-      name: "Healthcare Investment Group",
-      contactPerson: "Lisa Rodriguez", // Added personal contact
-      contactPersonId: "lisa-rodriguez", // Added for routing
-      type: "manager",
-      logo: "/medical-resonance-image.png",
-      category: "Sector Specialist",
-      location: "Boston, MA",
-      aum: "$3.2B+",
-      focus: ["Healthcare", "Biotechnology", "Medical Devices"],
-      status: "pending",
-      direction: "incoming",
-      lastInteraction: "May 12, 2025",
-    },
-    {
-      id: 15,
-      name: "Strategic Advisory Partners",
-      contactPerson: "Emily Zhang", // Added personal contact
-      contactPersonId: "emily-zhang", // Added for routing
-      type: "consultant",
-      logo: "/abstract-profile.png",
-      category: "Boutique Consultant",
-      location: "Chicago, IL",
-      clientCount: "150+",
-      yearsInBusiness: 25,
-      services: ["Due Diligence", "Manager Selection", "Risk Assessment"],
-      specializations: ["Alternative Investments", "Private Markets", "ESG"],
-      status: "pending",
-      direction: "incoming",
-      lastInteraction: "May 11, 2025",
-    },
-  ]
 
   // Mock search results for Vestira users
   const mockSearchResults = [
