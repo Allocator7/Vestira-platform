@@ -54,6 +54,7 @@ export default function AllocatorProfilePage() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showMessageModal, setShowMessageModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<any>(null)
 
   // Share modal states
   const [shareEmail, setShareEmail] = useState("")
@@ -744,7 +745,10 @@ export default function AllocatorProfilePage() {
                     </Button>
                     <Button
                       className="bg-electric-blue hover:bg-electric-blue/90 text-white"
-                      onClick={() => setShowMessageModal(true)}
+                      onClick={() => {
+                        setSelectedContact(primaryContact)
+                        setShowMessageModal(true)
+                      }}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Message
@@ -752,7 +756,10 @@ export default function AllocatorProfilePage() {
                     <Button
                       variant="outline"
                       className="border-electric-blue text-electric-blue hover:bg-electric-blue hover:text-white bg-transparent"
-                      onClick={() => setShowScheduleModal(true)}
+                      onClick={() => {
+                        setSelectedContact(primaryContact)
+                        setShowScheduleModal(true)
+                      }}
                     >
                       <CalendarDays className="h-4 w-4 mr-2" />
                       Schedule
@@ -773,19 +780,19 @@ export default function AllocatorProfilePage() {
                   </div>
                 </div>
 
-                {/* Key Metrics */}
+                {/* Top Boxes */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="text-center p-4 bg-canvas-bg rounded-lg">
                     <p className="text-2xl font-bold text-deep-brand">{allocator.aum}</p>
-                    <p className="text-sm text-base-gray">Assets Under Management</p>
+                    <p className="text-sm text-base-gray">Total Assets</p>
+                  </div>
+                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
+                    <p className="text-2xl font-bold text-deep-brand">{allocator.keyMetrics.totalAllocations}</p>
+                    <p className="text-sm text-base-gray">Investment Portfolio</p>
                   </div>
                   <div className="text-center p-4 bg-canvas-bg rounded-lg">
                     <p className="text-2xl font-bold text-deep-brand">{allocator.keyMetrics.activeManagers}</p>
-                    <p className="text-sm text-base-gray">Active Managers</p>
-                  </div>
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{allocator.allocationTargets.alternatives}</p>
-                    <p className="text-sm text-base-gray">Alternative Allocation</p>
+                    <p className="text-sm text-base-gray">External Managers</p>
                   </div>
                 </div>
               </div>
@@ -840,6 +847,32 @@ export default function AllocatorProfilePage() {
                           <span>{contact.phone}</span>
                         </div>
                       </div>
+                      <div className="flex gap-1 mt-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            setSelectedContact(contact)
+                            setShowMessageModal(true)
+                          }}
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Message
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            setSelectedContact(contact)
+                            setShowScheduleModal(true)
+                          }}
+                        >
+                          <CalendarDays className="h-3 w-3 mr-1" />
+                          Schedule
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -852,7 +885,7 @@ export default function AllocatorProfilePage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="allocations">Allocations</TabsTrigger>
+            <TabsTrigger value="allocations">Current Investments</TabsTrigger>
             <TabsTrigger value="activity">Recent Activity</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
@@ -889,59 +922,40 @@ export default function AllocatorProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Key Metrics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Total AUM:</span>
-                      <span className="font-medium">{allocator.keyMetrics.totalAllocations}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Active Managers:</span>
-                      <span className="font-medium">{allocator.keyMetrics.activeManagers}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Portfolio Companies:</span>
-                      <span className="font-medium">{allocator.keyMetrics.portfolioCompanies}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Founded:</span>
-                      <span className="font-medium">{allocator.founded}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
 
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5" />
-                    Allocation Targets
+                    Allocation Target Categories
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Alternatives:</span>
-                      <span className="font-medium">{allocator.allocationTargets.alternatives}</span>
+                      <span className="text-base-gray">Public Fixed Income:</span>
+                      <span className="font-medium">{allocator.allocationTargets.fixedIncome}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Fixed Income:</span>
-                      <span className="font-medium">{allocator.allocationTargets.fixedIncome}</span>
+                      <span className="text-base-gray">Private Fixed Income:</span>
+                      <span className="font-medium">{allocator.allocationTargets.alternatives}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-base-gray">Public Equity:</span>
                       <span className="font-medium">{allocator.allocationTargets.publicEquity}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Real Estate:</span>
+                      <span className="text-base-gray">Real Estate Debt:</span>
                       <span className="font-medium">{allocator.allocationTargets.realEstate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-base-gray">Real Estate Equity:</span>
+                      <span className="font-medium">{allocator.allocationTargets.realEstate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-base-gray">Alternatives:</span>
+                      <span className="font-medium">{allocator.allocationTargets.alternatives}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -952,7 +966,7 @@ export default function AllocatorProfilePage() {
           <TabsContent value="allocations" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Current Allocations</CardTitle>
+                <CardTitle>Current Investments</CardTitle>
                 <CardDescription>Active manager relationships and commitments</CardDescription>
               </CardHeader>
               <CardContent>
@@ -1150,7 +1164,7 @@ export default function AllocatorProfilePage() {
                 Send Message
               </DialogTitle>
               <DialogDescription>
-                Send a message to {primaryContact.name} at {allocator.firmName}
+                Send a message to {selectedContact?.name || primaryContact.name} at {allocator.firmName}
               </DialogDescription>
             </DialogHeader>
 
@@ -1161,7 +1175,7 @@ export default function AllocatorProfilePage() {
                 </div>
                 <p className="text-lg font-medium text-center">Message sent successfully!</p>
                 <p className="text-sm text-center mt-1 text-base-gray">
-                  Your message has been sent to {primaryContact.name}.
+                  Your message has been sent to {selectedContact?.name || primaryContact.name}.
                 </p>
               </div>
             ) : (
@@ -1169,7 +1183,7 @@ export default function AllocatorProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="to">To</Label>
-                    <Input id="to" value={`${primaryContact.name} <${primaryContact.email}>`} disabled />
+                    <Input id="to" value={`${selectedContact?.name || primaryContact.name} <${selectedContact?.email || primaryContact.email}>`} disabled />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="priority">Priority</Label>
@@ -1232,7 +1246,7 @@ export default function AllocatorProfilePage() {
                 <Calendar className="h-5 w-5" />
                 Schedule Meeting
               </DialogTitle>
-              <DialogDescription>Schedule a meeting with {primaryContact.name}</DialogDescription>
+              <DialogDescription>Schedule a meeting with {selectedContact?.name || primaryContact.name}</DialogDescription>
             </DialogHeader>
 
             {scheduleSuccess ? (
@@ -1242,7 +1256,7 @@ export default function AllocatorProfilePage() {
                 </div>
                 <p className="text-lg font-medium text-center">Meeting scheduled!</p>
                 <p className="text-sm text-center mt-1 text-base-gray">
-                  Your meeting with {primaryContact.name} has been scheduled for {meetingDate} at {meetingTime}.
+                  Your meeting with {selectedContact?.name || primaryContact.name} has been scheduled for {meetingDate} at {meetingTime}.
                 </p>
               </div>
             ) : (
