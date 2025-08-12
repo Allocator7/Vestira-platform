@@ -26,6 +26,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
+  Settings,
 } from "lucide-react"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { useToast } from "@/hooks/use-toast"
@@ -595,6 +596,10 @@ export default function DataRoomProfilePage() {
                 <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                   <CardTitle>Documents ({filteredDocuments.length})</CardTitle>
                   <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Settings className="h-4 w-4 mr-1" />
+                      Manage Files
+                    </Button>
                     <Button variant="outline" size="sm" onClick={handleDownloadAll} disabled={isDownloading}>
                       <Download className="h-4 w-4 mr-1" />
                       {isDownloading ? "Downloading..." : "Download All"}
@@ -717,10 +722,80 @@ export default function DataRoomProfilePage() {
 
 
           <TabsContent value="participants">
-            <Card>
-              <CardHeader>
-                <CardTitle>Firm Contacts (3)</CardTitle>
-              </CardHeader>
+            <div className="space-y-6">
+              {/* Connected Allocators */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Connected Allocators (5)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <img src="/placeholder.svg?height=40&width=40" alt="State Teachers Pension" />
+                          <AvatarFallback>ST</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">State Teachers Pension</p>
+                          <p className="text-sm text-baseGray">Pension Fund • $45B AUM</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-800">Active</Badge>
+                        <Button size="sm" variant="outline">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <img src="/placeholder.svg?height=40&width=40" alt="University Endowment" />
+                          <AvatarFallback>UE</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">University Endowment Foundation</p>
+                          <p className="text-sm text-baseGray">Endowment • $12B AUM</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-blue-100 text-blue-800">Reviewing</Badge>
+                        <Button size="sm" variant="outline">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <img src="/placeholder.svg?height=40&width=40" alt="Healthcare Foundation" />
+                          <AvatarFallback>HF</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">Healthcare Foundation</p>
+                          <p className="text-sm text-baseGray">Foundation • $3.5B AUM</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
+                        <Button size="sm" variant="outline">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Firm Contacts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Firm Contacts (3)</CardTitle>
+                </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -816,6 +891,7 @@ export default function DataRoomProfilePage() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

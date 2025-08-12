@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { FileText, Plus, Eye, MessageSquare, Calendar } from "lucide-react"
+import { FileText, Plus, Eye, MessageSquare, Calendar, Upload, Paperclip } from "lucide-react"
 
 export default function AllocatorDueDiligenceHubPage() {
   const [activeTab, setActiveTab] = useState("active")
+  const [showAttachmentModal, setShowAttachmentModal] = useState(false)
+  const [selectedDDQ, setSelectedDDQ] = useState<any>(null)
 
   // Mock data for DDQs
   const activeDDQs = [
@@ -109,6 +111,17 @@ export default function AllocatorDueDiligenceHubPage() {
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedDDQ(ddq)
+                            setShowAttachmentModal(true)
+                          }}
+                        >
+                          <Paperclip className="h-4 w-4 mr-1" />
+                          Attach Docs
+                        </Button>
                         <Button size="sm" variant="outline">
                           <MessageSquare className="h-4 w-4 mr-1" />
                           Message
@@ -181,6 +194,48 @@ export default function AllocatorDueDiligenceHubPage() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Document Attachment Modal */}
+        {showAttachmentModal && selectedDDQ && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Attach Documents to {selectedDDQ.name}</h3>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAttachmentModal(false)}
+                >
+                  ×
+                </Button>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600 mb-2">Drop files here or click to upload</p>
+                  <Button variant="outline" size="sm">
+                    Choose Files
+                  </Button>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="font-medium">Attached Documents</h4>
+                  <div className="text-sm text-gray-500 italic">No documents attached yet</div>
+                </div>
+              </div>
+              
+              <div className="flex gap-2 mt-6">
+                <Button variant="outline" onClick={() => setShowAttachmentModal(false)}>
+                  Cancel
+                </Button>
+                <Button className="bg-electric-blue hover:bg-electric-blue/90 text-white">
+                  Save Attachments
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Screen>
   )
