@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Screen } from "@/components/Screen"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -44,6 +44,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function ManagerProfilePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const managerId = searchParams.get("id")
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
@@ -544,13 +545,23 @@ export default function ManagerProfilePage() {
 
   useEffect(() => {
     if (managerId) {
-      const profile = managerProfiles[Number(managerId) as keyof typeof managerProfiles]
-      if (profile) {
-        setManager(profile)
-        setShareMessage(`I wanted to share ${profile.name}'s profile with you.`)
+      try {
+        const profile = managerProfiles[Number(managerId) as keyof typeof managerProfiles]
+        if (profile) {
+          setManager(profile)
+          setShareMessage(`I wanted to share ${profile.name}'s profile with you.`)
+        } else {
+          console.error('Profile not found for ID:', managerId)
+          // Redirect to connection center if profile not found
+          router.push('/screens/general/connection-center')
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error)
+        // Redirect to connection center if error occurs
+        router.push('/screens/general/connection-center')
       }
     }
-  }, [managerId])
+  }, [managerId, router])
 
   // Share functionality
   const handleCopyLink = async () => {

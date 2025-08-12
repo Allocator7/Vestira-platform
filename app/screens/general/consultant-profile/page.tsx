@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Screen } from "@/components/Screen"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,7 @@ import { EditConnectionModal } from "@/components/profile-modals/EditConnectionM
 
 export default function ConsultantProfilePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const consultantId = searchParams.get("id")
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -240,12 +241,22 @@ export default function ConsultantProfilePage() {
 
   useEffect(() => {
     if (consultantId) {
-      const profile = consultantProfiles[Number(consultantId) as keyof typeof consultantProfiles]
-      if (profile) {
-        setConsultant(profile)
+      try {
+        const profile = consultantProfiles[Number(consultantId) as keyof typeof consultantProfiles]
+        if (profile) {
+          setConsultant(profile)
+        } else {
+          console.error('Profile not found for ID:', consultantId)
+          // Redirect to connection center if profile not found
+          router.push('/screens/general/connection-center')
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error)
+        // Redirect to connection center if error occurs
+        router.push('/screens/general/connection-center')
       }
     }
-  }, [consultantId])
+  }, [consultantId, router])
 
   if (!consultant) {
     return (

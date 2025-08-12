@@ -229,12 +229,20 @@ export default function ConnectionCenterPage() {
 
   // Route to appropriate profile based on connection type
   const handleViewProfile = (connection: any) => {
-    if (connection.type === 'allocator') {
-      router.push(`/screens/general/allocator-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
-    } else if (connection.type === 'manager') {
-      router.push(`/screens/general/manager-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
-    } else if (connection.type === 'consultant') {
-      router.push(`/screens/general/consultant-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
+    try {
+      if (connection.type === 'allocator') {
+        router.push(`/screens/general/allocator-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
+      } else if (connection.type === 'manager') {
+        router.push(`/screens/general/manager-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
+      } else if (connection.type === 'consultant') {
+        router.push(`/screens/general/consultant-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
+      } else {
+        console.error('Unknown connection type:', connection.type)
+      }
+    } catch (error) {
+      console.error('Error navigating to profile:', error)
+      // Fallback to a safe route
+      router.push('/screens/general/connection-center')
     }
   }
 
