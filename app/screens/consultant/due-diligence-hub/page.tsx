@@ -50,7 +50,6 @@ export default function ConsultantDueDiligenceHubPage() {
     },
   ]
 
-
   return (
     <Screen>
       <div className="container py-8 max-w-7xl">
