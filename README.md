@@ -162,3 +162,4 @@ The application uses the following environment variables:
 ## License
 
 This project is private and proprietary.
+# Due Diligence Hubs aligned
