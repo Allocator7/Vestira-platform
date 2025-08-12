@@ -378,7 +378,6 @@ export default function AllocatorProfilePage() {
           type: "Policy",
         },
       ],
-    },
       investments: [
         {
           manager: "Growth Capital Partners",
