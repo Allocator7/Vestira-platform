@@ -561,49 +561,7 @@ export default function DataRoomProfilePage() {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Progress Breakdown */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Progress Breakdown
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Document Review</span>
-                          <span className="font-medium">85%</span>
-                        </div>
-                        <Progress value={85} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Due Diligence</span>
-                          <span className="font-medium">72%</span>
-                        </div>
-                        <Progress value={72} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Legal Review</span>
-                          <span className="font-medium">60%</span>
-                        </div>
-                        <Progress value={60} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Final Approval</span>
-                          <span className="font-medium">45%</span>
-                        </div>
-                        <Progress value={45} className="h-2" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
+              <div className="grid grid-cols-1 gap-6">
                 {/* Recent Activity Summary */}
                 <Card>
                   <CardHeader>

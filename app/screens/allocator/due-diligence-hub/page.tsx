@@ -2637,6 +2637,91 @@ const handleUseTemplate = () => {
 
                               <h5 className="font-medium text-gray-900 mb-3">{question.question}</h5>
 
+                              {/* Document Attachment Section */}
+                              <div className="mb-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <FileText className="h-4 w-4 text-gray-500" />
+                                  <span className="text-sm font-medium text-gray-700">Attached Documents</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {question.attachments && question.attachments.length > 0 ? (
+                                    question.attachments.map((attachment: any, idx: number) => (
+                                      <div key={idx} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                        <div className="flex items-center gap-2">
+                                          <FileText className="h-4 w-4 text-blue-600" />
+                                          <span className="text-sm text-gray-700">{attachment.name}</span>
+                                          <Badge variant="outline" className="text-xs">{attachment.size}</Badge>
+                                        </div>
+                                        <div className="flex gap-1">
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-6 px-2 text-xs"
+                                            onClick={() => window.open(attachment.url, '_blank')}
+                                          >
+                                            View
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="h-6 px-2 text-xs"
+                                            onClick={() => {
+                                              const link = document.createElement('a')
+                                              link.href = attachment.url
+                                              link.download = attachment.name
+                                              link.click()
+                                            }}
+                                          >
+                                            Download
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div className="text-sm text-gray-500 italic">No documents attached</div>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="mt-2"
+                                    onClick={() => {
+                                      const input = document.createElement('input')
+                                      input.type = 'file'
+                                      input.multiple = true
+                                      input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx'
+                                      input.onchange = (e) => {
+                                        const files = Array.from(e.target.files || [])
+                                        const newAttachments = files.map(file => ({
+                                          name: file.name,
+                                          size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+                                          url: URL.createObjectURL(file)
+                                        }))
+                                        
+                                        // Update the question with new attachments
+                                        if (selectedDDQForReview) {
+                                          const updatedSections = selectedDDQForReview.sections.map((section) => ({
+                                            ...section,
+                                            questions: section.questions.map((q) =>
+                                              q.id === question.id 
+                                                ? { 
+                                                    ...q, 
+                                                    attachments: [...(q.attachments || []), ...newAttachments] 
+                                                  } 
+                                                : q
+                                            ),
+                                          }))
+                                          setSelectedDDQForReview({ ...selectedDDQForReview, sections: updatedSections })
+                                        }
+                                      }}
+                                      input.click()
+                                    }}
+                                  >
+                                    <Upload className="h-4 w-4 mr-1" />
+                                    Attach Documents
+                                  </Button>
+                                </div>
+                              </div>
+
                               {question.answer && (
                                 <div className="mb-4">
                                   <div className="flex items-center gap-2 mb-2">
@@ -2700,6 +2785,87 @@ const handleUseTemplate = () => {
                         </div>
 
                         <h4 className="text-xl font-semibold text-gray-900 mb-6">{getCurrentQuestion().question}</h4>
+
+                        {/* Document Attachment Section */}
+                        <div className="mb-6">
+                          <div className="flex items-center gap-2 mb-3">
+                            <FileText className="h-5 w-5 text-gray-500" />
+                            <span className="text-lg font-medium text-gray-700">Attached Documents</span>
+                          </div>
+                          <div className="space-y-3">
+                            {getCurrentQuestion().attachments && getCurrentQuestion().attachments.length > 0 ? (
+                              getCurrentQuestion().attachments.map((attachment: any, idx: number) => (
+                                <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                  <div className="flex items-center gap-3">
+                                    <FileText className="h-5 w-5 text-blue-600" />
+                                    <span className="text-gray-700">{attachment.name}</span>
+                                    <Badge variant="outline">{attachment.size}</Badge>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => window.open(attachment.url, '_blank')}
+                                    >
+                                      View
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        const link = document.createElement('a')
+                                        link.href = attachment.url
+                                        link.download = attachment.name
+                                        link.click()
+                                      }}
+                                    >
+                                      Download
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-gray-500 italic">No documents attached</div>
+                            )}
+                            <Button
+                              variant="outline"
+                              onClick={() => {
+                                const input = document.createElement('input')
+                                input.type = 'file'
+                                input.multiple = true
+                                input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx'
+                                input.onchange = (e) => {
+                                  const files = Array.from(e.target.files || [])
+                                  const newAttachments = files.map(file => ({
+                                    name: file.name,
+                                    size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+                                    url: URL.createObjectURL(file)
+                                  }))
+                                  
+                                  // Update the current question with new attachments
+                                  if (selectedDDQForReview) {
+                                    const updatedSections = selectedDDQForReview.sections.map((section) => ({
+                                      ...section,
+                                      questions: section.questions.map((q) =>
+                                        q.id === getCurrentQuestion().id 
+                                          ? { 
+                                              ...q, 
+                                              attachments: [...(q.attachments || []), ...newAttachments] 
+                                            } 
+                                          : q
+                                      ),
+                                    }))
+                                    setSelectedDDQForReview({ ...selectedDDQForReview, sections: updatedSections })
+                                  }
+                                }}
+                                input.click()
+                              }}
+                            >
+                              <Upload className="h-4 w-4 mr-2" />
+                              Attach Documents
+                            </Button>
+                          </div>
+                        </div>
 
                         {getCurrentQuestion().answer && (
                           <div className="mb-6">
