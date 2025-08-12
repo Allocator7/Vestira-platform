@@ -3,14 +3,14 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { Screen } from "@/components/Screen"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Screen } from "../../../../components/Screen"
+import { Button } from "../../../../components/ui/button"
+import { Card, CardContent } from "../../../../components/ui/card"
+import { Badge } from "../../../../components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Input } from "../../../../components/ui/input"
+import { Label } from "../../../../components/ui/label"
+import { Textarea } from "../../../../components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -19,9 +19,9 @@ import {
   SelectValue,
   SelectGroup,
   SelectLabel,
-} from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+} from "../../../../components/ui/select"
+import { Checkbox } from "../../../../components/ui/checkbox"
+import { RadioGroup, RadioGroupItem } from "../../../../components/ui/radio-group"
 import {
   FileText,
   CheckCircle,
@@ -39,9 +39,9 @@ import {
   FileUp,
   LayoutTemplateIcon as Template,
 } from "lucide-react"
-import { useApp } from "@/context/AppContext"
+import { useApp } from "../../../../context/AppContext"
 import { useRouter, useSearchParams } from "next/navigation"
-import { BranchingQuestionManager } from "@/components/BranchingQuestionManager"
+import { BranchingQuestionManager } from "../../../../components/BranchingQuestionManager"
 
 // Custom Dropdown Component
 function CustomDropdown({
@@ -222,7 +222,7 @@ export default function ConsultantDueDiligenceHubPage() {
     setTimeout(() => setNotification(""), 3000)
   }
 
-  // Active DDQs - Allocator sending to managers
+  // Active DDQs - Consultant sending to managers
   const activeDDQs = [
     {
       id: "ddq-1",
@@ -749,7 +749,7 @@ export default function ConsultantDueDiligenceHubPage() {
       lastUpdated: "2024-01-15",
       version: "3.2",
       isVestiraStandard: true,
-      usage: "Used by 89% of allocators",
+      usage: "Used by 89% of consultants",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -762,7 +762,7 @@ export default function ConsultantDueDiligenceHubPage() {
       lastUpdated: "2024-01-10",
       version: "2.8",
       isVestiraStandard: true,
-      usage: "Used by 92% of allocators",
+      usage: "Used by 92% of consultants",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -775,7 +775,7 @@ export default function ConsultantDueDiligenceHubPage() {
       lastUpdated: "2024-01-08",
       version: "2.1",
       isVestiraStandard: true,
-      usage: "Used by 76% of allocators",
+      usage: "Used by 76% of consultants",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -788,7 +788,7 @@ export default function ConsultantDueDiligenceHubPage() {
       lastUpdated: "2024-01-12",
       version: "1.9",
       isVestiraStandard: true,
-      usage: "Used by 68% of allocators",
+      usage: "Used by 68% of consultants",
       compliance: "SOC 2 Compliant",
     },
   ]
@@ -1202,10 +1202,10 @@ export default function ConsultantDueDiligenceHubPage() {
     }
   }
 
-  console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
+  console.log("Consultant Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <Screen>
       {/* Notification */}
       {notification && (
         <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50">
@@ -1896,7 +1896,7 @@ export default function ConsultantDueDiligenceHubPage() {
                                       setSelectedDDQForReview({ ...selectedDDQForReview, sections: updatedSections })
                                     }
                                   }}
-                                  userRole="allocator"
+                                  userRole="consultant"
                                   currentUser={currentPersonProfile?.name || "Current User"}
                                 />
                               )}
@@ -1961,7 +1961,7 @@ export default function ConsultantDueDiligenceHubPage() {
                                 setSelectedDDQForReview({ ...selectedDDQForReview, sections: updatedSections })
                               }
                             }}
-                            userRole="allocator"
+                            userRole="consultant"
                             currentUser={currentPersonProfile?.name || "Current User"}
                           />
                         )}
@@ -2507,6 +2507,6 @@ export default function ConsultantDueDiligenceHubPage() {
           </TabsContent>
         </Tabs>
       </div>
-    </div>
+    </Screen>
   )
 }
