@@ -293,9 +293,9 @@ export default function ConsultantProfilePage() {
               <div className="flex-1">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
                   <div>
-                    <h1 className="text-3xl font-bold text-deep-brand mb-2">{consultant.name}</h1>
-                    <p className="text-lg text-base-gray mb-1">{consultant.type}</p>
-                    <p className="text-base text-base-gray mb-4">{consultant.location}</p>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{consultant.name}</h1>
+                    <p className="text-lg text-gray-600 mb-1">{consultant.type}</p>
+                    <p className="text-base text-gray-600 mb-4">{consultant.location}</p>
                   </div>
                   <div className="flex gap-2">
                     <Badge className="bg-purple-100 text-purple-800">Consultant</Badge>
@@ -304,21 +304,21 @@ export default function ConsultantProfilePage() {
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-center gap-2 text-base-gray">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="h-4 w-4" />
                     <span>{consultant.location}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-base-gray">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <Globe className="h-4 w-4" />
-                    <a href={consultant.website} className="text-electric-blue hover:underline">
+                    <a href={consultant.website} className="text-blue-600 hover:underline">
                       {consultant.website}
                     </a>
                   </div>
-                  <div className="flex items-center gap-2 text-base-gray">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <Mail className="h-4 w-4" />
                     <span>{consultant.email}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-base-gray">
+                  <div className="flex items-center gap-2 text-gray-600">
                     <Phone className="h-4 w-4" />
                     <span>{consultant.phone}</span>
                   </div>
@@ -326,23 +326,23 @@ export default function ConsultantProfilePage() {
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{consultant.assetsUnderAdvisory}</p>
-                    <p className="text-sm text-base-gray">Assets Under Advisory</p>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-gray-900">{consultant.assetsUnderAdvisory}</p>
+                    <p className="text-sm text-gray-600">Assets Under Advisory</p>
                   </div>
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{consultant.yearsInBusiness}</p>
-                    <p className="text-sm text-base-gray">Years in Business</p>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-gray-900">{consultant.yearsInBusiness}</p>
+                    <p className="text-sm text-gray-600">Years in Business</p>
                   </div>
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{consultant.clientCount}</p>
-                    <p className="text-sm text-base-gray">Total Clients</p>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-gray-900">{consultant.clientCount}</p>
+                    <p className="text-sm text-gray-600">Total Clients</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
                   <Button
-                    className="bg-electric-blue hover:bg-electric-blue/90 text-white"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
                     onClick={() => setShowSendMessage(true)}
                   >
                     <Mail className="h-4 w-4 mr-2" />
@@ -381,7 +381,7 @@ export default function ConsultantProfilePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-base-gray leading-relaxed">{consultant.about}</p>
+                  <p className="text-gray-600 leading-relaxed">{consultant.about}</p>
                 </CardContent>
               </Card>
 
@@ -432,7 +432,7 @@ export default function ConsultantProfilePage() {
                   <div className="space-y-3">
                     {Object.entries(consultant.keyMetrics).map(([key, value]) => (
                       <div key={key} className="flex justify-between">
-                        <span className="text-base-gray capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>
+                        <span className="text-gray-600 capitalize">{key.replace(/([A-Z])/g, " $1")}:</span>
                         <span className="font-medium">{value}</span>
                       </div>
                     ))}
@@ -450,7 +450,7 @@ export default function ConsultantProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <p className="text-base-gray">Detailed service offerings would be displayed here.</p>
+                                      <p className="text-gray-600">Detailed service offerings would be displayed here.</p>
                 </div>
               </CardContent>
             </Card>
@@ -466,10 +466,10 @@ export default function ConsultantProfilePage() {
                 <div className="space-y-4">
                   {consultant.recentInsights.map((insight, index) => (
                     <div key={index} className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg">
-                      <div className="w-2 h-2 bg-electric-blue rounded-full mt-2"></div>
+                                              <div className="w-2 h-2 bg-blue-600 rounded-full mt-2"></div>
                       <div className="flex-1">
-                        <p className="font-medium text-deep-brand">{insight.title}</p>
-                        <div className="flex items-center gap-2 text-sm text-base-gray mt-1">
+                                          <p className="font-medium text-gray-900">{insight.title}</p>
+                  <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                           <span>{insight.date}</span>
                           <Badge variant="outline" className="text-xs">
                             {insight.category}
@@ -491,7 +491,7 @@ export default function ConsultantProfilePage() {
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
-                  <p className="text-base-gray">Shared documents would be displayed here.</p>
+                                      <p className="text-gray-600">Shared documents would be displayed here.</p>
                 </div>
               </CardContent>
             </Card>
