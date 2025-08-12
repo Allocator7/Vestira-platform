@@ -572,7 +572,7 @@ export default function SignupPage() {
                             }`}
                           />
                         </div>
-                        <span className={formData.organizationType === "industry-group" ? "text-white" : "text-deep-brand"}>
+                        <span className={`${formData.organizationType === "industry-group" ? "text-white" : "text-deep-brand"} text-sm`}>
                           Industry Group
                         </span>
                       </Button>
