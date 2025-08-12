@@ -1,8 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
-import { Screen } from "@/components/Screen"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -22,21 +21,10 @@ import {
   BarChart3,
 } from "lucide-react"
 
-import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
-import { ScheduleMeetingModal } from "@/components/profile-modals/ScheduleMeetingModal"
-import { ShareProfileModal } from "@/components/profile-modals/ShareProfileModal"
-import { EditConnectionModal } from "@/components/profile-modals/EditConnectionModal"
-
 export default function ConsultantProfilePage() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const consultantId = searchParams.get("id")
   const [activeTab, setActiveTab] = useState("overview")
-
-  const [showSendMessage, setShowSendMessage] = useState(false)
-  const [showScheduleMeeting, setShowScheduleMeeting] = useState(false)
-  const [showShareProfile, setShowShareProfile] = useState(false)
-  const [showEditConnection, setShowEditConnection] = useState(false)
 
   // Sample consultant profiles data
   const consultantProfiles = {
@@ -256,19 +244,19 @@ export default function ConsultantProfilePage() {
 
   if (!consultant) {
     return (
-      <Screen>
+      <div className="min-h-screen bg-gray-50">
         <div className="container py-8 max-w-6xl">
           <div className="text-center">
             <h1 className="text-2xl font-bold mb-4">Consultant Profile Not Found</h1>
             <p className="text-gray-600">The requested consultant profile could not be found.</p>
           </div>
         </div>
-      </Screen>
+      </div>
     )
   }
 
   return (
-    <Screen>
+    <div className="min-h-screen bg-gray-50">
       <div className="container py-8 max-w-6xl">
         {/* Profile Header */}
         <Card className="mb-8">
@@ -284,7 +272,7 @@ export default function ConsultantProfilePage() {
                       .join("")}
                   </AvatarFallback>
                 </Avatar>
-                <Button variant="outline" className="w-full md:w-auto" onClick={() => setShowEditConnection(true)}>
+                <Button variant="outline" className="w-full md:w-auto">
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Connection
                 </Button>
@@ -343,16 +331,15 @@ export default function ConsultantProfilePage() {
                 <div className="flex gap-2">
                   <Button
                     className="bg-blue-600 hover:bg-blue-700 text-white"
-                    onClick={() => setShowSendMessage(true)}
                   >
                     <Mail className="h-4 w-4 mr-2" />
                     Send Message
                   </Button>
-                  <Button variant="outline" onClick={() => setShowScheduleMeeting(true)}>
+                  <Button variant="outline">
                     <Calendar className="h-4 w-4 mr-2" />
                     Schedule Meeting
                   </Button>
-                  <Button variant="outline" onClick={() => setShowShareProfile(true)}>
+                  <Button variant="outline">
                     <Share2 className="h-4 w-4 mr-2" />
                     Share Profile
                   </Button>
@@ -497,42 +484,7 @@ export default function ConsultantProfilePage() {
             </Card>
           </TabsContent>
         </Tabs>
-
-        {/* Modals */}
-        <SendMessageModal
-          isOpen={showSendMessage}
-          onClose={() => setShowSendMessage(false)}
-          recipientName={consultant.name}
-          recipientEmail={consultant.email}
-        />
-
-        <ScheduleMeetingModal
-          isOpen={showScheduleMeeting}
-          onClose={() => setShowScheduleMeeting(false)}
-          recipientName={consultant.name}
-          recipientEmail={consultant.email}
-        />
-
-        <ShareProfileModal
-          isOpen={showShareProfile}
-          onClose={() => setShowShareProfile(false)}
-          profileName={consultant.name}
-          profileUrl={`${window.location.origin}/screens/general/consultant-profile?id=${consultantId}`}
-        />
-
-        <EditConnectionModal
-          isOpen={showEditConnection}
-          onClose={() => setShowEditConnection(false)}
-          connectionName={consultant.name}
-          connectionType={consultant.type}
-          initialData={{
-            relationship: "professional",
-            tags: ["Consultant", consultant.type],
-            notes: "",
-            priority: "high",
-          }}
-        />
       </div>
-    </Screen>
+    </div>
   )
 }
