@@ -176,8 +176,15 @@ export default function IndustryGroupCommunicationsPage() {
     const campaign = campaigns.find((c) => c.id === campaignId)
     toast({
       title: "Campaign Details",
-      description: `Viewing details for: ${campaign?.title}`,
+      description: `Opening detailed view for: ${campaign?.title}`,
     })
+    // Simulate opening campaign details view
+    setTimeout(() => {
+      toast({
+        title: "Campaign Details Loaded",
+        description: `Showing analytics and recipient data for: ${campaign?.title}`,
+      })
+    }, 1000)
   }
 
   const handleEditCampaign = (campaignId: string) => {
@@ -194,6 +201,13 @@ export default function IndustryGroupCommunicationsPage() {
       title: "Campaign Resent",
       description: `Resending: ${campaign?.title}`,
     })
+    // Simulate resend process
+    setTimeout(() => {
+      toast({
+        title: "Campaign Resent Successfully",
+        description: `Campaign "${campaign?.title}" has been resent to all recipients.`,
+      })
+    }, 2000)
   }
 
   const handleUseTemplate = (templateId: string) => {
@@ -413,7 +427,12 @@ export default function IndustryGroupCommunicationsPage() {
                     className="pl-10"
                   />
                 </div>
-                <Button variant="outline" className="gap-2 bg-transparent">
+                <Button variant="outline" className="gap-2 bg-transparent" onClick={() => {
+                  toast({
+                    title: "Filters",
+                    description: "Advanced filtering options will be available here.",
+                  })
+                }}>
                   <Filter className="h-4 w-4" />
                   Filters
                 </Button>
@@ -595,6 +614,14 @@ export default function IndustryGroupCommunicationsPage() {
                     <Button variant="outline" size="sm" onClick={() => handleEditTemplate(template.id)}>
                       <Edit className="h-4 w-4" />
                     </Button>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      toast({
+                        title: "Template Options",
+                        description: `Additional options for template: ${template.name}`,
+                      })
+                    }}>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -668,7 +695,47 @@ export default function IndustryGroupCommunicationsPage() {
                     </label>
                   </div>
                 ))}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="custom-list"
+                    checked={selectedRecipients.includes("custom-list")}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setSelectedRecipients([...selectedRecipients, "custom-list"])
+                        toast({
+                          title: "Custom List",
+                          description: "You can add emails manually or upload an Excel file with email addresses.",
+                        })
+                      } else {
+                        setSelectedRecipients(selectedRecipients.filter((id) => id !== "custom-list"))
+                      }
+                    }}
+                  />
+                  <label htmlFor="custom-list" className="text-sm">
+                    Custom List
+                  </label>
+                </div>
               </div>
+              {selectedRecipients.includes("custom-list") && (
+                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                  <p className="text-sm text-gray-600 mb-2">Add custom email addresses:</p>
+                  <Textarea
+                    placeholder="Enter email addresses (one per line) or paste from Excel"
+                    rows={4}
+                    className="mb-2"
+                  />
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <FileText className="h-4 w-4 mr-2" />
+                      Upload Excel File
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download Template
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* VeMail Mass Messaging Section */}

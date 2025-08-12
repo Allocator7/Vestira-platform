@@ -192,6 +192,20 @@ export default function IndustryGroupTeamManagementPage() {
     )
   }
 
+  const handleSendEmail = (member: (typeof teamMembersData)[0]) => {
+    toast({
+      title: "Email Sent",
+      description: `Email sent to ${member.name} at ${member.email}.`,
+    })
+  }
+
+  const handleManagePermissions = (member: (typeof teamMembersData)[0]) => {
+    toast({
+      title: "Manage Permissions",
+      description: `Opening permissions management for ${member.name}.`,
+    })
+  }
+
   const openEditDialog = (member: (typeof teamMembersData)[0]) => {
     setCurrentMember(member)
     setIsEditMemberOpen(true)
@@ -550,11 +564,11 @@ export default function IndustryGroupTeamManagementPage() {
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleSendEmail(member)}>
                                     <Mail className="mr-2 h-4 w-4" />
                                     Send Email
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleManagePermissions(member)}>
                                     <Shield className="mr-2 h-4 w-4" />
                                     Permissions
                                   </DropdownMenuItem>

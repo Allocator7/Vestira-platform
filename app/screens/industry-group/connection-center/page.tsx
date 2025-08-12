@@ -94,11 +94,21 @@ export default function IndustryGroupConnectionCenterPage() {
     setIsMeetingModalOpen(true)
   }
 
-  // UPDATED: Route to personal profiles instead of organization profiles
+  // Route to appropriate profile based on connection type
   const handleViewProfile = (connection: any) => {
-    // Route to personal profile using the contactPersonId
-    if (connection.contactPersonId) {
-      router.push(`/screens/general/person-profile?id=${connection.contactPersonId}`)
+    try {
+      // Route to appropriate profile based on connection type and contact person
+      if (connection.contactPersonId) {
+        // Route to the correct profile page based on the contact person
+        router.push(`/screens/general/allocator-profile?id=${connection.contactPersonId}`)
+      } else {
+        // Fallback routing
+        router.push(`/screens/general/allocator-profile?id=${connection.id}`)
+      }
+    } catch (error) {
+      console.error("Error navigating to profile:", error)
+      // Fallback to a default profile page
+      router.push("/screens/general/allocator-profile")
     }
   }
 

@@ -145,11 +145,17 @@ export default function IndustryGroupEventsPage() {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case "date":
+        case "date-asc":
           return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-        case "title":
+        case "date-desc":
+          return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        case "title-asc":
           return a.title.localeCompare(b.title)
-        case "registrations":
+        case "title-desc":
+          return b.title.localeCompare(a.title)
+        case "registrations-asc":
+          return a.registrations - b.registrations
+        case "registrations-desc":
           return b.registrations - a.registrations
         default:
           return 0
@@ -220,6 +226,15 @@ export default function IndustryGroupEventsPage() {
     })
   }
 
+  const handleEditEvent = (event: any) => {
+    setSelectedEvent(event)
+    setEventDetailsOpen(true)
+    toast({
+      title: "Edit Event",
+      description: `Opening editor for ${event.title}`,
+    })
+  }
+
   const handleDuplicateEvent = (event: any) => {
     const duplicatedEvent = {
       ...event,
@@ -244,6 +259,13 @@ export default function IndustryGroupEventsPage() {
       title: "Export Started",
       description: "Your event data is being prepared for download.",
     })
+    // Simulate export process
+    setTimeout(() => {
+      toast({
+        title: "Export Complete",
+        description: "Event data has been exported successfully.",
+      })
+    }, 2000)
   }
 
   const handleShareEvent = (event: any) => {
@@ -344,9 +366,12 @@ export default function IndustryGroupEventsPage() {
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="title">Title</SelectItem>
-                <SelectItem value="registrations">Registrations</SelectItem>
+                <SelectItem value="date-asc">Date (Nearest to Furthest)</SelectItem>
+                <SelectItem value="date-desc">Date (Furthest to Nearest)</SelectItem>
+                <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+                <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+                <SelectItem value="registrations-asc">Registrations (Low to High)</SelectItem>
+                <SelectItem value="registrations-desc">Registrations (High to Low)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -467,7 +492,7 @@ export default function IndustryGroupEventsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2">
+                            <DropdownMenuItem className="gap-2" onClick={() => handleEditEvent(event)}>
                               <Edit className="h-4 w-4" />
                               Edit Event
                             </DropdownMenuItem>

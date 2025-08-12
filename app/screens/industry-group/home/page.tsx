@@ -141,7 +141,7 @@ export default function IndustryGroupHomePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-deep-brand text-sm">Send VeMail</h3>
-                  <p className="text-xs text-base-gray">Mass messaging</p>
+                  <p className="text-xs text-base-gray">VeMail mass messaging</p>
                 </div>
                 <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -342,9 +342,9 @@ export default function IndustryGroupHomePage() {
                   Recent insights from your industry group activities
                 </CardDescription>
               </div>
-              <Link href="/screens/industry-group/communications">
+              <Link href="/screens/industry-group/market-insights">
                 <Button variant="outline" size="sm">
-                  View All Communications
+                  View All Insights
                 </Button>
               </Link>
             </div>

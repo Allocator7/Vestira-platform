@@ -206,6 +206,18 @@ export default function AttendeeManagementPage() {
           description: `Opening edit form for ${attendee?.name}.`,
         })
         break
+      case "call":
+        toast({
+          title: "Call Initiated",
+          description: `Calling ${attendee?.name} at ${attendee?.phone}.`,
+        })
+        break
+      case "view":
+        toast({
+          title: "View Details",
+          description: `Opening detailed view for ${attendee?.name}.`,
+        })
+        break
       case "delete":
         setAttendees(attendees.filter((a) => a.id !== attendeeId))
         toast({
@@ -325,7 +337,12 @@ export default function AttendeeManagementPage() {
                     <SelectItem value="standard">Standard</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => {
+                  toast({
+                    title: "More Filters",
+                    description: "Advanced filtering options will be available here.",
+                  })
+                }}>
                   <Filter className="h-4 w-4 mr-2" />
                   More Filters
                 </Button>
@@ -431,7 +448,7 @@ export default function AttendeeManagementPage() {
                               <Edit className="h-4 w-4 mr-2" />
                               Edit Profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "view")}>
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
                             </DropdownMenuItem>
