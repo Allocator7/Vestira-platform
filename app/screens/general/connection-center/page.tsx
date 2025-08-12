@@ -36,18 +36,18 @@ import { Separator } from "@/components/ui/separator"
 import { Send } from "lucide-react"
 
 export default function ConnectionCenterPage() {
-  // Sample connections data - UPDATED with personal contact information
+  // Sample connections data - UPDATED to match allocator profile data exactly
   const connections = [
     {
       id: 1,
       name: "Sovereign Wealth Fund",
-      contactPerson: "Sarah Chen", // Added personal contact
-      contactPersonId: "sarah-chen", // Added for routing
+      contactPerson: "Sarah Chen",
+      contactPersonId: "sarah-chen",
       type: "allocator",
       logo: "/FI_logo.png",
       category: "Sovereign Wealth Fund",
       location: "Singapore",
-      aum: "$320B+",
+      aum: "$320B",
       focus: ["Alternative Assets", "Global Markets", "Long-term"],
       status: "connected",
       lastInteraction: "May 10, 2025",
@@ -55,13 +55,13 @@ export default function ConnectionCenterPage() {
     {
       id: 2,
       name: "Global Pension Alliance",
-      contactPerson: "Jennifer Park", // Added personal contact
-      contactPersonId: "jennifer-park", // Added for routing
+      contactPerson: "Jennifer Park",
+      contactPersonId: "jennifer-park",
       type: "allocator",
       logo: "/trp-symbol.png",
       category: "Pension Fund",
       location: "Toronto, CA",
-      aum: "$180B+",
+      aum: "$180B",
       focus: ["Private Markets & Real Assets"],
       status: "connected",
       lastInteraction: "May 5, 2025",
@@ -69,13 +69,13 @@ export default function ConnectionCenterPage() {
     {
       id: 3,
       name: "University Endowment Foundation",
-      contactPerson: "Alex Kim", // Added personal contact
-      contactPersonId: "alex-kim", // Added for routing
+      contactPerson: "Alex Kim",
+      contactPersonId: "alex-kim",
       type: "allocator",
       logo: "/trp-symbol.png",
       category: "Endowment",
       location: "Boston, MA",
-      aum: "$45B+",
+      aum: "$45B",
       focus: ["Alternative Investments"],
       status: "connected",
       lastInteraction: "May 3, 2025",
