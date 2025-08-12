@@ -55,6 +55,8 @@ export default function AllocatorProfilePage() {
   const [showMessageModal, setShowMessageModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
   const [selectedContact, setSelectedContact] = useState<any>(null)
+  const [showContactSelector, setShowContactSelector] = useState(false)
+  const [selectedAction, setSelectedAction] = useState<'message' | 'schedule' | null>(null)
 
   // Share modal states
   const [shareEmail, setShareEmail] = useState("")
@@ -701,6 +703,27 @@ export default function AllocatorProfilePage() {
     }, 1500)
   }
 
+  const handleSendMessageWithContact = (allocator: any) => {
+    setSelectedAction('message')
+    setShowContactSelector(true)
+  }
+
+  const handleScheduleMeetingWithContact = (allocator: any) => {
+    setSelectedAction('schedule')
+    setShowContactSelector(true)
+  }
+
+  const handleContactSelect = (contact: any) => {
+    setSelectedContact(contact)
+    setShowContactSelector(false)
+    
+    if (selectedAction === 'message') {
+      setShowMessageModal(true)
+    } else if (selectedAction === 'schedule') {
+      setShowScheduleModal(true)
+    }
+  }
+
   if (!allocator) {
     return (
       <Screen>
@@ -745,10 +768,7 @@ export default function AllocatorProfilePage() {
                     </Button>
                     <Button
                       className="bg-electric-blue hover:bg-electric-blue/90 text-white"
-                      onClick={() => {
-                        setSelectedContact(primaryContact)
-                        setShowMessageModal(true)
-                      }}
+                      onClick={() => handleSendMessageWithContact(allocator)}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Message
@@ -756,10 +776,7 @@ export default function AllocatorProfilePage() {
                     <Button
                       variant="outline"
                       className="border-electric-blue text-electric-blue hover:bg-electric-blue hover:text-white bg-transparent"
-                      onClick={() => {
-                        setSelectedContact(primaryContact)
-                        setShowScheduleModal(true)
-                      }}
+                      onClick={() => handleScheduleMeetingWithContact(allocator)}
                     >
                       <CalendarDays className="h-4 w-4 mr-2" />
                       Schedule
@@ -1364,6 +1381,40 @@ export default function AllocatorProfilePage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Contact Selector Modal */}
+        {showContactSelector && (
+          <Dialog open={showContactSelector} onOpenChange={setShowContactSelector}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Select Contact</DialogTitle>
+                <DialogDescription>
+                  Choose a contact at {allocator.firmName} to {selectedAction === 'message' ? 'message' : 'schedule a meeting with'}.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3">
+                {allocator.contacts.map((contact: any) => (
+                  <div
+                    key={contact.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => handleContactSelect(contact)}
+                  >
+                    <div>
+                      <p className="font-medium">{contact.name}</p>
+                      <p className="text-sm text-gray-600">{contact.title}</p>
+                      {contact.isPrimary && (
+                        <Badge variant="outline" className="text-xs mt-1">Primary</Badge>
+                      )}
+                    </div>
+                    <Button size="sm" variant="outline">
+                      {selectedAction === 'message' ? 'Message' : 'Schedule'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </Screen>
   )
