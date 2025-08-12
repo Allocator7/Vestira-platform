@@ -100,98 +100,6 @@ const mockClientFirms: ClientFirm[] = [
       },
     ],
   },
-  {
-    id: "3",
-    firmName: "Global Insurance Group",
-    organizationType: "Insurance Company",
-    location: "New York, NY",
-    aum: "$85B",
-    commitment: "$400M",
-    assetClasses: ["Public Fixed Income", "Private Fixed Income"],
-    strategies: ["Investment Grade Corporate Bonds", "Direct Lending"],
-    logo: "/stylized-wm.png",
-    lastContact: "2024-01-05",
-    relationship: "Active Client",
-    description: "Insurance investment professional specializing in fixed income and credit strategies.",
-    contacts: [
-      {
-        name: "Lisa Thompson",
-        title: "Senior Investment Director",
-        email: "lisa.thompson@globalinsurance.com",
-        strategies: ["Investment Grade Corporate Bonds", "Direct Lending"],
-        isMainContact: true,
-      },
-    ],
-  },
-  {
-    id: "4",
-    firmName: "Sovereign Wealth Fund",
-    organizationType: "Sovereign Wealth Fund",
-    location: "Singapore",
-    aum: "$320B",
-    commitment: "$800M",
-    assetClasses: ["Real Estate", "Private Fixed Income"],
-    strategies: ["Real Estate Equity", "Infrastructure Debt"],
-    logo: "/FI_logo.png",
-    lastContact: "2024-01-03",
-    relationship: "Prospect",
-    description: "Sovereign wealth fund manager focused on infrastructure and real estate investments.",
-    contacts: [
-      {
-        name: "Robert Williams",
-        title: "Managing Director",
-        email: "robert.williams@swf.gov.sg",
-        strategies: ["Real Estate Equity", "Infrastructure Debt"],
-        isMainContact: true,
-      },
-    ],
-  },
-  {
-    id: "5",
-    firmName: "Family Office Partners",
-    organizationType: "Family Office",
-    location: "San Francisco, CA",
-    aum: "$8B",
-    commitment: "$100M",
-    assetClasses: ["Public Equities", "Private Equity & Other Alternatives"],
-    strategies: ["ESG/Sustainable Equity", "Venture Capital"],
-    logo: "/abstract-profile.png",
-    lastContact: "2023-12-28",
-    relationship: "Prospect",
-    description: "Family office CIO with emphasis on sustainable investing and technology ventures.",
-    contacts: [
-      {
-        name: "Emily Zhang",
-        title: "Chief Investment Officer",
-        email: "emily.zhang@familyoffice.com",
-        strategies: ["ESG/Sustainable Equity", "Venture Capital"],
-        isMainContact: true,
-      },
-    ],
-  },
-  {
-    id: "6",
-    firmName: "Healthcare Foundation",
-    organizationType: "Foundation",
-    location: "Chicago, IL",
-    aum: "$3.5B",
-    commitment: "$75M",
-    assetClasses: ["Public Fixed Income", "Public Equities"],
-    strategies: ["Core Fixed Income", "Large Cap Equity"],
-    logo: "/medical-resonance-image.png",
-    lastContact: "2023-12-20",
-    relationship: "Past Client",
-    description: "Foundation investment leader focused on healthcare sector and conservative strategies.",
-    contacts: [
-      {
-        name: "Alexandra Kim",
-        title: "Investment Committee Chair",
-        email: "alexandra.kim@healthcarefoundation.org",
-        strategies: ["Core Fixed Income", "Large Cap Equity"],
-        isMainContact: true,
-      },
-    ],
-  },
 ]
 
 export default function ManagerClientsPage() {
@@ -204,6 +112,7 @@ export default function ManagerClientsPage() {
     organizationTypes: [] as string[],
   })
   const [filteredClientFirms, setFilteredClientFirms] = useState(mockClientFirms)
+  const [showFilters, setShowFilters] = useState(false)
 
   const [selectedClient, setSelectedClient] = useState<ClientFirm | null>(null)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -284,15 +193,25 @@ export default function ManagerClientsPage() {
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
-    handleFiltersChange(filters)
+    // Re-apply filters with new search term
+    const currentFilters = {
+      assetClasses: filters.assetClasses,
+      strategies: filters.strategies,
+      organizationTypes: filters.organizationTypes,
+    }
+    handleFiltersChange(currentFilters)
   }
 
   const handleSortChange = (value: string) => {
     setSortBy(value)
-    handleFiltersChange(filters)
+    // Re-apply filters with new sort
+    const currentFilters = {
+      assetClasses: filters.assetClasses,
+      strategies: filters.strategies,
+      organizationTypes: filters.organizationTypes,
+    }
+    handleFiltersChange(currentFilters)
   }
-
-
 
   const getRelationshipColor = (relationship: string) => {
     switch (relationship) {
@@ -316,7 +235,7 @@ export default function ManagerClientsPage() {
             <p className="text-baseGray mt-1">Manage relationships with your institutional clients</p>
           </div>
           <ExportButton
-            data={filteredClients}
+            data={filteredClientFirms}
             filename="client-portfolio"
             className="bg-electric-blue hover:bg-electric-blue/90 text-white"
           />
@@ -346,15 +265,24 @@ export default function ManagerClientsPage() {
                         { value: "lastContact", label: "Recent Contact" },
                       ]}
                     />
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowFilters(!showFilters)}
+                    >
+                      Filters
+                    </Button>
                   </div>
                 </div>
 
-                <ComprehensiveFilters
-                  onFiltersChange={handleFiltersChange}
-                  initialFilters={filters}
-                  showOrganizationTypes={true}
-                  userType="allocator"
-                />
+                {showFilters && (
+                  <div className="mb-6">
+                    <ComprehensiveFilters 
+                      onFiltersChange={handleFiltersChange} 
+                      initialFilters={filters} 
+                      showSectors={false}
+                    />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
