@@ -83,13 +83,13 @@ export default function ConnectionCenterPage() {
     {
       id: 6,
       name: "Quantum Capital Partners",
-      contactPerson: "James Wilson", // Added personal contact
-      contactPersonId: "james-wilson", // Added for routing
+      contactPerson: "James Wilson",
+      contactPersonId: "james-wilson",
       type: "manager",
       logo: "/stylized-wm.png",
       category: "Hedge Fund",
       location: "New York, NY",
-      aum: "$2.5B+",
+      aum: "$2.5B",
       focus: ["Global Macro", "Fixed Income", "Currencies"],
       status: "connected",
       lastInteraction: "May 8, 2025",
@@ -97,8 +97,8 @@ export default function ConnectionCenterPage() {
     {
       id: 9,
       name: "Cambridge Associates",
-      contactPerson: "David Kim", // Added personal contact
-      contactPersonId: "david-kim", // Added for routing
+      contactPerson: "David Kim",
+      contactPersonId: "david-kim",
       type: "consultant",
       logo: "/abstract-profile.png",
       category: "Investment Consultant",
@@ -113,13 +113,13 @@ export default function ConnectionCenterPage() {
     {
       id: 14,
       name: "Healthcare Investment Group",
-      contactPerson: "Lisa Rodriguez", // Added personal contact
-      contactPersonId: "lisa-rodriguez", // Added for routing
+      contactPerson: "Lisa Rodriguez",
+      contactPersonId: "lisa-rodriguez",
       type: "manager",
       logo: "/medical-resonance-image.png",
       category: "Sector Specialist",
       location: "Boston, MA",
-      aum: "$3.2B+",
+      aum: "$3.2B",
       focus: ["Healthcare", "Biotechnology", "Medical Devices"],
       status: "pending",
       direction: "incoming",
@@ -128,8 +128,8 @@ export default function ConnectionCenterPage() {
     {
       id: 15,
       name: "Strategic Advisory Partners",
-      contactPerson: "Emily Zhang", // Added personal contact
-      contactPersonId: "emily-zhang", // Added for routing
+      contactPerson: "Emily Zhang",
+      contactPersonId: "emily-zhang",
       type: "consultant",
       logo: "/abstract-profile.png",
       category: "Boutique Consultant",

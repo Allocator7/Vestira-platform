@@ -459,6 +459,85 @@ export default function ManagerProfilePage() {
         },
       ],
     },
+    14: {
+      name: "Lisa Rodriguez",
+      title: "Managing Director",
+      firm: "Healthcare Investment Group",
+      firmType: "Sector Specialist",
+      location: "Boston, MA",
+      website: "https://healthcareinvestmentgroup.com",
+      email: "l.rodriguez@healthcareig.com",
+      phone: "+1 (617) 555-0456",
+      avatar: "/placeholder-user.jpg",
+      aum: "$3.2B",
+      founded: "2015",
+      yearsInBusiness: 9,
+      experience: "12 years",
+      focus: ["Healthcare", "Biotechnology", "Medical Devices"],
+      about:
+        "Lisa Rodriguez is the Managing Director of Healthcare Investment Group, a specialized investment firm focused on healthcare and biotechnology opportunities. With over 12 years of experience in healthcare investing, Lisa has led numerous successful investments in innovative medical technologies and biotech companies.",
+      keyMetrics: {
+        totalFunds: 2,
+        activeInvestments: 18,
+        portfolioCompanies: 35,
+        geographicFocus: ["North America", "Europe"],
+      },
+      trackRecord: {
+        irr: "16.5%",
+        multiple: "2.3x",
+        totalReturns: "$420M",
+      },
+      recentActivity: [
+        {
+          date: "2024-01-15",
+          activity: "Invested in breakthrough cancer therapy startup",
+          type: "Investment",
+        },
+        {
+          date: "2024-01-08",
+          activity: "Completed due diligence on medical device company",
+          type: "Review",
+        },
+      ],
+      investments: [
+        {
+          company: "OncoTech Therapeutics",
+          sector: "Biotechnology",
+          stage: "Series B",
+          investment: "$75M",
+          status: "Active",
+          multiple: "2.1x",
+        },
+        {
+          company: "MedDevice Innovations",
+          sector: "Medical Devices",
+          stage: "Growth",
+          investment: "$45M",
+          status: "Active",
+          multiple: "1.8x",
+        },
+      ],
+      documents: [
+        {
+          id: "doc1",
+          name: "Healthcare Investment Strategy",
+          type: "Strategy",
+          category: "Investment Strategy",
+          size: "1.5 MB",
+          lastModified: "2024-01-15",
+          status: "Active",
+        },
+        {
+          id: "doc2",
+          name: "Biotech Market Analysis",
+          type: "Research",
+          category: "Market Research",
+          size: "2.1 MB",
+          lastModified: "2024-01-10",
+          status: "Active",
+        },
+      ],
+    },
   }
 
   const [manager, setManager] = useState<any>(null)
