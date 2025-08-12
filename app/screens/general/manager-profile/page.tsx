@@ -552,16 +552,12 @@ export default function ManagerProfilePage() {
           setShareMessage(`I wanted to share ${profile.name}'s profile with you.`)
         } else {
           console.error('Profile not found for ID:', managerId)
-          // Redirect to connection center if profile not found
-          router.push('/screens/general/connection-center')
         }
       } catch (error) {
         console.error('Error loading profile:', error)
-        // Redirect to connection center if error occurs
-        router.push('/screens/general/connection-center')
       }
     }
-  }, [managerId, router])
+  }, [managerId])
 
   // Share functionality
   const handleCopyLink = async () => {

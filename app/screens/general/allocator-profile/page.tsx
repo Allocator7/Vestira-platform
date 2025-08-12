@@ -436,16 +436,12 @@ export default function AllocatorProfilePage() {
           setShareMessage(`I wanted to share ${profile.firmName}'s profile with you.`)
         } else {
           console.error('Profile not found for ID:', allocatorId)
-          // Redirect to connection center if profile not found
-          router.push('/screens/general/connection-center')
         }
       } catch (error) {
         console.error('Error loading profile:', error)
-        // Redirect to connection center if error occurs
-        router.push('/screens/general/connection-center')
       }
     }
-  }, [allocatorId, router])
+  }, [allocatorId])
 
   // Share functionality
   const handleCopyLink = async () => {

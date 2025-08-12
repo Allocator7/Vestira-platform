@@ -231,11 +231,11 @@ export default function ConnectionCenterPage() {
   const handleViewProfile = (connection: any) => {
     try {
       if (connection.type === 'allocator') {
-        router.push(`/screens/general/allocator-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
+        router.push(`/screens/general/allocator-profile?id=${connection.id}`)
       } else if (connection.type === 'manager') {
-        router.push(`/screens/general/manager-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
+        router.push(`/screens/general/manager-profile?id=${connection.id}`)
       } else if (connection.type === 'consultant') {
-        router.push(`/screens/general/consultant-profile?id=${connection.id}&firm=${encodeURIComponent(connection.name)}`)
+        router.push(`/screens/general/consultant-profile?id=${connection.id}`)
       } else {
         console.error('Unknown connection type:', connection.type)
       }

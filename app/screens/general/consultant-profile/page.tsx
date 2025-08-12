@@ -247,16 +247,12 @@ export default function ConsultantProfilePage() {
           setConsultant(profile)
         } else {
           console.error('Profile not found for ID:', consultantId)
-          // Redirect to connection center if profile not found
-          router.push('/screens/general/connection-center')
         }
       } catch (error) {
         console.error('Error loading profile:', error)
-        // Redirect to connection center if error occurs
-        router.push('/screens/general/connection-center')
       }
     }
-  }, [consultantId, router])
+  }, [consultantId])
 
   if (!consultant) {
     return (
