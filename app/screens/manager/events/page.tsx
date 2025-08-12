@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Search, Filter, MapPin, Clock, Users, Star } from "lucide-react"
+import { Calendar, Search, Filter, MapPin, Clock, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -37,7 +37,6 @@ export default function ManagerEventsCenter() {
       attendees: 450,
       maxAttendees: 500,
       price: "$1,200",
-      rating: 4.8,
       description:
         "Premier event for alternative investment professionals focusing on fundraising strategies and market trends.",
       isRegistered: false,
@@ -55,7 +54,6 @@ export default function ManagerEventsCenter() {
       attendees: 85,
       maxAttendees: 100,
       price: "$450",
-      rating: 4.6,
       description: "Hands-on workshop covering effective investor communication and relationship management.",
       isRegistered: false,
       image: "/events/ir-workshop.jpg",
@@ -72,7 +70,6 @@ export default function ManagerEventsCenter() {
       attendees: 220,
       maxAttendees: 300,
       price: "$800",
-      rating: 4.9,
       description: "Exploring ESG integration strategies in private market investments.",
       isRegistered: true,
       image: "/events/esg-symposium.jpg",
@@ -102,7 +99,6 @@ export default function ManagerEventsCenter() {
       type: "Webinar",
       status: "attended",
       registrationDate: "2025-05-01",
-      rating: 4.5,
     },
   ]
 
@@ -187,10 +183,6 @@ export default function ManagerEventsCenter() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <Badge variant={event.isRegistered ? "default" : "secondary"}>{event.type}</Badge>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{event.rating}</span>
-                    </div>
                   </div>
                   <CardTitle className="text-lg leading-tight">{event.title}</CardTitle>
                   <p className="text-sm text-gray-600">{event.organizer}</p>
