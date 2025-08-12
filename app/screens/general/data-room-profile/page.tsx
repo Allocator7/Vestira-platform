@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
+
 import {
   Search,
   Download,
@@ -343,21 +343,8 @@ export default function DataRoomProfilePage() {
               </div>
             </div>
 
-            {/* Progress and Key Metrics - Horizontal Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              {/* Overall Progress */}
-              <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-deepBrand">Document Review Progress</span>
-                  <span className="text-2xl font-bold text-deepBrand">{dataRoomData.completionRate}%</span>
-                </div>
-                <Progress value={dataRoomData.completionRate} className="h-3 mb-2" />
-                <div className="text-xs text-gray-600">
-                  {Math.round((dataRoomData.completionRate / 100) * dataRoomData.totalDocuments)} of{" "}
-                  {dataRoomData.totalDocuments} documents reviewed
-                </div>
-              </Card>
-
+            {/* Owner & Contact and Security - Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Owner & Contact */}
               <Card className="p-4">
                 <div className="flex items-center gap-3 mb-3">
