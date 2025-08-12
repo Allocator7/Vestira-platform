@@ -47,6 +47,8 @@ export default function IndustryGroupCommunicationsPage() {
     type: "",
     subject: "",
     message: "",
+    scheduledDate: "",
+    scheduledTime: "",
   })
 
   // Mock communications data
@@ -168,13 +170,7 @@ export default function IndustryGroupCommunicationsPage() {
     })
   }
 
-  const handleExport = () => {
-    toast({
-      title: "Export Started",
-      description: "Downloading communications report...",
-    })
-    // Simulate export functionality
-  }
+
 
   const handleViewCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
@@ -243,6 +239,8 @@ export default function IndustryGroupCommunicationsPage() {
       type: "",
       subject: "",
       message: "",
+      scheduledDate: "",
+      scheduledTime: "",
     })
     setSelectedRecipients([])
     setShowComposeModal(false)
@@ -258,10 +256,30 @@ export default function IndustryGroupCommunicationsPage() {
       return
     }
 
+    if (!campaignForm.scheduledDate || !campaignForm.scheduledTime) {
+      toast({
+        title: "Missing Schedule Information",
+        description: "Please select a date and time for scheduling",
+        variant: "destructive",
+      })
+      return
+    }
+
     toast({
       title: "Campaign Scheduled",
-      description: `Campaign "${campaignForm.name}" has been scheduled successfully!`,
+      description: `Campaign "${campaignForm.name}" has been scheduled for ${campaignForm.scheduledDate} at ${campaignForm.scheduledTime}!`,
     })
+    
+    // Reset form and close modal
+    setCampaignForm({
+      name: "",
+      type: "",
+      subject: "",
+      message: "",
+      scheduledDate: "",
+      scheduledTime: "",
+    })
+    setSelectedRecipients([])
     setShowComposeModal(false)
   }
 
@@ -323,10 +341,7 @@ export default function IndustryGroupCommunicationsPage() {
           <p className="text-base-gray mt-1">Manage member communications and campaigns</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2 bg-transparent" onClick={handleExport}>
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
+
           <Button variant="outline" className="gap-2 bg-transparent" onClick={handleManageTemplates}>
             <Template className="h-4 w-4" />
             Templates
@@ -719,6 +734,26 @@ export default function IndustryGroupCommunicationsPage() {
                 value={campaignForm.message}
                 onChange={(e) => setCampaignForm({ ...campaignForm, message: e.target.value })}
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schedule Date</label>
+                <Input
+                  type="date"
+                  value={campaignForm.scheduledDate}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, scheduledDate: e.target.value })}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Schedule Time</label>
+                <Input
+                  type="time"
+                  value={campaignForm.scheduledTime}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, scheduledTime: e.target.value })}
+                />
+              </div>
             </div>
 
             <div className="flex gap-3">

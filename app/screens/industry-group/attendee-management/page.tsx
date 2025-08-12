@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { SendInvitationModal } from "@/components/industry-group/SendInvitationModal"
-import { IssueCertificateModal } from "@/components/industry-group/IssueCertificateModal"
+
 import {
   Search,
   Filter,
@@ -97,7 +97,7 @@ export default function AttendeeManagementPage() {
   const [memberTypeFilter, setMemberTypeFilter] = useState("all")
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
   const [showInvitationModal, setShowInvitationModal] = useState(false)
-  const [showCertificateModal, setShowCertificateModal] = useState(false)
+
   const [attendees, setAttendees] = useState(mockAttendees)
 
   const getStatusBadge = (status: string) => {
@@ -168,9 +168,7 @@ export default function AttendeeManagementPage() {
           description: `Email sent to ${selectedAttendees.length} attendees.`,
         })
         break
-      case "certificate":
-        setShowCertificateModal(true)
-        break
+
       case "export":
         toast({
           title: "Export Started",
@@ -221,7 +219,7 @@ export default function AttendeeManagementPage() {
   const stats = {
     total: attendees.length,
     active: attendees.filter((a) => a.status === "confirmed" || a.status === "attended").length,
-    certificates: attendees.reduce((sum, a) => sum + a.certificatesEarned, 0),
+
     avgAttendance: Math.round((attendees.reduce((sum, a) => sum + a.eventsAttended, 0) / attendees.length) * 100) / 100,
   }
 
@@ -268,17 +266,7 @@ export default function AttendeeManagementPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Certificates Issued</p>
-                <p className="text-2xl font-bold">{stats.certificates}</p>
-              </div>
-              <Award className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -296,7 +284,7 @@ export default function AttendeeManagementPage() {
         <TabsList>
           <TabsTrigger value="attendees">All Attendees</TabsTrigger>
           <TabsTrigger value="engagement">Engagement Analytics</TabsTrigger>
-          <TabsTrigger value="certificates">Certificates</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="attendees" className="space-y-4">
@@ -356,10 +344,7 @@ export default function AttendeeManagementPage() {
                       <Mail className="h-4 w-4 mr-2" />
                       Send Email
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleBulkAction("certificate")}>
-                      <Award className="h-4 w-4 mr-2" />
-                      Issue Certificate
-                    </Button>
+
                     <Button size="sm" variant="outline" onClick={() => handleBulkAction("export")}>
                       <Download className="h-4 w-4 mr-2" />
                       Export Selected
@@ -418,7 +403,7 @@ export default function AttendeeManagementPage() {
                     <div className="flex items-center space-x-4">
                       <div className="text-right text-sm">
                         <p className="font-medium">{attendee.eventsAttended} events</p>
-                        <p className="text-gray-500">{attendee.certificatesEarned} certificates</p>
+      
                         <p className="text-xs text-gray-400">Last: {attendee.lastEventDate}</p>
                       </div>
                       <div className="flex gap-1">
@@ -450,10 +435,7 @@ export default function AttendeeManagementPage() {
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <FileText className="h-4 w-4 mr-2" />
-                              View Certificates
-                            </DropdownMenuItem>
+
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-red-600"
@@ -532,98 +514,13 @@ export default function AttendeeManagementPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="certificates" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>Certificate Management</CardTitle>
-                  <CardDescription>Manage and track professional certificates</CardDescription>
-                </div>
-                <Button onClick={() => setShowCertificateModal(true)}>
-                  <Award className="h-4 w-4 mr-2" />
-                  Issue Certificate
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-blue-600">{stats.certificates}</div>
-                      <div className="text-sm text-gray-600">Total Certificates</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-green-600">24</div>
-                      <div className="text-sm text-gray-600">This Month</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-purple-600">4</div>
-                      <div className="text-sm text-gray-600">Certificate Types</div>
-                    </CardContent>
-                  </Card>
-                </div>
 
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Recent Certificates Issued</h4>
-                  {[
-                    { name: "Sarah Johnson", course: "ESG Investment Fundamentals", date: "2024-01-20", type: "CPE" },
-                    {
-                      name: "Michael Chen",
-                      course: "Risk Management Certification",
-                      date: "2024-01-18",
-                      type: "Completion",
-                    },
-                    {
-                      name: "Emily Rodriguez",
-                      course: "Alternative Investments",
-                      date: "2024-01-15",
-                      type: "Achievement",
-                    },
-                    { name: "David Wilson", course: "Regulatory Compliance", date: "2024-01-12", type: "Attendance" },
-                  ].map((cert, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Award className="h-8 w-8 text-yellow-500" />
-                        <div>
-                          <p className="font-medium">{cert.name}</p>
-                          <p className="text-sm text-gray-600">{cert.course}</p>
-                          <Badge variant="outline" className="text-xs mt-1">
-                            {cert.type}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">{cert.date}</p>
-                        <div className="flex gap-2 mt-2">
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Download className="h-4 w-4 mr-1" />
-                            Download
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Modals */}
       <SendInvitationModal open={showInvitationModal} onOpenChange={setShowInvitationModal} events={mockEvents} />
 
-      <IssueCertificateModal open={showCertificateModal} onOpenChange={setShowCertificateModal} />
+
     </div>
   )
 }
