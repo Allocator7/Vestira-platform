@@ -274,7 +274,7 @@ export default function ManagerClientsPage() {
         return aumB - aumA
       })
     } else if (sortBy === "name") {
-      filtered.sort((a, b) => a.name.localeCompare(b.name))
+      filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
     } else if (sortBy === "lastContact") {
       filtered.sort((a, b) => new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime())
     }
