@@ -438,7 +438,13 @@ export default function IndustryGroupEventsPage() {
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by Event Type" />
+                <SelectValue placeholder="Filter by Event Type">
+                  {filterType === "all" ? "All Event Types" : 
+                   filterType === "conference" ? "Conference" :
+                   filterType === "webinar" ? "Webinar" :
+                   filterType === "workshop" ? "Workshop" :
+                   filterType === "networking" ? "Networking" : "Filter by Event Type"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Event Types</SelectItem>
@@ -450,7 +456,14 @@ export default function IndustryGroupEventsPage() {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by Criteria" />
+                <SelectValue placeholder="Sort by Criteria">
+                  {sortBy === "date-asc" ? "Date (Nearest to Furthest)" :
+                   sortBy === "date-desc" ? "Date (Furthest to Nearest)" :
+                   sortBy === "title-asc" ? "Title (A-Z)" :
+                   sortBy === "title-desc" ? "Title (Z-A)" :
+                   sortBy === "registrations-asc" ? "Registrations (Low to High)" :
+                   sortBy === "registrations-desc" ? "Registrations (High to Low)" : "Sort by Criteria"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="date-asc">Date (Nearest to Furthest)</SelectItem>

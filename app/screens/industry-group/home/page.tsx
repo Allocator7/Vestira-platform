@@ -19,9 +19,11 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { CreateEventModal } from "@/components/industry-group/CreateEventModal"
 
 export default function IndustryGroupHomePage() {
+  const router = useRouter()
   const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false)
 
   const recentActivity = [
@@ -138,9 +140,11 @@ export default function IndustryGroupHomePage() {
               className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px] cursor-pointer"
               onClick={() => {
                 try {
-                  window.location.href = "/screens/industry-group/communications"
+                  router.push("/screens/industry-group/communications")
                 } catch (error) {
                   console.error("Navigation error:", error)
+                  // Fallback to window.location
+                  window.location.href = "/screens/industry-group/communications"
                 }
               }}
             >
