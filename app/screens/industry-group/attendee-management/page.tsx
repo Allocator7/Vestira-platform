@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/components/ui/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { SendInvitationModal } from "@/components/industry-group/SendInvitationModal"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
@@ -152,10 +153,11 @@ export default function AttendeeManagementPage() {
   })
 
   const handleExportData = () => {
-    toast.info("Preparing attendee data for export...", "Export Started")
-    
-    // Always export all attendees - this is the correct behavior
-    const dataToExport = attendees
+    try {
+      toast.info("Preparing attendee data for export...", "Export Started")
+      
+      // Always export all attendees - this is the correct behavior
+      const dataToExport = attendees
     
     // Generate comprehensive CSV data
     const csvHeaders = [
@@ -223,7 +225,11 @@ export default function AttendeeManagementPage() {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
     
-    toast.success(`${filename} has been exported successfully with ${dataToExport.length} attendees.`, "Export Complete")
+      toast.success(`${filename} has been exported successfully with ${dataToExport.length} attendees.`, "Export Complete")
+    } catch (error) {
+      console.error("Export error:", error)
+      toast.error("Failed to export data. Please try again.", "Export Failed")
+    }
   }
 
   const handleBulkAction = (action: string) => {
@@ -318,8 +324,13 @@ export default function AttendeeManagementPage() {
         
       case "view":
         // Open View Profile modal
-        setSelectedAttendeeForView(attendee)
-        setShowViewProfileModal(true)
+        try {
+          setSelectedAttendeeForView(attendee)
+          setShowViewProfileModal(true)
+        } catch (error) {
+          console.error("Error opening view profile:", error)
+          toast.error("Failed to open attendee profile. Please try again.", "Error")
+        }
         break
         
       case "delete":
@@ -699,8 +710,8 @@ export default function AttendeeManagementPage() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Membership Details</h4>
                   <div className="space-y-2 text-sm">
-                    <p><span className="font-medium">Status:</span> <Badge className={getStatusColor(selectedAttendeeForView.status)}>{selectedAttendeeForView.status}</Badge></p>
-                    <p><span className="font-medium">Member Type:</span> <Badge className={getMemberTypeColor(selectedAttendeeForView.memberType)}>{selectedAttendeeForView.memberType}</Badge></p>
+                    <p><span className="font-medium">Status:</span> {getStatusBadge(selectedAttendeeForView.status)}</p>
+                    <p><span className="font-medium">Member Type:</span> {getMemberTypeBadge(selectedAttendeeForView.memberType)}</p>
                     <p><span className="font-medium">Registration Date:</span> {selectedAttendeeForView.registrationDate}</p>
                   </div>
                 </div>
