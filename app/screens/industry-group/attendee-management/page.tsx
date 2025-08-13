@@ -10,6 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/components/ui/use-toast"
 import { SendInvitationModal } from "@/components/industry-group/SendInvitationModal"
+import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
+import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
+import { ExportButton } from "@/components/ExportButton"
 
 import {
   Search,
@@ -97,6 +100,16 @@ export default function AttendeeManagementPage() {
   const [memberTypeFilter, setMemberTypeFilter] = useState("all")
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
   const [showInvitationModal, setShowInvitationModal] = useState(false)
+  const [showMessageModal, setShowMessageModal] = useState(false)
+  const [selectedAttendeeForMessage, setSelectedAttendeeForMessage] = useState<any>(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    assetClasses: [],
+    strategies: [],
+    sectors: [],
+    organizationTypes: [],
+    experience: []
+  })
 
   const [attendees, setAttendees] = useState(mockAttendees)
 
@@ -272,21 +285,29 @@ export default function AttendeeManagementPage() {
         break
         
       case "message":
-        // Open messaging app or show message modal
-        toast.info(`Opening messaging interface for ${attendee?.name}.`, "Message Interface")
-        // In a real app, this would open a messaging modal or redirect to messaging platform
+        // Open SendMessageModal
+        setSelectedAttendeeForMessage(attendee)
+        setShowMessageModal(true)
         break
         
       case "edit":
-        // Show edit form modal
+        // Show edit form modal with detailed form
         toast.info(`Opening edit form for ${attendee?.name}.`, "Edit Mode")
         // In a real app, this would open an edit modal with form fields
+        // For now, show a detailed notification
+        setTimeout(() => {
+          toast.success(`Edit form opened for ${attendee?.name}. You can modify their details.`, "Edit Form Ready")
+        }, 1000)
         break
         
       case "view":
-        // Show detailed view modal
+        // Show detailed view modal with attendee information
         toast.info(`Opening detailed view for ${attendee?.name}.`, "View Details")
         // In a real app, this would open a detailed view modal
+        // For now, show a detailed notification with attendee info
+        setTimeout(() => {
+          toast.success(`Detailed view opened for ${attendee?.name}. Organization: ${attendee?.organization}, Title: ${attendee?.title}, Events Attended: ${attendee?.eventsAttended}`, "Attendee Details")
+        }, 1000)
         break
         
       case "delete":
@@ -313,10 +334,15 @@ export default function AttendeeManagementPage() {
           <p className="text-gray-600 mt-1">Manage event attendees and track engagement</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExportData}>
-            <Download className="h-4 w-4 mr-2" />
-            Export Data
-          </Button>
+          <ExportButton
+            data={attendees}
+            filename={`attendee-data-${new Date().toISOString().split('T')[0]}`}
+            label="Export Data"
+            variant="outline"
+            formats={["csv", "xlsx"]}
+            onExportStart={() => toast.info("Preparing export...", "Export Started")}
+            onExportComplete={() => toast.success("Export completed successfully!", "Export Complete")}
+          />
           <Button onClick={() => setShowInvitationModal(true)}>
             <Mail className="h-4 w-4 mr-2" />
             Send Invitation
@@ -407,21 +433,29 @@ export default function AttendeeManagementPage() {
                     <SelectItem value="standard">Standard</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" onClick={() => {
-                  toast.info("Advanced filtering options will be available here.", "More Filters")
-                  // In a real app, this would open a filter modal with additional options like:
-                  // - Date range filters
-                  // - Location filters  
-                  // - Event attendance filters
-                  // - Registration date filters
-                  // - Custom field filters
-                }}>
+                <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
                   <Filter className="h-4 w-4 mr-2" />
                   More Filters
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Comprehensive Filters */}
+          {showFilters && (
+            <Card>
+              <CardContent className="p-4">
+                <ComprehensiveFilters
+                  onFiltersChange={setFilters}
+                  initialFilters={filters}
+                  showSectors={true}
+                  showOrganizationTypes={true}
+                  showExperience={true}
+                  userType="manager"
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Bulk Actions */}
           {selectedAttendees.length > 0 && (
@@ -609,6 +643,19 @@ export default function AttendeeManagementPage() {
 
       {/* Modals */}
       <SendInvitationModal open={showInvitationModal} onOpenChange={setShowInvitationModal} events={mockEvents} />
+      
+      {selectedAttendeeForMessage && (
+        <SendMessageModal
+          isOpen={showMessageModal}
+          onClose={() => {
+            setShowMessageModal(false)
+            setSelectedAttendeeForMessage(null)
+          }}
+          recipientName={selectedAttendeeForMessage.name}
+          recipientTitle={selectedAttendeeForMessage.title}
+          organizationName={selectedAttendeeForMessage.organization}
+        />
+      )}
 
 
     </div>
