@@ -40,6 +40,7 @@ import {
   Briefcase,
   TrendingUp,
   MoreHorizontal,
+  Trash2,
   LayoutTemplateIcon as Template,
 } from "lucide-react"
 
