@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
+import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
 import {
   Mail,
   Send,
@@ -43,6 +44,12 @@ export default function IndustryGroupCommunicationsPage() {
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([])
   const [showComposeModal, setShowComposeModal] = useState(false)
   const [showTemplatesModal, setShowTemplatesModal] = useState(false)
+  const [showCampaignDetailsModal, setShowCampaignDetailsModal] = useState(false)
+  const [selectedCampaign, setSelectedCampaign] = useState<any>(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({})
+  const [customEmails, setCustomEmails] = useState("")
+  const [showCustomListModal, setShowCustomListModal] = useState(false)
   const [campaignForm, setCampaignForm] = useState({
     name: "",
     type: "",
@@ -169,11 +176,15 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleViewCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
-    toast.info(`Opening detailed view for: ${campaign?.title}`, "Campaign Details")
-    // Simulate opening campaign details view
-    setTimeout(() => {
-      toast.success(`Showing analytics and recipient data for: ${campaign?.title}`, "Campaign Details Loaded")
-    }, 1000)
+    if (!campaign) {
+      toast.error("Campaign not found", "Error")
+      return
+    }
+    
+    // Open a detailed view modal with campaign analytics
+    setSelectedCampaign(campaign)
+    setShowCampaignDetailsModal(true)
+    toast.success(`Showing detailed analytics for: ${campaign.title}`, "Campaign Details")
   }
 
   const handleEditCampaign = (campaignId: string) => {
@@ -183,11 +194,20 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleResendCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
-    toast.info(`Resending: ${campaign?.title}`, "Campaign Resent")
-    // Simulate resend process
-    setTimeout(() => {
-      toast.success(`Campaign "${campaign?.title}" has been resent to all recipients.`, "Campaign Resent Successfully")
-    }, 2000)
+    if (!campaign) {
+      toast.error("Campaign not found", "Error")
+      return
+    }
+    
+    // Show confirmation dialog and then resend
+    if (confirm(`Are you sure you want to resend "${campaign.title}" to all ${campaign.recipients} recipients?`)) {
+      toast.info(`Resending campaign: ${campaign.title}`, "Resending...")
+      
+      // Simulate resend process
+      setTimeout(() => {
+        toast.success(`Campaign "${campaign.title}" has been resent to ${campaign.recipients} recipients successfully.`, "Campaign Resent Successfully")
+      }, 2000)
+    }
   }
 
   const handleUseTemplate = (templateId: string) => {
@@ -259,6 +279,27 @@ export default function IndustryGroupCommunicationsPage() {
   const handleSaveDraft = () => {
     toast.success("Campaign has been saved as draft", "Draft Saved")
     setShowComposeModal(false)
+  }
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
+  }
+
+  const handleCustomListSubmit = () => {
+    if (!customEmails.trim()) {
+      toast.error("Please enter email addresses", "Missing Emails")
+      return
+    }
+    
+    const emailList = customEmails.split('\n').filter(email => email.trim())
+    if (emailList.length === 0) {
+      toast.error("Please enter valid email addresses", "Invalid Emails")
+      return
+    }
+    
+    toast.success(`Custom list created with ${emailList.length} email addresses`, "Custom List Created")
+    setShowCustomListModal(false)
+    setCustomEmails("")
   }
 
   const getStatusColor = (status: string) => {
@@ -383,15 +424,26 @@ export default function IndustryGroupCommunicationsPage() {
                     className="pl-10"
                   />
                 </div>
-                <Button variant="outline" className="gap-2 bg-transparent" onClick={() => {
-                  toast.info("Advanced filtering options will be available here.", "Filters")
-                }}>
+                <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setShowFilters(!showFilters)}>
                   <Filter className="h-4 w-4" />
                   Filters
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Comprehensive Filters */}
+          {showFilters && (
+            <Card>
+              <CardContent className="p-4">
+                <ComprehensiveFilters 
+                  onFiltersChange={handleFiltersChange} 
+                  initialFilters={filters} 
+                  showSectors={false}
+                />
+              </CardContent>
+            </Card>
+          )}
 
           <div className="space-y-4">
             {campaigns.map((campaign) => (
@@ -568,7 +620,24 @@ export default function IndustryGroupCommunicationsPage() {
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.info(`Additional options for template: ${template.name}`, "Template Options")
+                      // Show template options: Duplicate, Delete, Export
+                      const action = prompt(`Choose action for "${template.name}":\n1. Duplicate\n2. Delete\n3. Export\n\nEnter 1, 2, or 3:`)
+                      
+                      switch(action) {
+                        case "1":
+                          toast.success(`Template "${template.name}" duplicated successfully`, "Template Duplicated")
+                          break
+                        case "2":
+                          if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
+                            toast.success(`Template "${template.name}" deleted successfully`, "Template Deleted")
+                          }
+                          break
+                        case "3":
+                          toast.success(`Template "${template.name}" exported successfully`, "Template Exported")
+                          break
+                        default:
+                          toast.info("Action cancelled", "Cancelled")
+                      }
                     }}>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -652,7 +721,7 @@ export default function IndustryGroupCommunicationsPage() {
                     onCheckedChange={(checked) => {
                       if (checked) {
                         setSelectedRecipients([...selectedRecipients, "custom-list"])
-                        toast.info("You can add emails manually or upload an Excel file with email addresses.", "Custom List")
+                        setShowCustomListModal(true)
                       } else {
                         setSelectedRecipients(selectedRecipients.filter((id) => id !== "custom-list"))
                       }
@@ -781,6 +850,84 @@ export default function IndustryGroupCommunicationsPage() {
               </Button>
               <Button variant="outline" onClick={handleSaveDraft}>
                 Save Draft
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Campaign Details Modal */}
+      {selectedCampaign && (
+        <Dialog open={showCampaignDetailsModal} onOpenChange={setShowCampaignDetailsModal}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle>Campaign Details: {selectedCampaign.title}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">{selectedCampaign.recipients}</div>
+                  <div className="text-sm text-gray-600">Total Recipients</div>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">{selectedCampaign.opened}</div>
+                  <div className="text-sm text-gray-600">Opened ({Math.round((selectedCampaign.opened / selectedCampaign.recipients) * 100)}%)</div>
+                </div>
+                <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">{selectedCampaign.clicked}</div>
+                  <div className="text-sm text-gray-600">Clicked ({Math.round((selectedCampaign.clicked / selectedCampaign.recipients) * 100)}%)</div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Campaign Information</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div><span className="font-medium">Subject:</span> {selectedCampaign.subject}</div>
+                    <div><span className="font-medium">Type:</span> {selectedCampaign.type}</div>
+                    <div><span className="font-medium">Status:</span> {selectedCampaign.status}</div>
+                    <div><span className="font-medium">Sent Date:</span> {selectedCampaign.sentDate || 'Not sent yet'}</div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium mb-2">Tags</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedCampaign.tags.map((tag: string, index: number) => (
+                      <Badge key={index} variant="secondary">{tag}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Custom List Modal */}
+      <Dialog open={showCustomListModal} onOpenChange={setShowCustomListModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Custom Email List</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Email Addresses</label>
+              <Textarea
+                placeholder="Enter email addresses (one per line)&#10;example@company.com&#10;another@company.com"
+                rows={8}
+                value={customEmails}
+                onChange={(e) => setCustomEmails(e.target.value)}
+              />
+              <p className="text-sm text-gray-500 mt-1">Enter one email address per line</p>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button onClick={handleCustomListSubmit}>
+                Create List
+              </Button>
+              <Button variant="outline" onClick={() => setShowCustomListModal(false)}>
+                Cancel
               </Button>
             </div>
           </div>
