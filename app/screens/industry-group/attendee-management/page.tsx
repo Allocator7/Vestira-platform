@@ -153,47 +153,47 @@ export default function AttendeeManagementPage() {
   })
 
   const handleExportData = () => {
-    try {
-      toast.info("Preparing attendee data for export...", "Export Started")
-      
-      // Create CSV content
-      const headers = ["Name", "Email", "Organization", "Title", "Phone", "Location", "Status", "Member Type", "Events Attended", "Last Event Date", "Registration Date", "Certificates Earned"]
-      const csvContent = [
-        headers.join(","),
-        ...attendees.map((attendee) =>
-          [
-            attendee.name,
-            attendee.email,
-            attendee.organization,
-            attendee.title,
-            attendee.phone,
-            attendee.location,
-            attendee.status,
-            attendee.memberType,
-            attendee.eventsAttended,
-            attendee.lastEventDate,
-            attendee.registrationDate,
-            attendee.certificatesEarned || 0,
-          ]
-            .map((field) => `"${field}"`)
-            .join(","),
-        ),
-      ].join("\n")
+    const dataToExport = attendees.map((attendee) => ({
+      name: attendee.name,
+      email: attendee.email,
+      organization: attendee.organization,
+      title: attendee.title,
+      phone: attendee.phone,
+      location: attendee.location,
+      status: attendee.status,
+      memberType: attendee.memberType,
+      eventsAttended: attendee.eventsAttended,
+      lastEventDate: attendee.lastEventDate,
+      registrationDate: attendee.registrationDate,
+      certificatesEarned: attendee.certificatesEarned || 0,
+    }))
 
-      // Create and download file
-      const blob = new Blob([csvContent], { type: "text/csv" })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement("a")
-      a.href = url
-      a.download = "attendee-data.csv"
-      a.click()
-      window.URL.revokeObjectURL(url)
-      
-      toast.success(`Attendee data exported successfully with ${attendees.length} attendees.`, "Export Complete")
-    } catch (error) {
-      console.error("Export failed:", error)
-      toast.error("Failed to export data. Please try again.", "Export Failed")
-    }
+    // Create CSV content
+    const headers = Object.keys(dataToExport[0] || {})
+    const csvContent = [
+      headers.join(","),
+      ...dataToExport.map((row) =>
+        headers
+          .map((header) => {
+            const value = row[header as keyof typeof row]
+            return typeof value === "string" && value.includes(",") ? `"${value}"` : value
+          })
+          .join(","),
+      ),
+    ].join("\n")
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `attendee-data-${new Date().toISOString().split("T")[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    toast.success("Attendee data exported successfully!")
   }
 
   const handleBulkAction = (action: string) => {
