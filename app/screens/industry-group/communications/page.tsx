@@ -46,7 +46,7 @@ import {
 
 export default function IndustryGroupCommunicationsPage() {
   const router = useRouter()
-  const toast = useToast()
+  const { toast } = useToast()
   
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -181,12 +181,12 @@ export default function IndustryGroupCommunicationsPage() {
   // Button handlers
   const handleNewCampaign = () => {
     setShowComposeModal(true)
-    toast.info("Opening campaign composer", "New Campaign")
+    toast({ title: "New Campaign", description: "Opening campaign composer" })
   }
 
   const handleManageTemplates = () => {
     setShowTemplatesModal(true)
-    toast.info("Opening template manager", "Templates")
+    toast({ title: "Templates", description: "Opening template manager" })
   }
 
 
@@ -194,35 +194,35 @@ export default function IndustryGroupCommunicationsPage() {
   const handleViewCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
     if (!campaign) {
-      toast.error("Campaign not found", "Error")
+      toast({ title: "Error", description: "Campaign not found", variant: "destructive" })
       return
     }
     
     // Open a detailed view modal with campaign analytics
     setSelectedCampaign(campaign)
     setShowCampaignDetailsModal(true)
-    toast.success(`Showing detailed analytics for: ${campaign.title}`, "Campaign Details")
+    toast({ title: "Campaign Details", description: `Showing detailed analytics for: ${campaign.title}` })
   }
 
   const handleEditCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
-    toast.info(`Opening editor for: ${campaign?.title}`, "Edit Campaign")
+    toast({ title: "Edit Campaign", description: `Opening editor for: ${campaign?.title}` })
   }
 
   const handleResendCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
     if (!campaign) {
-      toast.error("Campaign not found", "Error")
+      toast({ title: "Error", description: "Campaign not found", variant: "destructive" })
       return
     }
     
     // Show confirmation dialog and then resend
     if (confirm(`Are you sure you want to resend "${campaign.title}" to all ${campaign.recipients} recipients?`)) {
-      toast.info(`Resending campaign: ${campaign.title}`, "Resending...")
+      toast({ title: "Resending...", description: `Resending campaign: ${campaign.title}` })
       
       // Simulate resend process
       setTimeout(() => {
-        toast.success(`Campaign "${campaign.title}" has been resent to ${campaign.recipients} recipients successfully.`, "Campaign Resent Successfully")
+        toast({ title: "Campaign Resent Successfully", description: `Campaign "${campaign.title}" has been resent to ${campaign.recipients} recipients successfully.` })
       }, 2000)
     }
   }
@@ -231,36 +231,36 @@ export default function IndustryGroupCommunicationsPage() {
     const template = templates.find((t) => t.id === templateId)
     setShowTemplatesModal(false)
     setShowComposeModal(true)
-    toast.success(`Using template: ${template?.name}`, "Template Applied")
+    toast({ title: "Template Applied", description: `Using template: ${template?.name}` })
   }
 
   const handleEditTemplate = (templateId: string) => {
     const template = templates.find((t) => t.id === templateId)
     if (!template) {
-      toast.error("Template not found", "Error")
+      toast({ title: "Error", description: "Template not found", variant: "destructive" })
       return
     }
     
     // Open template editor modal
     setSelectedTemplate(template)
     setShowTemplateEditorModal(true)
-    toast.success(`Opening editor for: ${template.name}`, "Edit Template")
+    toast({ title: "Edit Template", description: `Opening editor for: ${template.name}` })
   }
 
   const handleSendNow = () => {
     if (!campaignForm.name || !campaignForm.subject || !campaignForm.message) {
-      toast.error("Please fill in all required fields", "Missing Information")
+      toast({ title: "Missing Information", description: "Please fill in all required fields", variant: "destructive" })
       return
     }
 
     const isVeMailCampaign = selectedRecipients.some((id) => id === "all-managers" || id === "all-allocators")
 
-    toast.success(
-      isVeMailCampaign
+    toast({
+      title: isVeMailCampaign ? "VeMail Campaign Sent" : "Campaign Sent",
+      description: isVeMailCampaign
         ? `VeMail campaign "${campaignForm.name}" has been sent to non-connected recipients!`
-        : `Campaign "${campaignForm.name}" has been sent successfully!`,
-      isVeMailCampaign ? "VeMail Campaign Sent" : "Campaign Sent"
-    )
+        : `Campaign "${campaignForm.name}" has been sent successfully!`
+    })
 
     // Reset form and close modal
     setCampaignForm({
@@ -277,16 +277,16 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleSchedule = () => {
     if (!campaignForm.name || !campaignForm.subject || !campaignForm.message) {
-      toast.error("Please fill in all required fields", "Missing Information")
+      toast({ title: "Missing Information", description: "Please fill in all required fields", variant: "destructive" })
       return
     }
 
     if (!campaignForm.scheduledDate || !campaignForm.scheduledTime) {
-      toast.error("Please select a date and time for scheduling", "Missing Schedule Information")
+      toast({ title: "Missing Schedule Information", description: "Please select a date and time for scheduling", variant: "destructive" })
       return
     }
 
-    toast.success(`Campaign "${campaignForm.name}" has been scheduled for ${campaignForm.scheduledDate} at ${campaignForm.scheduledTime}!`, "Campaign Scheduled")
+    toast({ title: "Campaign Scheduled", description: `Campaign "${campaignForm.name}" has been scheduled for ${campaignForm.scheduledDate} at ${campaignForm.scheduledTime}!` })
     
     // Reset form and close modal
     setCampaignForm({
@@ -302,7 +302,7 @@ export default function IndustryGroupCommunicationsPage() {
   }
 
   const handleSaveDraft = () => {
-    toast.success("Campaign has been saved as draft", "Draft Saved")
+    toast({ title: "Draft Saved", description: "Campaign has been saved as draft" })
     setShowComposeModal(false)
   }
 
@@ -318,17 +318,17 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleCustomListSubmit = () => {
     if (!customEmails.trim()) {
-      toast.error("Please enter email addresses", "Missing Emails")
+      toast({ title: "Missing Emails", description: "Please enter email addresses", variant: "destructive" })
       return
     }
     
     const emailList = customEmails.split('\n').filter(email => email.trim())
     if (emailList.length === 0) {
-      toast.error("Please enter valid email addresses", "Invalid Emails")
+      toast({ title: "Invalid Emails", description: "Please enter valid email addresses", variant: "destructive" })
       return
     }
     
-    toast.success(`Custom list created with ${emailList.length} email addresses`, "Custom List Created")
+    toast({ title: "Custom List Created", description: `Custom list created with ${emailList.length} email addresses` })
     setShowCustomListModal(false)
     setCustomEmails("")
   }
@@ -347,11 +347,11 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleTemplateSave = () => {
     if (!templateForm.name.trim() || !templateForm.content.trim()) {
-      toast.error("Please fill in template name and content", "Missing Information")
+      toast({ title: "Missing Information", description: "Please fill in template name and content", variant: "destructive" })
       return
     }
     
-    toast.success(`Template "${templateForm.name}" saved successfully`, "Template Saved")
+    toast({ title: "Template Saved", description: `Template "${templateForm.name}" saved successfully` })
     setShowTemplateEditorModal(false)
     setTemplateForm({ name: "", description: "", content: "" })
     setSelectedTemplate(null)
@@ -685,13 +685,13 @@ export default function IndustryGroupCommunicationsPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => {
-                          toast.success(`Template "${template.name}" duplicated successfully`, "Template Duplicated")
+                          toast({ title: "Template Duplicated", description: `Template "${template.name}" duplicated successfully` })
                         }}>
                           <FileText className="h-4 w-4 mr-2" />
                           Duplicate
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => {
-                          toast.success(`Template "${template.name}" exported successfully`, "Template Exported")
+                          toast({ title: "Template Exported", description: `Template "${template.name}" exported successfully` })
                         }}>
                           <Download className="h-4 w-4 mr-2" />
                           Export
@@ -700,7 +700,7 @@ export default function IndustryGroupCommunicationsPage() {
                         <DropdownMenuItem 
                           onClick={() => {
                             if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
-                              toast.success(`Template "${template.name}" deleted successfully`, "Template Deleted")
+                              toast({ title: "Template Deleted", description: `Template "${template.name}" deleted successfully` })
                             }
                           }}
                           className="text-red-600"
