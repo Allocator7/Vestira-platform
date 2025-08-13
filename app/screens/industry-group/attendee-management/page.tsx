@@ -12,7 +12,6 @@ import { useToast } from "@/components/ui/use-toast"
 import { SendInvitationModal } from "@/components/industry-group/SendInvitationModal"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
-import { ExportButton } from "@/components/ExportButton"
 
 import {
   Search,
@@ -151,9 +150,12 @@ export default function AttendeeManagementPage() {
   })
 
   const handleExportData = () => {
-    toast.info("Your attendee data is being prepared for download.", "Export Started")
+    toast.info("Preparing attendee data for export...", "Export Started")
     
-    // Generate CSV data
+    // Use filtered attendees if filters are applied, otherwise use all attendees
+    const dataToExport = filteredAttendees.length > 0 ? filteredAttendees : attendees
+    
+    // Generate comprehensive CSV data
     const csvHeaders = [
       "Name",
       "Email", 
@@ -165,10 +167,11 @@ export default function AttendeeManagementPage() {
       "Member Type",
       "Events Attended",
       "Last Event Date",
-      "Registration Date"
+      "Registration Date",
+      "Certificates Earned"
     ]
     
-    const csvData = attendees.map(attendee => [
+    const csvData = dataToExport.map(attendee => [
       attendee.name,
       attendee.email,
       attendee.organization,
@@ -179,25 +182,46 @@ export default function AttendeeManagementPage() {
       attendee.memberType,
       attendee.eventsAttended,
       attendee.lastEventDate,
-      attendee.registrationDate
+      attendee.registrationDate,
+      attendee.certificatesEarned || 0
     ])
     
-    const csvContent = [csvHeaders, ...csvData]
-      .map(row => row.map(field => `"${field}"`).join(','))
+    // Add summary row
+    const summaryRow = [
+      `Total Attendees: ${dataToExport.length}`,
+      "",
+      "",
+      "",
+      "",
+      "",
+      `Active: ${dataToExport.filter(a => a.status === 'confirmed' || a.status === 'attended').length}`,
+      `Premium: ${dataToExport.filter(a => a.memberType === 'premium').length}`,
+      `Total Events: ${dataToExport.reduce((sum, a) => sum + a.eventsAttended, 0)}`,
+      "",
+      "",
+      `Total Certificates: ${dataToExport.reduce((sum, a) => sum + (a.certificatesEarned || 0), 0)}`
+    ]
+    
+    const csvContent = [csvHeaders, ...csvData, [], summaryRow]
+      .map(row => row.map(field => `"${field || ''}"`).join(','))
       .join('\n')
     
-    // Create and download file
+    // Create and download file with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0]
+    const filename = `attendee-data-${timestamp}.csv`
+    
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement("a")
     const url = URL.createObjectURL(blob)
     link.setAttribute("href", url)
-    link.setAttribute("download", `attendee-data-${new Date().toISOString().split('T')[0]}.csv`)
+    link.setAttribute("download", filename)
     link.style.visibility = 'hidden'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    URL.revokeObjectURL(url)
     
-    toast.success("Attendee data has been exported successfully.", "Export Complete")
+    toast.success(`${filename} has been exported successfully with ${dataToExport.length} attendees.`, "Export Complete")
   }
 
   const handleBulkAction = (action: string) => {
@@ -290,23 +314,13 @@ export default function AttendeeManagementPage() {
         setShowMessageModal(true)
         break
         
-      case "edit":
-        // Show edit form modal with detailed form
-        toast.info(`Opening edit form for ${attendee?.name}.`, "Edit Mode")
-        // In a real app, this would open an edit modal with form fields
-        // For now, show a detailed notification
-        setTimeout(() => {
-          toast.success(`Edit form opened for ${attendee?.name}. You can modify their details.`, "Edit Form Ready")
-        }, 1000)
-        break
-        
       case "view":
         // Show detailed view modal with attendee information
-        toast.info(`Opening detailed view for ${attendee?.name}.`, "View Details")
-        // In a real app, this would open a detailed view modal
-        // For now, show a detailed notification with attendee info
+        toast.info(`Opening profile view for ${attendee?.name}.`, "View Profile")
+        // In a real app, this would open a detailed profile modal
+        // For now, show a detailed notification with comprehensive attendee info
         setTimeout(() => {
-          toast.success(`Detailed view opened for ${attendee?.name}. Organization: ${attendee?.organization}, Title: ${attendee?.title}, Events Attended: ${attendee?.eventsAttended}`, "Attendee Details")
+          toast.success(`Profile view opened for ${attendee?.name}. Organization: ${attendee?.organization}, Title: ${attendee?.title}, Events Attended: ${attendee?.eventsAttended}, Status: ${attendee?.status}, Member Type: ${attendee?.memberType}`, "Attendee Profile")
         }, 1000)
         break
         
@@ -334,15 +348,14 @@ export default function AttendeeManagementPage() {
           <p className="text-gray-600 mt-1">Manage event attendees and track engagement</p>
         </div>
         <div className="flex gap-2">
-          <ExportButton
-            data={attendees}
-            filename={`attendee-data-${new Date().toISOString().split('T')[0]}`}
-            label="Export Data"
-            variant="outline"
-            formats={["csv", "xlsx"]}
-            onExportStart={() => toast.info("Preparing export...", "Export Started")}
-            onExportComplete={() => toast.success("Export completed successfully!", "Export Complete")}
-          />
+          <Button 
+            variant="outline" 
+            onClick={handleExportData}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
+            Export Data
+          </Button>
           <Button onClick={() => setShowInvitationModal(true)}>
             <Mail className="h-4 w-4 mr-2" />
             Send Invitation
@@ -551,22 +564,17 @@ export default function AttendeeManagementPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "edit")}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Profile
-                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "view")}>
                               <Eye className="h-4 w-4 mr-2" />
-                              View Details
+                              View Profile
                             </DropdownMenuItem>
-
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-red-600"
                               onClick={() => handleAttendeeAction(attendee.id, "delete")}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Remove
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
