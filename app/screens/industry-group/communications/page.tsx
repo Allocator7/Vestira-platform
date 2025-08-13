@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
-// import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
+import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -306,7 +306,13 @@ export default function IndustryGroupCommunicationsPage() {
     setShowComposeModal(false)
   }
 
-  const handleFiltersChange = (newFilters: any) => {
+  const handleFiltersChange = (newFilters: {
+    assetClasses: string[]
+    strategies: string[]
+    sectors?: string[]
+    organizationTypes?: string[]
+    experience?: string[]
+  }) => {
     setFilters(newFilters)
   }
 
@@ -485,7 +491,14 @@ export default function IndustryGroupCommunicationsPage() {
           {showFilters && (
             <Card>
               <CardContent className="p-4">
-                <p className="text-gray-600">Advanced filtering options will be available here.</p>
+                <ComprehensiveFilters 
+                  onFiltersChange={handleFiltersChange} 
+                  initialFilters={filters as any} 
+                  showSectors={false}
+                  showOrganizationTypes={false}
+                  showExperience={false}
+                  userType="manager"
+                />
               </CardContent>
             </Card>
           )}
