@@ -101,6 +101,8 @@ export default function AttendeeManagementPage() {
   const [showInvitationModal, setShowInvitationModal] = useState(false)
   const [showMessageModal, setShowMessageModal] = useState(false)
   const [selectedAttendeeForMessage, setSelectedAttendeeForMessage] = useState<any>(null)
+  const [showViewProfileModal, setShowViewProfileModal] = useState(false)
+  const [selectedAttendeeForView, setSelectedAttendeeForView] = useState<any>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     assetClasses: [],
@@ -152,8 +154,8 @@ export default function AttendeeManagementPage() {
   const handleExportData = () => {
     toast.info("Preparing attendee data for export...", "Export Started")
     
-    // Use filtered attendees if filters are applied, otherwise use all attendees
-    const dataToExport = filteredAttendees.length > 0 ? filteredAttendees : attendees
+    // Always export all attendees - this is the correct behavior
+    const dataToExport = attendees
     
     // Generate comprehensive CSV data
     const csvHeaders = [
@@ -315,13 +317,9 @@ export default function AttendeeManagementPage() {
         break
         
       case "view":
-        // Show detailed view modal with attendee information
-        toast.info(`Opening profile view for ${attendee?.name}.`, "View Profile")
-        // In a real app, this would open a detailed profile modal
-        // For now, show a detailed notification with comprehensive attendee info
-        setTimeout(() => {
-          toast.success(`Profile view opened for ${attendee?.name}. Organization: ${attendee?.organization}, Title: ${attendee?.title}, Events Attended: ${attendee?.eventsAttended}, Status: ${attendee?.status}, Member Type: ${attendee?.memberType}`, "Attendee Profile")
-        }, 1000)
+        // Open View Profile modal
+        setSelectedAttendeeForView(attendee)
+        setShowViewProfileModal(true)
         break
         
       case "delete":
@@ -663,6 +661,72 @@ export default function AttendeeManagementPage() {
           recipientTitle={selectedAttendeeForMessage.title}
           organizationName={selectedAttendeeForMessage.organization}
         />
+      )}
+
+      {/* View Profile Modal */}
+      {selectedAttendeeForView && (
+        <Dialog open={showViewProfileModal} onOpenChange={setShowViewProfileModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Attendee Profile</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Header with avatar and basic info */}
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-semibold">
+                  {selectedAttendeeForView.name
+                    .split(" ")
+                    .map((n: string) => n[0])
+                    .join("")}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{selectedAttendeeForView.name}</h3>
+                  <p className="text-gray-600">{selectedAttendeeForView.title}</p>
+                  <p className="text-sm text-gray-500">{selectedAttendeeForView.organization}</p>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Contact Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Email:</span> {selectedAttendeeForView.email}</p>
+                    <p><span className="font-medium">Phone:</span> {selectedAttendeeForView.phone}</p>
+                    <p><span className="font-medium">Location:</span> {selectedAttendeeForView.location}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Membership Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Status:</span> <Badge className={getStatusColor(selectedAttendeeForView.status)}>{selectedAttendeeForView.status}</Badge></p>
+                    <p><span className="font-medium">Member Type:</span> <Badge className={getMemberTypeColor(selectedAttendeeForView.memberType)}>{selectedAttendeeForView.memberType}</Badge></p>
+                    <p><span className="font-medium">Registration Date:</span> {selectedAttendeeForView.registrationDate}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Engagement Statistics */}
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Engagement Statistics</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">{selectedAttendeeForView.eventsAttended}</p>
+                    <p className="text-sm text-gray-600">Events Attended</p>
+                  </div>
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{selectedAttendeeForView.certificatesEarned || 0}</p>
+                    <p className="text-sm text-gray-600">Certificates Earned</p>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <p className="text-2xl font-bold text-purple-600">{selectedAttendeeForView.lastEventDate}</p>
+                    <p className="text-sm text-gray-600">Last Event</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
 
 
