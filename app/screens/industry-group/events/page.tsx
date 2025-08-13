@@ -254,27 +254,85 @@ export default function IndustryGroupEventsPage() {
   }
 
   const handleExportData = () => {
-    // Mock export functionality
-    toast({
-      title: "Export Started",
-      description: "Your event data is being prepared for download.",
-    })
-    // Simulate export process
-    setTimeout(() => {
+    try {
+      // Mock export functionality
       toast({
-        title: "Export Complete",
-        description: "Event data has been exported successfully.",
+        title: "Export Started",
+        description: "Your event data is being prepared for download.",
       })
-    }, 2000)
+      
+      // Simulate export process with actual data preparation
+      const exportData = events.map(event => ({
+        title: event.title,
+        type: event.type,
+        status: event.status,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: event.location,
+        registrations: event.registrations,
+        maxAttendees: event.maxAttendees,
+        confirmed: event.confirmed,
+        attended: event.attended
+      }))
+      
+      // Simulate file download
+      setTimeout(() => {
+        toast({
+          title: "Export Complete",
+          description: `Event data has been exported successfully. (${exportData.length} events)`,
+        })
+      }, 2000)
+    } catch (error) {
+      console.error("Export error:", error)
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting the data. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleShareEvent = (event: any) => {
-    // Mock share functionality
-    navigator.clipboard.writeText(`Check out this event: ${event.title}`)
-    toast({
-      title: "Link Copied",
-      description: "Event link has been copied to clipboard.",
-    })
+    try {
+      // Create a shareable link for the event
+      const shareText = `Check out this event: ${event.title}\n\nDate: ${event.startDate}${event.startDate !== event.endDate ? ` - ${event.endDate}` : ''}\nTime: ${event.startTime} - ${event.endTime}\nLocation: ${event.location}\n\nRegister now!`
+      
+      // Try to use native sharing if available
+      if (navigator.share) {
+        navigator.share({
+          title: event.title,
+          text: shareText,
+          url: window.location.href
+        }).then(() => {
+          toast({
+            title: "Event Shared",
+            description: `${event.title} has been shared successfully.`,
+          })
+        }).catch((error) => {
+          console.error('Error sharing:', error)
+          // Fallback to clipboard
+          navigator.clipboard.writeText(shareText)
+          toast({
+            title: "Link Copied",
+            description: "Event details have been copied to clipboard.",
+          })
+        })
+      } else {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(shareText)
+        toast({
+          title: "Link Copied",
+          description: "Event details have been copied to clipboard.",
+        })
+      }
+    } catch (error) {
+      console.error("Share error:", error)
+      toast({
+        title: "Share Failed",
+        description: "There was an error sharing the event. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleViewEvent = (event: any) => {
@@ -351,10 +409,10 @@ export default function IndustryGroupEventsPage() {
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by type" />
+                <SelectValue placeholder="Event Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">All Event Types</SelectItem>
                 <SelectItem value="conference">Conference</SelectItem>
                 <SelectItem value="webinar">Webinar</SelectItem>
                 <SelectItem value="workshop">Workshop</SelectItem>
@@ -363,7 +421,7 @@ export default function IndustryGroupEventsPage() {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort Events" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="date-asc">Date (Nearest to Furthest)</SelectItem>

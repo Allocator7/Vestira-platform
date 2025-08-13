@@ -418,28 +418,6 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
                           Check In
                         </Button>
                       )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="sm" variant="outline">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "email")}>
-                            <Mail className="h-4 w-4 mr-2" />
-                            Send Email
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "message")}>
-                            <MessageSquare className="h-4 w-4 mr-2" />
-                            Send Message
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "edit")}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Details
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
                   </div>
                 ))}
@@ -455,11 +433,38 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
           <Button
             variant="outline"
             onClick={() => {
-              toast({ title: "Export Started", description: "Attendee data is being prepared." })
-              // Simulate export process
-              setTimeout(() => {
-                toast({ title: "Export Complete", description: "Attendee data has been exported successfully." })
-              }, 2000)
+              try {
+                toast({ title: "Export Started", description: "Attendee data is being prepared." })
+                
+                // Prepare export data
+                const exportData = attendees.map(attendee => ({
+                  name: attendee.name,
+                  email: attendee.email,
+                  organization: attendee.organization,
+                  title: attendee.title,
+                  status: attendee.status,
+                  registrationDate: attendee.registrationDate,
+                  phone: attendee.phone,
+                  location: attendee.location,
+                  memberType: attendee.memberType,
+                  checkInTime: attendee.checkInTime
+                }))
+                
+                // Simulate export process
+                setTimeout(() => {
+                  toast({ 
+                    title: "Export Complete", 
+                    description: `Attendee data has been exported successfully. (${exportData.length} attendees)` 
+                  })
+                }, 2000)
+              } catch (error) {
+                console.error("Export error:", error)
+                toast({
+                  title: "Export Failed",
+                  description: "There was an error exporting the attendee data. Please try again.",
+                  variant: "destructive",
+                })
+              }
             }}
           >
             <Download className="h-4 w-4 mr-2" />

@@ -199,6 +199,7 @@ export function VestiraSidebar({
       icon: Network,
       route: "/screens/industry-group/connection-center",
     },
+    { id: "market-insights", label: "Market Insights", icon: BookOpen, route: "/screens/industry-group/market-insights" },
     {
       id: "inbox",
       label: "Inbox",
