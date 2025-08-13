@@ -14,6 +14,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/components/ui/use-toast"
 import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
   Mail,
   Send,
   Users,
@@ -50,6 +57,13 @@ export default function IndustryGroupCommunicationsPage() {
   const [filters, setFilters] = useState({})
   const [customEmails, setCustomEmails] = useState("")
   const [showCustomListModal, setShowCustomListModal] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
+  const [showTemplateEditorModal, setShowTemplateEditorModal] = useState(false)
+  const [templateForm, setTemplateForm] = useState({
+    name: "",
+    description: "",
+    content: "",
+  })
   const [campaignForm, setCampaignForm] = useState({
     name: "",
     type: "",
@@ -219,7 +233,15 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleEditTemplate = (templateId: string) => {
     const template = templates.find((t) => t.id === templateId)
-    toast.info(`Editing template: ${template?.name}`, "Edit Template")
+    if (!template) {
+      toast.error("Template not found", "Error")
+      return
+    }
+    
+    // Open template editor modal
+    setSelectedTemplate(template)
+    setShowTemplateEditorModal(true)
+    toast.success(`Opening editor for: ${template.name}`, "Edit Template")
   }
 
   const handleSendNow = () => {
@@ -300,6 +322,30 @@ export default function IndustryGroupCommunicationsPage() {
     toast.success(`Custom list created with ${emailList.length} email addresses`, "Custom List Created")
     setShowCustomListModal(false)
     setCustomEmails("")
+  }
+
+  // Filter campaigns based on search query
+  const filteredCampaigns = campaigns.filter((campaign) => {
+    const searchLower = searchQuery.toLowerCase()
+    return (
+      campaign.title.toLowerCase().includes(searchLower) ||
+      campaign.subject.toLowerCase().includes(searchLower) ||
+      campaign.type.toLowerCase().includes(searchLower) ||
+      campaign.status.toLowerCase().includes(searchLower) ||
+      campaign.tags.some(tag => tag.toLowerCase().includes(searchLower))
+    )
+  })
+
+  const handleTemplateSave = () => {
+    if (!templateForm.name.trim() || !templateForm.content.trim()) {
+      toast.error("Please fill in template name and content", "Missing Information")
+      return
+    }
+    
+    toast.success(`Template "${templateForm.name}" saved successfully`, "Template Saved")
+    setShowTemplateEditorModal(false)
+    setTemplateForm({ name: "", description: "", content: "" })
+    setSelectedTemplate(null)
   }
 
   const getStatusColor = (status: string) => {
@@ -446,7 +492,7 @@ export default function IndustryGroupCommunicationsPage() {
           )}
 
           <div className="space-y-4">
-            {campaigns.map((campaign) => (
+            {filteredCampaigns.map((campaign) => (
               <Card key={campaign.id} className="bg-white shadow-vestira hover:shadow-vestira-lg transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4">
@@ -619,28 +665,39 @@ export default function IndustryGroupCommunicationsPage() {
                     <Button variant="outline" size="sm" onClick={() => handleEditTemplate(template.id)}>
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => {
-                      // Show template options: Duplicate, Delete, Export
-                      const action = prompt(`Choose action for "${template.name}":\n1. Duplicate\n2. Delete\n3. Export\n\nEnter 1, 2, or 3:`)
-                      
-                      switch(action) {
-                        case "1":
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => {
                           toast.success(`Template "${template.name}" duplicated successfully`, "Template Duplicated")
-                          break
-                        case "2":
-                          if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
-                            toast.success(`Template "${template.name}" deleted successfully`, "Template Deleted")
-                          }
-                          break
-                        case "3":
+                        }}>
+                          <FileText className="h-4 w-4 mr-2" />
+                          Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
                           toast.success(`Template "${template.name}" exported successfully`, "Template Exported")
-                          break
-                        default:
-                          toast.info("Action cancelled", "Cancelled")
-                      }
-                    }}>
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
+                        }}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Export
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
+                              toast.success(`Template "${template.name}" deleted successfully`, "Template Deleted")
+                            }
+                          }}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </CardContent>
               </Card>
@@ -927,6 +984,75 @@ export default function IndustryGroupCommunicationsPage() {
                 Create List
               </Button>
               <Button variant="outline" onClick={() => setShowCustomListModal(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Editor Modal */}
+      <Dialog open={showTemplateEditorModal} onOpenChange={setShowTemplateEditorModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Template: {selectedTemplate?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Template Name</label>
+                <Input
+                  placeholder="Enter template name"
+                  value={templateForm.name}
+                  onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Template Type</label>
+                <Select
+                  value={selectedTemplate?.type || ""}
+                  onValueChange={(value) => setSelectedTemplate({ ...selectedTemplate, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="event-announcement">Event Announcement</SelectItem>
+                    <SelectItem value="newsletter">Newsletter</SelectItem>
+                    <SelectItem value="event-reminder">Event Reminder</SelectItem>
+                    <SelectItem value="survey">Survey</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <Input
+                placeholder="Enter template description"
+                value={templateForm.description}
+                onChange={(e) => setTemplateForm({ ...templateForm, description: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Template Content</label>
+              <Textarea
+                placeholder="Enter your template content with placeholders like {{name}}, {{company}}, etc."
+                rows={12}
+                value={templateForm.content}
+                onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}
+              />
+              <p className="text-sm text-gray-500">
+                Use placeholders like {{name}}, {{company}}, {{event_date}} for dynamic content
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button onClick={handleTemplateSave}>
+                Save Template
+              </Button>
+              <Button variant="outline" onClick={() => setShowTemplateEditorModal(false)}>
                 Cancel
               </Button>
             </div>
