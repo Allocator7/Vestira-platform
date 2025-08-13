@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 import { InviteMemberModal } from "@/components/industry-group/InviteMemberModal"
 import { MemberProfileModal } from "@/components/industry-group/MemberProfileModal"
+import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
 import {
   Search,
   Filter,
@@ -126,7 +127,7 @@ const initialMembers: Member[] = [
 ]
 
 export default function MemberDirectoryPage() {
-  const { toast } = useToast()
+  const toast = useToast()
   const [members, setMembers] = useState<Member[]>(initialMembers)
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
@@ -142,6 +143,8 @@ export default function MemberDirectoryPage() {
   const [selectedMemberForInMail, setSelectedMemberForInMail] = useState<any>(null)
   const [inMailSubject, setInMailSubject] = useState("")
   const [inMailMessage, setInMailMessage] = useState("")
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({})
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -207,45 +210,65 @@ export default function MemberDirectoryPage() {
 
   const handleBulkEmail = async () => {
     if (selectedMembers.length === 0) {
-      toast({
-        title: "No Members Selected",
-        description: "Please select members to send emails to.",
-        variant: "destructive",
-      })
+          toast.error("Please select members to send emails to.", "No Members Selected")
       return
     }
 
     setIsLoading(true)
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    toast({
-      title: "Emails Sent",
-      description: `Sent emails to ${selectedMembers.length} selected members.`,
-    })
+    toast.success(`Sent emails to ${selectedMembers.length} selected members.`, "Emails Sent")
 
     setIsLoading(false)
     setSelectedMembers([])
   }
 
-  const handleBulkExport = async () => {
-    if (selectedMembers.length === 0) {
-      toast({
-        title: "No Members Selected",
-        description: "Please select members to export.",
-        variant: "destructive",
-      })
-      return
-    }
+  const handleBulkExport = () => {
+    const dataToExport = members.map((member) => ({
+      name: member.name,
+      type: member.type,
+      contactPerson: member.contactPerson,
+      email: member.email,
+      phone: member.phone,
+      location: member.location,
+      memberSince: member.memberSince,
+      aum: member.aum,
+      status: member.status,
+      website: member.website,
+      specializations: member.specializations.join(", "),
+      membershipTier: member.membershipTier,
+    }))
 
-    setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Create CSV content
+    const headers = Object.keys(dataToExport[0] || {})
+    const csvContent = [
+      headers.join(","),
+      ...dataToExport.map((row) =>
+        headers
+          .map((header) => {
+            const value = row[header as keyof typeof row]
+            return typeof value === "string" && value.includes(",") ? `"${value}"` : value
+          })
+          .join(","),
+      ),
+    ].join("\n")
 
-    toast({
-      title: "Export Complete",
-      description: `Exported ${selectedMembers.length} member records.`,
-    })
+    // Download CSV
+    const blob = new Blob([csvContent], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `member-directory-${new Date().toISOString().split("T")[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
 
-    setIsLoading(false)
+    toast.success("Member directory exported successfully!")
+  }
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
   }
 
   const handleDeleteMember = async (memberId: string) => {
@@ -254,10 +277,7 @@ export default function MemberDirectoryPage() {
 
     setMembers((prev) => prev.filter((member) => member.id !== memberId))
 
-    toast({
-      title: "Member Removed",
-      description: "Member has been removed from the directory.",
-    })
+    toast.success("Member has been removed from the directory.", "Member Removed")
 
     setIsLoading(false)
   }
@@ -269,21 +289,14 @@ export default function MemberDirectoryPage() {
 
   const handleSendInMail = async () => {
     if (!inMailSubject.trim() || !inMailMessage.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in both subject and message fields.",
-        variant: "destructive",
-      })
+          toast.error("Please fill in both subject and message fields.", "Missing Information")
       return
     }
 
     setIsLoading(true)
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
-    toast({
-      title: "VeMail Sent",
-      description: `Your message has been sent to ${selectedMemberForInMail?.name}.`,
-    })
+    toast.success(`Your message has been sent to ${selectedMemberForInMail?.name}.`, "VeMail Sent")
 
     setIsLoading(false)
     setInMailModalOpen(false)
@@ -368,55 +381,26 @@ export default function MemberDirectoryPage() {
                 />
               </div>
             </div>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Types" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="Public Pension">Public Pension</SelectItem>
-                <SelectItem value="Insurance">Insurance</SelectItem>
-                <SelectItem value="Private Equity">Private Equity</SelectItem>
-                <SelectItem value="Hedge Fund">Hedge Fund</SelectItem>
-                <SelectItem value="Asset Manager">Asset Manager</SelectItem>
-                <SelectItem value="Consultant">Consultant</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={tierFilter} onValueChange={setTierFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Tiers" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Tiers</SelectItem>
-                <SelectItem value="standard">Standard</SelectItem>
-                <SelectItem value="premium">Premium</SelectItem>
-                <SelectItem value="platinum">Platinum</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={() => {
-              toast({
-                title: "More Filters",
-                description: "Advanced filtering options will be available here.",
-              })
-            }}>
+            <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
               <Filter className="h-4 w-4 mr-2" />
               More Filters
             </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Comprehensive Filters */}
+      {showFilters && (
+        <Card>
+          <CardContent className="p-4">
+            <ComprehensiveFilters 
+              onFiltersChange={handleFiltersChange} 
+              initialFilters={filters} 
+              showSectors={false}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Bulk Actions */}
       {selectedMembers.length > 0 && (
