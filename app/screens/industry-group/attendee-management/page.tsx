@@ -156,78 +156,42 @@ export default function AttendeeManagementPage() {
     try {
       toast.info("Preparing attendee data for export...", "Export Started")
       
-      // Always export all attendees - this is the correct behavior
-      const dataToExport = attendees
-    
-    // Generate comprehensive CSV data
-    const csvHeaders = [
-      "Name",
-      "Email", 
-      "Organization",
-      "Title",
-      "Phone",
-      "Location",
-      "Status",
-      "Member Type",
-      "Events Attended",
-      "Last Event Date",
-      "Registration Date",
-      "Certificates Earned"
-    ]
-    
-    const csvData = dataToExport.map(attendee => [
-      attendee.name,
-      attendee.email,
-      attendee.organization,
-      attendee.title,
-      attendee.phone,
-      attendee.location,
-      attendee.status,
-      attendee.memberType,
-      attendee.eventsAttended,
-      attendee.lastEventDate,
-      attendee.registrationDate,
-      attendee.certificatesEarned || 0
-    ])
-    
-    // Add summary row
-    const summaryRow = [
-      `Total Attendees: ${dataToExport.length}`,
-      "",
-      "",
-      "",
-      "",
-      "",
-      `Active: ${dataToExport.filter(a => a.status === 'confirmed' || a.status === 'attended').length}`,
-      `Premium: ${dataToExport.filter(a => a.memberType === 'premium').length}`,
-      `Total Events: ${dataToExport.reduce((sum, a) => sum + a.eventsAttended, 0)}`,
-      "",
-      "",
-      `Total Certificates: ${dataToExport.reduce((sum, a) => sum + (a.certificatesEarned || 0), 0)}`
-    ]
-    
-    const csvContent = [csvHeaders, ...csvData, [], summaryRow]
-      .map(row => row.map(field => `"${field || ''}"`).join(','))
-      .join('\n')
-    
-    // Create and download file with timestamp
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0]
-    const filename = `attendee-data-${timestamp}.csv`
-    
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement("a")
-    const url = URL.createObjectURL(blob)
-    link.setAttribute("href", url)
-    link.setAttribute("download", filename)
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-    
-      toast.success(`${filename} has been exported successfully with ${dataToExport.length} attendees.`, "Export Complete")
+      // Create CSV content
+      const headers = ["Name", "Email", "Organization", "Title", "Phone", "Location", "Status", "Member Type", "Events Attended", "Last Event Date", "Registration Date", "Certificates Earned"]
+      const csvContent = [
+        headers.join(","),
+        ...attendees.map((attendee) =>
+          [
+            attendee.name,
+            attendee.email,
+            attendee.organization,
+            attendee.title,
+            attendee.phone,
+            attendee.location,
+            attendee.status,
+            attendee.memberType,
+            attendee.eventsAttended,
+            attendee.lastEventDate,
+            attendee.registrationDate,
+            attendee.certificatesEarned || 0,
+          ]
+            .map((field) => `"${field}"`)
+            .join(","),
+        ),
+      ].join("\n")
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv" })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "attendee-data.csv"
+      a.click()
+      window.URL.revokeObjectURL(url)
+      
+      toast.success(`Attendee data exported successfully with ${attendees.length} attendees.`, "Export Complete")
     } catch (error) {
-      console.error("Export error:", error)
+      console.error("Export failed:", error)
       toast.error("Failed to export data. Please try again.", "Export Failed")
     }
   }
