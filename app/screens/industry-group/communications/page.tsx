@@ -36,7 +36,7 @@ import {
 
 export default function IndustryGroupCommunicationsPage() {
   const router = useRouter()
-  const { toast } = useToast()
+  const toast = useToast()
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("campaigns")
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([])
@@ -156,57 +156,36 @@ export default function IndustryGroupCommunicationsPage() {
   // Button handlers
   const handleNewCampaign = () => {
     setShowComposeModal(true)
-    toast({
-      title: "New Campaign",
-      description: "Opening campaign composer",
-    })
+    toast.info("Opening campaign composer", "New Campaign")
   }
 
   const handleManageTemplates = () => {
     setShowTemplatesModal(true)
-    toast({
-      title: "Templates",
-      description: "Opening template manager",
-    })
+    toast.info("Opening template manager", "Templates")
   }
 
 
 
   const handleViewCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
-    toast({
-      title: "Campaign Details",
-      description: `Opening detailed view for: ${campaign?.title}`,
-    })
+    toast.info(`Opening detailed view for: ${campaign?.title}`, "Campaign Details")
     // Simulate opening campaign details view
     setTimeout(() => {
-      toast({
-        title: "Campaign Details Loaded",
-        description: `Showing analytics and recipient data for: ${campaign?.title}`,
-      })
+      toast.success(`Showing analytics and recipient data for: ${campaign?.title}`, "Campaign Details Loaded")
     }, 1000)
   }
 
   const handleEditCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
-    toast({
-      title: "Edit Campaign",
-      description: `Opening editor for: ${campaign?.title}`,
-    })
+    toast.info(`Opening editor for: ${campaign?.title}`, "Edit Campaign")
   }
 
   const handleResendCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
-    toast({
-      title: "Campaign Resent",
-      description: `Resending: ${campaign?.title}`,
-    })
+    toast.info(`Resending: ${campaign?.title}`, "Campaign Resent")
     // Simulate resend process
     setTimeout(() => {
-      toast({
-        title: "Campaign Resent Successfully",
-        description: `Campaign "${campaign?.title}" has been resent to all recipients.`,
-      })
+      toast.success(`Campaign "${campaign?.title}" has been resent to all recipients.`, "Campaign Resent Successfully")
     }, 2000)
   }
 
@@ -214,38 +193,28 @@ export default function IndustryGroupCommunicationsPage() {
     const template = templates.find((t) => t.id === templateId)
     setShowTemplatesModal(false)
     setShowComposeModal(true)
-    toast({
-      title: "Template Applied",
-      description: `Using template: ${template?.name}`,
-    })
+    toast.success(`Using template: ${template?.name}`, "Template Applied")
   }
 
   const handleEditTemplate = (templateId: string) => {
     const template = templates.find((t) => t.id === templateId)
-    toast({
-      title: "Edit Template",
-      description: `Editing template: ${template?.name}`,
-    })
+    toast.info(`Editing template: ${template?.name}`, "Edit Template")
   }
 
   const handleSendNow = () => {
     if (!campaignForm.name || !campaignForm.subject || !campaignForm.message) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      })
+      toast.error("Please fill in all required fields", "Missing Information")
       return
     }
 
     const isVeMailCampaign = selectedRecipients.some((id) => id === "all-managers" || id === "all-allocators")
 
-    toast({
-      title: isVeMailCampaign ? "VeMail Campaign Sent" : "Campaign Sent",
-      description: isVeMailCampaign
+    toast.success(
+      isVeMailCampaign
         ? `VeMail campaign "${campaignForm.name}" has been sent to non-connected recipients!`
         : `Campaign "${campaignForm.name}" has been sent successfully!`,
-    })
+      isVeMailCampaign ? "VeMail Campaign Sent" : "Campaign Sent"
+    )
 
     // Reset form and close modal
     setCampaignForm({
@@ -262,27 +231,16 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleSchedule = () => {
     if (!campaignForm.name || !campaignForm.subject || !campaignForm.message) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      })
+      toast.error("Please fill in all required fields", "Missing Information")
       return
     }
 
     if (!campaignForm.scheduledDate || !campaignForm.scheduledTime) {
-      toast({
-        title: "Missing Schedule Information",
-        description: "Please select a date and time for scheduling",
-        variant: "destructive",
-      })
+      toast.error("Please select a date and time for scheduling", "Missing Schedule Information")
       return
     }
 
-    toast({
-      title: "Campaign Scheduled",
-      description: `Campaign "${campaignForm.name}" has been scheduled for ${campaignForm.scheduledDate} at ${campaignForm.scheduledTime}!`,
-    })
+    toast.success(`Campaign "${campaignForm.name}" has been scheduled for ${campaignForm.scheduledDate} at ${campaignForm.scheduledTime}!`, "Campaign Scheduled")
     
     // Reset form and close modal
     setCampaignForm({
@@ -298,10 +256,7 @@ export default function IndustryGroupCommunicationsPage() {
   }
 
   const handleSaveDraft = () => {
-    toast({
-      title: "Draft Saved",
-      description: "Campaign has been saved as draft",
-    })
+    toast.success("Campaign has been saved as draft", "Draft Saved")
     setShowComposeModal(false)
   }
 
@@ -428,10 +383,7 @@ export default function IndustryGroupCommunicationsPage() {
                   />
                 </div>
                 <Button variant="outline" className="gap-2 bg-transparent" onClick={() => {
-                  toast({
-                    title: "Filters",
-                    description: "Advanced filtering options will be available here.",
-                  })
+                  toast.info("Advanced filtering options will be available here.", "Filters")
                 }}>
                   <Filter className="h-4 w-4" />
                   Filters
@@ -615,10 +567,7 @@ export default function IndustryGroupCommunicationsPage() {
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast({
-                        title: "Template Options",
-                        description: `Additional options for template: ${template.name}`,
-                      })
+                      toast.info(`Additional options for template: ${template.name}`, "Template Options")
                     }}>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -702,10 +651,7 @@ export default function IndustryGroupCommunicationsPage() {
                     onCheckedChange={(checked) => {
                       if (checked) {
                         setSelectedRecipients([...selectedRecipients, "custom-list"])
-                        toast({
-                          title: "Custom List",
-                          description: "You can add emails manually or upload an Excel file with email addresses.",
-                        })
+                        toast.info("You can add emails manually or upload an Excel file with email addresses.", "Custom List")
                       } else {
                         setSelectedRecipients(selectedRecipients.filter((id) => id !== "custom-list"))
                       }
