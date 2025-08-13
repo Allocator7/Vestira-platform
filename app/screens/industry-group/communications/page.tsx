@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
-import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
+// import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +47,8 @@ import {
 export default function IndustryGroupCommunicationsPage() {
   const router = useRouter()
   const toast = useToast()
+  
+
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("campaigns")
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([])
@@ -483,11 +485,7 @@ export default function IndustryGroupCommunicationsPage() {
           {showFilters && (
             <Card>
               <CardContent className="p-4">
-                <ComprehensiveFilters 
-                  onFiltersChange={handleFiltersChange} 
-                  initialFilters={filters} 
-                  showSectors={false}
-                />
+                <p className="text-gray-600">Advanced filtering options will be available here.</p>
               </CardContent>
             </Card>
           )}
