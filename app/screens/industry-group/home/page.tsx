@@ -134,26 +134,25 @@ export default function IndustryGroupHomePage() {
               <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
 
-            <Link href="/screens/industry-group/communications" onClick={(e) => {
-              // Add error handling for navigation
-              try {
-                // Navigation will proceed normally
-              } catch (error) {
-                e.preventDefault()
-                console.error("Navigation error:", error)
-              }
-            }}>
-              <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
-                <div className="p-2 rounded-full bg-white shadow-sm">
-                  <Mail className="h-5 w-5 text-electric-blue" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand text-sm">Send VeMail</h3>
-                  <p className="text-xs text-base-gray">VeMail mass messaging</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div 
+              className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px] cursor-pointer"
+              onClick={() => {
+                try {
+                  window.location.href = "/screens/industry-group/communications"
+                } catch (error) {
+                  console.error("Navigation error:", error)
+                }
+              }}
+            >
+              <div className="p-2 rounded-full bg-white shadow-sm">
+                <Mail className="h-5 w-5 text-electric-blue" />
               </div>
-            </Link>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-deep-brand text-sm">Send VeMail</h3>
+                <p className="text-xs text-base-gray">VeMail mass messaging</p>
+              </div>
+              <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
           </div>
         </div>
 

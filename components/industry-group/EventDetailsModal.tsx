@@ -450,13 +450,42 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
                   checkInTime: attendee.checkInTime
                 }))
                 
-                // Simulate export process
+                // Create CSV content
+                const headers = ["Name", "Email", "Organization", "Title", "Status", "Registration Date", "Phone", "Location", "Member Type", "Check-in Time"]
+                const csvContent = [
+                  headers.join(","),
+                  ...exportData.map(row => [
+                    `"${row.name}"`,
+                    `"${row.email}"`,
+                    `"${row.organization}"`,
+                    `"${row.title}"`,
+                    `"${row.status}"`,
+                    `"${row.registrationDate}"`,
+                    `"${row.phone}"`,
+                    `"${row.location}"`,
+                    `"${row.memberType}"`,
+                    `"${row.checkInTime || ''}"`
+                  ].join(","))
+                ].join("\n")
+                
+                // Create and download file
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+                const link = document.createElement("a")
+                const url = URL.createObjectURL(blob)
+                link.setAttribute("href", url)
+                link.setAttribute("download", `attendees-${event.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`)
+                link.style.visibility = "hidden"
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                
+                // Show success toast
                 setTimeout(() => {
                   toast({ 
                     title: "Export Complete", 
                     description: `Attendee data has been exported successfully. (${exportData.length} attendees)` 
                   })
-                }, 2000)
+                }, 1000)
               } catch (error) {
                 console.error("Export error:", error)
                 toast({

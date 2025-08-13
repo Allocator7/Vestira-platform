@@ -255,13 +255,13 @@ export default function IndustryGroupEventsPage() {
 
   const handleExportData = () => {
     try {
-      // Mock export functionality
+      // Show initial toast
       toast({
         title: "Export Started",
         description: "Your event data is being prepared for download.",
       })
       
-      // Simulate export process with actual data preparation
+      // Prepare export data
       const exportData = events.map(event => ({
         title: event.title,
         type: event.type,
@@ -275,13 +275,42 @@ export default function IndustryGroupEventsPage() {
         attended: event.attended
       }))
       
-      // Simulate file download
+      // Create CSV content
+      const headers = ["Title", "Type", "Status", "Start Date", "End Date", "Location", "Registrations", "Max Attendees", "Confirmed", "Attended"]
+      const csvContent = [
+        headers.join(","),
+        ...exportData.map(row => [
+          `"${row.title}"`,
+          `"${row.type}"`,
+          `"${row.status}"`,
+          `"${row.startDate}"`,
+          `"${row.endDate}"`,
+          `"${row.location}"`,
+          row.registrations,
+          row.maxAttendees,
+          row.confirmed,
+          row.attended
+        ].join(","))
+      ].join("\n")
+      
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+      const link = document.createElement("a")
+      const url = URL.createObjectURL(blob)
+      link.setAttribute("href", url)
+      link.setAttribute("download", `event-data-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = "hidden"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Show success toast
       setTimeout(() => {
         toast({
           title: "Export Complete",
           description: `Event data has been exported successfully. (${exportData.length} events)`,
         })
-      }, 2000)
+      }, 1000)
     } catch (error) {
       console.error("Export error:", error)
       toast({
@@ -409,7 +438,7 @@ export default function IndustryGroupEventsPage() {
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Event Type" />
+                <SelectValue placeholder="Filter by Event Type" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Event Types</SelectItem>
@@ -421,7 +450,7 @@ export default function IndustryGroupEventsPage() {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort Events" />
+                <SelectValue placeholder="Sort by Criteria" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="date-asc">Date (Nearest to Furthest)</SelectItem>
