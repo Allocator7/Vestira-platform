@@ -31,6 +31,7 @@ import {
   CheckCircle,
   Briefcase,
   TrendingUp,
+  MoreHorizontal,
   LayoutTemplateIcon as Template,
 } from "lucide-react"
 
