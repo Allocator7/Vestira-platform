@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
 import { SendInvitationModal } from "@/components/industry-group/SendInvitationModal"
 
 import {
@@ -91,7 +91,7 @@ const mockEvents = [
 ]
 
 export default function AttendeeManagementPage() {
-  const { toast } = useToast()
+  const toast = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [memberTypeFilter, setMemberTypeFilter] = useState("all")
@@ -138,42 +138,112 @@ export default function AttendeeManagementPage() {
   })
 
   const handleExportData = () => {
-    toast({
-      title: "Export Started",
-      description: "Your attendee data is being prepared for download.",
-    })
-    // Simulate export
-    setTimeout(() => {
-      toast({
-        title: "Export Complete",
-        description: "Attendee data has been exported successfully.",
-      })
-    }, 2000)
+    toast.info("Your attendee data is being prepared for download.", "Export Started")
+    
+    // Generate CSV data
+    const csvHeaders = [
+      "Name",
+      "Email", 
+      "Organization",
+      "Title",
+      "Phone",
+      "Location",
+      "Status",
+      "Member Type",
+      "Events Attended",
+      "Last Event Date",
+      "Registration Date"
+    ]
+    
+    const csvData = attendees.map(attendee => [
+      attendee.name,
+      attendee.email,
+      attendee.organization,
+      attendee.title,
+      attendee.phone,
+      attendee.location,
+      attendee.status,
+      attendee.memberType,
+      attendee.eventsAttended,
+      attendee.lastEventDate,
+      attendee.registrationDate
+    ])
+    
+    const csvContent = [csvHeaders, ...csvData]
+      .map(row => row.map(field => `"${field}"`).join(','))
+      .join('\n')
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", `attendee-data-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    toast.success("Attendee data has been exported successfully.", "Export Complete")
   }
 
   const handleBulkAction = (action: string) => {
     if (selectedAttendees.length === 0) {
-      toast({
-        title: "No Selection",
-        description: "Please select attendees to perform bulk actions.",
-        variant: "destructive",
-      })
+      toast.error("Please select attendees to perform bulk actions.", "No Selection")
       return
     }
 
     switch (action) {
       case "email":
-        toast({
-          title: "Bulk Email Sent",
-          description: `Email sent to ${selectedAttendees.length} attendees.`,
-        })
+        toast.success(`Email sent to ${selectedAttendees.length} attendees.`, "Bulk Email Sent")
         break
 
       case "export":
-        toast({
-          title: "Export Started",
-          description: `Exporting data for ${selectedAttendees.length} selected attendees.`,
-        })
+        // Export only selected attendees
+        const selectedAttendeeData = attendees.filter(a => selectedAttendees.includes(a.id))
+        const csvHeaders = [
+          "Name",
+          "Email", 
+          "Organization",
+          "Title",
+          "Phone",
+          "Location",
+          "Status",
+          "Member Type",
+          "Events Attended",
+          "Last Event Date",
+          "Registration Date"
+        ]
+        
+        const csvData = selectedAttendeeData.map(attendee => [
+          attendee.name,
+          attendee.email,
+          attendee.organization,
+          attendee.title,
+          attendee.phone,
+          attendee.location,
+          attendee.status,
+          attendee.memberType,
+          attendee.eventsAttended,
+          attendee.lastEventDate,
+          attendee.registrationDate
+        ])
+        
+        const csvContent = [csvHeaders, ...csvData]
+          .map(row => row.map(field => `"${field}"`).join(','))
+          .join('\n')
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const link = document.createElement("a")
+        const url = URL.createObjectURL(blob)
+        link.setAttribute("href", url)
+        link.setAttribute("download", `selected-attendees-${new Date().toISOString().split('T')[0]}.csv`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        toast.success(`Exported data for ${selectedAttendees.length} selected attendees.`, "Export Complete")
         break
     }
   }
@@ -183,47 +253,47 @@ export default function AttendeeManagementPage() {
 
     switch (action) {
       case "email":
-        toast({
-          title: "Email Sent",
-          description: `Email sent to ${attendee?.name}.`,
-        })
+        // Open default email client
+        const emailSubject = encodeURIComponent("Industry Group Event Update")
+        const emailBody = encodeURIComponent(`Dear ${attendee?.name},\n\nThank you for your participation in our events.\n\nBest regards,\nIndustry Group Team`)
+        window.open(`mailto:${attendee?.email}?subject=${emailSubject}&body=${emailBody}`)
+        toast.success(`Email client opened for ${attendee?.name}.`, "Email Initiated")
         break
+        
       case "call":
-        toast({
-          title: "Call Initiated",
-          description: `Calling ${attendee?.name} at ${attendee?.phone}.`,
-        })
+        // Open phone dialer
+        const phoneNumber = attendee?.phone?.replace(/\D/g, '') || ''
+        if (phoneNumber) {
+          window.open(`tel:${phoneNumber}`)
+          toast.success(`Phone dialer opened for ${attendee?.name}.`, "Call Initiated")
+        } else {
+          toast.error("Phone number not available.", "Call Failed")
+        }
         break
+        
       case "message":
-        toast({
-          title: "Message Sent",
-          description: `Message sent to ${attendee?.name}.`,
-        })
+        // Open messaging app or show message modal
+        toast.info(`Opening messaging interface for ${attendee?.name}.`, "Message Interface")
+        // In a real app, this would open a messaging modal or redirect to messaging platform
         break
+        
       case "edit":
-        toast({
-          title: "Edit Mode",
-          description: `Opening edit form for ${attendee?.name}.`,
-        })
+        // Show edit form modal
+        toast.info(`Opening edit form for ${attendee?.name}.`, "Edit Mode")
+        // In a real app, this would open an edit modal with form fields
         break
-      case "call":
-        toast({
-          title: "Call Initiated",
-          description: `Calling ${attendee?.name} at ${attendee?.phone}.`,
-        })
-        break
+        
       case "view":
-        toast({
-          title: "View Details",
-          description: `Opening detailed view for ${attendee?.name}.`,
-        })
+        // Show detailed view modal
+        toast.info(`Opening detailed view for ${attendee?.name}.`, "View Details")
+        // In a real app, this would open a detailed view modal
         break
+        
       case "delete":
-        setAttendees(attendees.filter((a) => a.id !== attendeeId))
-        toast({
-          title: "Attendee Removed",
-          description: `${attendee?.name} has been removed from the system.`,
-        })
+        if (confirm(`Are you sure you want to remove ${attendee?.name} from the system?`)) {
+          setAttendees(attendees.filter((a) => a.id !== attendeeId))
+          toast.success(`${attendee?.name} has been removed from the system.`, "Attendee Removed")
+        }
         break
     }
   }
@@ -338,10 +408,13 @@ export default function AttendeeManagementPage() {
                   </SelectContent>
                 </Select>
                 <Button variant="outline" onClick={() => {
-                  toast({
-                    title: "More Filters",
-                    description: "Advanced filtering options will be available here.",
-                  })
+                  toast.info("Advanced filtering options will be available here.", "More Filters")
+                  // In a real app, this would open a filter modal with additional options like:
+                  // - Date range filters
+                  // - Location filters  
+                  // - Event attendance filters
+                  // - Registration date filters
+                  // - Custom field filters
                 }}>
                   <Filter className="h-4 w-4 mr-2" />
                   More Filters
