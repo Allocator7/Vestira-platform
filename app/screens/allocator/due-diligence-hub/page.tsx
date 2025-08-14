@@ -173,12 +173,6 @@ export default function AllocatorDueDiligenceHubPage() {
   })
 
   const [showTemplatePreviewModal, setShowTemplatePreviewModal] = useState(false)
-  
-  try {
-    // Get context and router with fallbacks
-    const { userRole, currentPersonProfile } = useApp() || { userRole: null, currentPersonProfile: null }
-    const router = useRouter()
-    const searchParams = useSearchParams()
   const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState(null)
   const [showUseTemplateModal, setShowUseTemplateModal] = useState(false)
   const [selectedTemplateForUse, setSelectedTemplateForUse] = useState(null)
@@ -246,6 +240,140 @@ export default function AllocatorDueDiligenceHubPage() {
       }
     }
   }, [])
+
+  // Real manager data from the system
+  const availableManagers = [
+    { 
+      id: "1", 
+      name: "Growth Capital Partners", 
+      contact: "David Rodriguez", 
+      title: "Managing Partner",
+      firm: "Growth Capital Partners",
+      firmType: "Private Equity",
+      location: "San Francisco, CA",
+      aum: "$2.5B",
+      email: "david.rodriguez@growthcapital.com"
+    },
+    { 
+      id: "2", 
+      name: "Sustainable Equity Fund", 
+      contact: "Sarah Chen", 
+      title: "Portfolio Manager",
+      firm: "Sustainable Equity Fund",
+      firmType: "Hedge Fund",
+      location: "New York, NY",
+      aum: "$1.2B",
+      email: "sarah.chen@sustainableequity.com"
+    },
+    { 
+      id: "3", 
+      name: "Global Infrastructure Partners", 
+      contact: "Michael Thompson", 
+      title: "Investment Director",
+      firm: "Global Infrastructure Partners",
+      firmType: "Infrastructure",
+      location: "London, UK",
+      aum: "$4.8B",
+      email: "michael.thompson@globalinfra.com"
+    },
+    { 
+      id: "4", 
+      name: "Emerging Markets Capital", 
+      contact: "Lisa Park", 
+      title: "Senior Portfolio Manager",
+      firm: "Emerging Markets Capital",
+      firmType: "Emerging Markets",
+      location: "Singapore",
+      aum: "$3.1B",
+      email: "lisa.park@emcapital.com"
+    },
+    { 
+      id: "5", 
+      name: "Real Estate Investment Trust", 
+      contact: "James Wilson", 
+      title: "Chief Investment Officer",
+      firm: "Real Estate Investment Trust",
+      firmType: "Real Estate",
+      location: "Chicago, IL",
+      aum: "$6.2B",
+      email: "james.wilson@reit.com"
+    }
+  ]
+
+  // Vestira standard templates
+  const vestiraTemplates = [
+    {
+      id: "vestira-standard",
+      name: "Vestira Standard DDQ",
+      description: "Comprehensive due diligence questionnaire covering all major areas",
+      category: "General",
+      questionCount: 120,
+      estimatedTime: "3-4 hours",
+      lastUpdated: "2024-01-15",
+      version: "2.1",
+      isVestiraStandard: true,
+      usage: "Completed by 85% of Allocators",
+      compliance: "SOC 2 Compliant",
+      questions: []
+    },
+    {
+      id: "vestira-esg",
+      name: "Vestira ESG DDQ",
+      description: "Environmental, social, and governance focused questionnaire",
+      category: "ESG",
+      questionCount: 75,
+      estimatedTime: "2-3 hours",
+      lastUpdated: "2024-01-10",
+      version: "1.8",
+      isVestiraStandard: true,
+      usage: "Completed by 45% of Allocators",
+      compliance: "SOC 2 Compliant",
+      questions: []
+    },
+    {
+      id: "vestira-infrastructure",
+      name: "Vestira Infrastructure DDQ",
+      description: "Specialized questionnaire for infrastructure investments",
+      category: "Infrastructure",
+      questionCount: 90,
+      estimatedTime: "2.5-3.5 hours",
+      lastUpdated: "2024-01-12",
+      version: "1.5",
+      isVestiraStandard: true,
+      usage: "Completed by 68% of Managers",
+      compliance: "SOC 2 Compliant",
+      questions: []
+    },
+  ]
+
+  // Custom templates
+  const [customTemplates, setCustomTemplates] = useState([
+    {
+      id: "custom-1",
+      name: "ESG Assessment Questionnaire",
+      description: "Environmental, social, and governance evaluation template",
+      category: "ESG",
+      questionCount: 65,
+      estimatedTime: "2-3 hours",
+      lastUpdated: "2024-01-05",
+      version: "1.2",
+      isVestiraStandard: false,
+      usage: "Custom template",
+      compliance: "Internal Use",
+      questions: []
+    },
+  ])
+  
+  try {
+    console.log('Due Diligence Hub: Starting component initialization')
+    
+    // Get context and router with fallbacks
+    const { userRole, currentPersonProfile } = useApp() || { userRole: null, currentPersonProfile: null }
+    console.log('Due Diligence Hub: Context loaded', { userRole, currentPersonProfile })
+    
+    const router = useRouter()
+    const searchParams = useSearchParams()
+    console.log('Due Diligence Hub: Router and search params loaded')
 
   // Real manager data from the system
   const availableManagers = [
@@ -4078,6 +4206,12 @@ const handleUseTemplate = () => {
   )
   } catch (err) {
     console.error('Error in Due Diligence Hub:', err)
+    console.error('Error stack:', err instanceof Error ? err.stack : 'No stack trace')
+    console.error('Error details:', {
+      name: err instanceof Error ? err.name : 'Unknown',
+      message: err instanceof Error ? err.message : String(err),
+      type: typeof err
+    })
     setError(err instanceof Error ? err.message : 'An unexpected error occurred')
     return null
   }
