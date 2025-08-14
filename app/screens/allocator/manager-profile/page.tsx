@@ -267,9 +267,9 @@ export default function ManagerProfilePage() {
           <div className="w-full md:w-2/3 space-y-6">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="team">Team</TabsTrigger>
-                <TabsTrigger value="documents">Documents</TabsTrigger>
+                <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
+                <TabsTrigger value="team" className="flex-1">Team</TabsTrigger>
+                <TabsTrigger value="documents" className="flex-1">Documents</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6 pt-4">

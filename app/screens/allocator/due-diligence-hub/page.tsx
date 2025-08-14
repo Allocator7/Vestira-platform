@@ -81,6 +81,19 @@ function CustomDropdown({
 export default function AllocatorDueDiligenceHubPage() {
   const [error, setError] = useState<string | null>(null)
   
+  // Simple error boundary
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-600 mb-2">Something went wrong</h2>
+          <p className="text-gray-600 mb-4">We encountered an unexpected error. Please try again or contact support if the problem persists.</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    )
+  }
+  
   // All state hooks must be at the top level
   const [activeTab, setActiveTab] = useState("active")
   const [searchQuery, setSearchQuery] = useState("")
@@ -161,10 +174,11 @@ export default function AllocatorDueDiligenceHubPage() {
 
   const [showTemplatePreviewModal, setShowTemplatePreviewModal] = useState(false)
   
-  // Get context and router
-  const { userRole, currentPersonProfile } = useApp()
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  try {
+    // Get context and router with fallbacks
+    const { userRole, currentPersonProfile } = useApp() || { userRole: null, currentPersonProfile: null }
+    const router = useRouter()
+    const searchParams = useSearchParams()
   const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState(null)
   const [showUseTemplateModal, setShowUseTemplateModal] = useState(false)
   const [selectedTemplateForUse, setSelectedTemplateForUse] = useState(null)
@@ -4062,4 +4076,9 @@ const handleUseTemplate = () => {
       )}
     </Screen>
   )
+  } catch (err) {
+    console.error('Error in Due Diligence Hub:', err)
+    setError(err instanceof Error ? err.message : 'An unexpected error occurred')
+    return null
+  }
 }
