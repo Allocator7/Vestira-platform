@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useToast } from "@/components/ui/use-toast"
-import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,10 +43,8 @@ import {
 } from "lucide-react"
 
 export default function IndustryGroupCommunicationsPage() {
-  const router = useRouter()
   const { toast } = useToast()
   
-
   const [searchQuery, setSearchQuery] = useState("")
   const [activeTab, setActiveTab] = useState("campaigns")
   const [selectedRecipients, setSelectedRecipients] = useState<string[]>([])
@@ -189,8 +185,6 @@ export default function IndustryGroupCommunicationsPage() {
     toast({ title: "Templates", description: "Opening template manager" })
   }
 
-
-
   const handleViewCampaign = (campaignId: string) => {
     const campaign = campaigns.find((c) => c.id === campaignId)
     if (!campaign) {
@@ -198,7 +192,6 @@ export default function IndustryGroupCommunicationsPage() {
       return
     }
     
-    // Open a detailed view modal with campaign analytics
     setSelectedCampaign(campaign)
     setShowCampaignDetailsModal(true)
     toast({ title: "Campaign Details", description: `Showing detailed analytics for: ${campaign.title}` })
@@ -216,11 +209,9 @@ export default function IndustryGroupCommunicationsPage() {
       return
     }
     
-    // Show confirmation dialog and then resend
     if (confirm(`Are you sure you want to resend "${campaign.title}" to all ${campaign.recipients} recipients?`)) {
       toast({ title: "Resending...", description: `Resending campaign: ${campaign.title}` })
       
-      // Simulate resend process
       setTimeout(() => {
         toast({ title: "Campaign Resent Successfully", description: `Campaign "${campaign.title}" has been resent to ${campaign.recipients} recipients successfully.` })
       }, 2000)
@@ -241,7 +232,6 @@ export default function IndustryGroupCommunicationsPage() {
       return
     }
     
-    // Open template editor modal
     setSelectedTemplate(template)
     setShowTemplateEditorModal(true)
     toast({ title: "Edit Template", description: `Opening editor for: ${template.name}` })
@@ -262,7 +252,6 @@ export default function IndustryGroupCommunicationsPage() {
         : `Campaign "${campaignForm.name}" has been sent successfully!`
     })
 
-    // Reset form and close modal
     setCampaignForm({
       name: "",
       type: "",
@@ -288,7 +277,6 @@ export default function IndustryGroupCommunicationsPage() {
 
     toast({ title: "Campaign Scheduled", description: `Campaign "${campaignForm.name}" has been scheduled for ${campaignForm.scheduledDate} at ${campaignForm.scheduledTime}!` })
     
-    // Reset form and close modal
     setCampaignForm({
       name: "",
       type: "",
@@ -304,16 +292,6 @@ export default function IndustryGroupCommunicationsPage() {
   const handleSaveDraft = () => {
     toast({ title: "Draft Saved", description: "Campaign has been saved as draft" })
     setShowComposeModal(false)
-  }
-
-  const handleFiltersChange = (newFilters: {
-    assetClasses: string[]
-    strategies: string[]
-    sectors?: string[]
-    organizationTypes?: string[]
-    experience?: string[]
-  }) => {
-    setFilters(newFilters)
   }
 
   const handleCustomListSubmit = () => {
@@ -407,12 +385,11 @@ export default function IndustryGroupCommunicationsPage() {
           <p className="text-base-gray mt-1">Manage member communications and campaigns</p>
         </div>
         <div className="flex gap-3">
-
-          <Button variant="outline" className="gap-2 bg-transparent" onClick={handleManageTemplates}>
+          <Button onClick={handleManageTemplates} variant="outline" className="gap-2">
             <Template className="h-4 w-4" />
             Templates
           </Button>
-          <Button className="gap-2" onClick={handleNewCampaign}>
+          <Button onClick={handleNewCampaign} className="gap-2">
             <Plus className="h-4 w-4" />
             New Campaign
           </Button>
@@ -420,58 +397,67 @@ export default function IndustryGroupCommunicationsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="bg-white shadow-vestira">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
           <CardContent className="p-4">
-            <div className="text-2xl font-bold text-deep-brand">{campaignStats.total}</div>
-            <div className="text-sm text-base-gray">Total Campaigns</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white shadow-vestira">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-green-600">{campaignStats.sent}</div>
-            <div className="text-sm text-base-gray">Sent</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white shadow-vestira">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-blue-600">{campaignStats.scheduled}</div>
-            <div className="text-sm text-base-gray">Scheduled</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white shadow-vestira">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-electric-blue">{campaignStats.totalRecipients}</div>
-            <div className="text-sm text-base-gray">Total Recipients</div>
-          </CardContent>
-        </Card>
-        <Card className="bg-white shadow-vestira">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-purple-600">
-              {campaignStats.totalOpened > 0
-                ? Math.round((campaignStats.totalOpened / campaignStats.totalRecipients) * 100)
-                : 0}
-              %
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-base-gray">Total Campaigns</p>
+                <p className="text-2xl font-bold text-deep-brand">{campaignStats.total}</p>
+              </div>
+              <Mail className="h-8 w-8 text-blue-500" />
             </div>
-            <div className="text-sm text-base-gray">Avg Open Rate</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-base-gray">Sent</p>
+                <p className="text-2xl font-bold text-green-600">{campaignStats.sent}</p>
+              </div>
+              <Send className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-base-gray">Scheduled</p>
+                <p className="text-2xl font-bold text-blue-600">{campaignStats.scheduled}</p>
+              </div>
+              <Calendar className="h-8 w-8 text-blue-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-base-gray">Total Recipients</p>
+                <p className="text-2xl font-bold text-deep-brand">{campaignStats.totalRecipients.toLocaleString()}</p>
+              </div>
+              <Users className="h-8 w-8 text-purple-500" />
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 lg:w-auto">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
         </TabsList>
 
-        {/* Campaigns Tab */}
         <TabsContent value="campaigns" className="space-y-4">
-          <Card className="bg-white shadow-vestira">
-            <CardContent className="p-6">
+          {/* Search and Filters */}
+          <Card>
+            <CardContent className="p-4">
               <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-base-gray" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-gray h-4 w-4" />
                   <Input
                     placeholder="Search campaigns..."
                     value={searchQuery}
@@ -479,7 +465,11 @@ export default function IndustryGroupCommunicationsPage() {
                     className="pl-10"
                   />
                 </div>
-                <Button variant="outline" className="gap-2 bg-transparent" onClick={() => setShowFilters(!showFilters)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="gap-2"
+                >
                   <Filter className="h-4 w-4" />
                   Filters
                 </Button>
@@ -491,18 +481,20 @@ export default function IndustryGroupCommunicationsPage() {
           {showFilters && (
             <Card>
               <CardContent className="p-4">
-                <ComprehensiveFilters 
+                {/* <ComprehensiveFilters 
                   onFiltersChange={handleFiltersChange} 
                   initialFilters={filters as any} 
                   showSectors={false}
                   showOrganizationTypes={false}
                   showExperience={false}
                   userType="manager"
-                />
+                /> */}
+                <p className="text-sm text-base-gray">Filters will be added here later.</p>
               </CardContent>
             </Card>
           )}
 
+          {/* Campaigns List */}
           <div className="space-y-4">
             {filteredCampaigns.map((campaign) => (
               <Card key={campaign.id} className="bg-white shadow-vestira hover:shadow-vestira-lg transition-shadow">
@@ -538,8 +530,7 @@ export default function IndustryGroupCommunicationsPage() {
                             <div className="flex items-center gap-2 text-blue-600">
                               <CheckCircle className="h-4 w-4" />
                               <span>
-                                {campaign.clicked} clicked ({Math.round((campaign.clicked / campaign.recipients) * 100)}
-                                %)
+                                {campaign.clicked} clicked ({Math.round((campaign.clicked / campaign.recipients) * 100)}%)
                               </span>
                             </div>
                           </>
@@ -593,90 +584,16 @@ export default function IndustryGroupCommunicationsPage() {
           </div>
         </TabsContent>
 
-        {/* Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="bg-white shadow-vestira">
-              <CardHeader>
-                <CardTitle>Campaign Performance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-base-gray">Average Open Rate</span>
-                    <span className="font-semibold">68.5%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-base-gray">Average Click Rate</span>
-                    <span className="font-semibold">24.3%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-base-gray">Unsubscribe Rate</span>
-                    <span className="font-semibold">1.2%</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-base-gray">Bounce Rate</span>
-                    <span className="font-semibold">2.8%</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white shadow-vestira">
-              <CardHeader>
-                <CardTitle>Member Engagement</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-base-gray">Highly Engaged</span>
-                    <span className="font-semibold text-green-600">342 members</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-base-gray">Moderately Engaged</span>
-                    <span className="font-semibold text-yellow-600">678 members</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-base-gray">Low Engagement</span>
-                    <span className="font-semibold text-red-600">430 members</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      {/* Templates Modal */}
-      <Dialog open={showTemplatesModal} onOpenChange={setShowTemplatesModal}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Email Templates</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TabsContent value="templates" className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {templates.map((template) => (
               <Card key={template.id} className="bg-white shadow-vestira hover:shadow-vestira-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg">{template.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-base-gray mb-4">{template.description}</p>
-                  <div className="space-y-2 text-sm text-base-gray">
-                    <div>Last used: {template.lastUsed}</div>
-                    <div>Used {template.usage} times</div>
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 bg-transparent"
-                      onClick={() => handleUseTemplate(template.id)}
-                    >
-                      Use Template
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleEditTemplate(template.id)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-deep-brand">{template.name}</h3>
+                      <p className="text-sm text-base-gray">{template.description}</p>
+                    </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="sm">
@@ -710,6 +627,104 @@ export default function IndustryGroupCommunicationsPage() {
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-base-gray">
+                    <span>Used {template.usage} times</span>
+                    <span>Last used: {template.lastUsed}</span>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleUseTemplate(template.id)}
+                    >
+                      Use Template
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditTemplate(template.id)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Templates Modal */}
+      <Dialog open={showTemplatesModal} onOpenChange={setShowTemplatesModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Manage Templates</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {templates.map((template) => (
+              <Card key={template.id} className="bg-white shadow-vestira hover:shadow-vestira-lg transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-semibold text-deep-brand">{template.name}</h3>
+                      <p className="text-sm text-base-gray">{template.description}</p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => {
+                          toast({ title: "Template Duplicated", description: `Template "${template.name}" duplicated successfully` })
+                        }}>
+                          <FileText className="h-4 w-4 mr-2" />
+                          Duplicate
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => {
+                          toast({ title: "Template Exported", description: `Template "${template.name}" exported successfully` })
+                        }}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Export
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
+                              toast({ title: "Template Deleted", description: `Template "${template.name}" deleted successfully` })
+                            }
+                          }}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-base-gray">
+                    <span>Used {template.usage} times</span>
+                    <span>Last used: {template.lastUsed}</span>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => handleUseTemplate(template.id)}
+                    >
+                      Use Template
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditTemplate(template.id)}
+                    >
+                      Edit
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -783,119 +798,26 @@ export default function IndustryGroupCommunicationsPage() {
                     </label>
                   </div>
                 ))}
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="custom-list"
-                    checked={selectedRecipients.includes("custom-list")}
-                    onCheckedChange={(checked) => {
-                      if (checked) {
-                        setSelectedRecipients([...selectedRecipients, "custom-list"])
-                        setShowCustomListModal(true)
-                      } else {
-                        setSelectedRecipients(selectedRecipients.filter((id) => id !== "custom-list"))
-                      }
-                    }}
-                  />
-                  <label htmlFor="custom-list" className="text-sm">
-                    Custom List
-                  </label>
-                </div>
               </div>
-              {selectedRecipients.includes("custom-list") && (
-                <div className="mt-4 p-4 border rounded-lg bg-gray-50">
-                  <p className="text-sm text-gray-600 mb-2">Add custom email addresses:</p>
-                  <Textarea
-                    placeholder="Enter email addresses (one per line) or paste from Excel"
-                    rows={4}
-                    className="mb-2"
-                  />
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Upload Excel File
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Download Template
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* VeMail Mass Messaging Section */}
-            <div className="space-y-4 border-t pt-6">
-              <h3 className="text-lg font-medium flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                VeMail Mass Messaging Options
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Button
-                  className="h-20 flex-col gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => {
-                    setCampaignForm({
-                      ...campaignForm,
-                      name: "Manager Promotion Campaign",
-                      type: "announcement",
-                    })
-                    setSelectedRecipients(["all-managers"])
-                  }}
-                >
-                  <Briefcase className="h-6 w-6" />
-                  <span>Promote to All Managers</span>
-                </Button>
-
-                <Button
-                  className="h-20 flex-col gap-2 bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => {
-                    setCampaignForm({
-                      ...campaignForm,
-                      name: "Allocator Promotion Campaign",
-                      type: "announcement",
-                    })
-                    setSelectedRecipients(["all-allocators"])
-                  }}
-                >
-                  <TrendingUp className="h-6 w-6" />
-                  <span>Promote to All Allocators</span>
-                </Button>
-              </div>
-
-              <Button
-                className="w-full h-16 flex items-center justify-center gap-3 bg-purple-600 hover:bg-purple-700 text-white"
-                onClick={() => {
-                  setCampaignForm({
-                    ...campaignForm,
-                    name: "Universal Promotion Campaign",
-                    type: "announcement",
-                  })
-                  setSelectedRecipients(["all-managers", "all-allocators"])
-                }}
-              >
-                <Megaphone className="h-6 w-6" />
-                <span className="text-lg">Promote to All Managers & Allocators</span>
-              </Button>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Message</label>
               <Textarea
-                placeholder="Enter your message..."
-                rows={8}
+                placeholder="Enter your message content..."
                 value={campaignForm.message}
                 onChange={(e) => setCampaignForm({ ...campaignForm, message: e.target.value })}
+                rows={8}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Schedule Date</label>
                 <Input
                   type="date"
                   value={campaignForm.scheduledDate}
                   onChange={(e) => setCampaignForm({ ...campaignForm, scheduledDate: e.target.value })}
-                  min={new Date().toISOString().split('T')[0]}
                 />
               </div>
               <div className="space-y-2">
@@ -908,17 +830,15 @@ export default function IndustryGroupCommunicationsPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
-              <Button className="gap-2" onClick={handleSendNow}>
-                <Send className="h-4 w-4" />
-                Send Now
-              </Button>
-              <Button variant="outline" className="gap-2 bg-transparent" onClick={handleSchedule}>
-                <Calendar className="h-4 w-4" />
-                Schedule
-              </Button>
+            <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={handleSaveDraft}>
                 Save Draft
+              </Button>
+              <Button variant="outline" onClick={handleSchedule}>
+                Schedule
+              </Button>
+              <Button onClick={handleSendNow}>
+                Send Now
               </Button>
             </div>
           </div>
@@ -926,77 +846,64 @@ export default function IndustryGroupCommunicationsPage() {
       </Dialog>
 
       {/* Campaign Details Modal */}
-      {selectedCampaign && (
-        <Dialog open={showCampaignDetailsModal} onOpenChange={setShowCampaignDetailsModal}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle>Campaign Details: {selectedCampaign.title}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{selectedCampaign.recipients}</div>
-                  <div className="text-sm text-gray-600">Total Recipients</div>
-                </div>
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{selectedCampaign.opened}</div>
-                  <div className="text-sm text-gray-600">Opened ({Math.round((selectedCampaign.opened / selectedCampaign.recipients) * 100)}%)</div>
-                </div>
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">{selectedCampaign.clicked}</div>
-                  <div className="text-sm text-gray-600">Clicked ({Math.round((selectedCampaign.clicked / selectedCampaign.recipients) * 100)}%)</div>
-                </div>
+      <Dialog open={showCampaignDetailsModal} onOpenChange={setShowCampaignDetailsModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Campaign Details</DialogTitle>
+          </DialogHeader>
+          {selectedCampaign && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg">{selectedCampaign.title}</h3>
+                <p className="text-base-gray">{selectedCampaign.subject}</p>
               </div>
-              
-              <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <h4 className="font-medium mb-2">Campaign Information</h4>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div><span className="font-medium">Subject:</span> {selectedCampaign.subject}</div>
-                    <div><span className="font-medium">Type:</span> {selectedCampaign.type}</div>
-                    <div><span className="font-medium">Status:</span> {selectedCampaign.status}</div>
-                    <div><span className="font-medium">Sent Date:</span> {selectedCampaign.sentDate || 'Not sent yet'}</div>
-                  </div>
+                  <span className="font-medium">Status:</span> {selectedCampaign.status}
                 </div>
-                
                 <div>
-                  <h4 className="font-medium mb-2">Tags</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedCampaign.tags.map((tag: string, index: number) => (
-                      <Badge key={index} variant="secondary">{tag}</Badge>
-                    ))}
-                  </div>
+                  <span className="font-medium">Type:</span> {selectedCampaign.type}
+                </div>
+                <div>
+                  <span className="font-medium">Recipients:</span> {selectedCampaign.recipients}
+                </div>
+                <div>
+                  <span className="font-medium">Opened:</span> {selectedCampaign.opened}
+                </div>
+                <div>
+                  <span className="font-medium">Clicked:</span> {selectedCampaign.clicked}
+                </div>
+                <div>
+                  <span className="font-medium">Sent Date:</span> {selectedCampaign.sentDate || "Not sent"}
                 </div>
               </div>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Custom List Modal */}
       <Dialog open={showCustomListModal} onOpenChange={setShowCustomListModal}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Create Custom Email List</DialogTitle>
+            <DialogTitle>Add Custom Email List</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <label className="text-sm font-medium">Email Addresses</label>
               <Textarea
-                placeholder="Enter email addresses (one per line)&#10;example@company.com&#10;another@company.com"
-                rows={8}
+                placeholder="Enter email addresses (one per line) or paste from Excel..."
                 value={customEmails}
                 onChange={(e) => setCustomEmails(e.target.value)}
+                rows={8}
               />
-              <p className="text-sm text-gray-500 mt-1">Enter one email address per line</p>
             </div>
-            
-            <div className="flex gap-2">
-              <Button onClick={handleCustomListSubmit}>
-                Create List
-              </Button>
+            <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowCustomListModal(false)}>
                 Cancel
+              </Button>
+              <Button onClick={handleCustomListSubmit}>
+                Add to Recipients
               </Button>
             </div>
           </div>
@@ -1007,37 +914,17 @@ export default function IndustryGroupCommunicationsPage() {
       <Dialog open={showTemplateEditorModal} onOpenChange={setShowTemplateEditorModal}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Template: {selectedTemplate?.name}</DialogTitle>
+            <DialogTitle>Edit Template</DialogTitle>
           </DialogHeader>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Template Name</label>
-                <Input
-                  placeholder="Enter template name"
-                  value={templateForm.name}
-                  onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Template Type</label>
-                <Select
-                  value={selectedTemplate?.type || ""}
-                  onValueChange={(value) => setSelectedTemplate({ ...selectedTemplate, type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="event-announcement">Event Announcement</SelectItem>
-                    <SelectItem value="newsletter">Newsletter</SelectItem>
-                    <SelectItem value="event-reminder">Event Reminder</SelectItem>
-                    <SelectItem value="survey">Survey</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Template Name</label>
+              <Input
+                placeholder="Enter template name"
+                value={templateForm.name}
+                onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+              />
             </div>
-
             <div className="space-y-2">
               <label className="text-sm font-medium">Description</label>
               <Input
@@ -1046,26 +933,21 @@ export default function IndustryGroupCommunicationsPage() {
                 onChange={(e) => setTemplateForm({ ...templateForm, description: e.target.value })}
               />
             </div>
-
             <div className="space-y-2">
-              <label className="text-sm font-medium">Template Content</label>
+              <label className="text-sm font-medium">Content</label>
               <Textarea
-                placeholder="Enter your template content with placeholders like {{name}}, {{company}}, etc."
-                rows={12}
+                placeholder="Enter template content..."
                 value={templateForm.content}
                 onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}
+                rows={12}
               />
-              <p className="text-sm text-gray-500">
-                Use placeholders like {{name}}, {{company}}, {{event_date}} for dynamic content
-              </p>
             </div>
-
-            <div className="flex gap-3">
-              <Button onClick={handleTemplateSave}>
-                Save Template
-              </Button>
+            <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowTemplateEditorModal(false)}>
                 Cancel
+              </Button>
+              <Button onClick={handleTemplateSave}>
+                Save Template
               </Button>
             </div>
           </div>
