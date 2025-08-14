@@ -477,9 +477,6 @@ Our emerging markets strategy focuses on companies with strong competitive posit
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setShowInsightModal(false)}>
-                  <X className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </DialogHeader>

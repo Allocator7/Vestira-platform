@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Separator } from "../../../../components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
+import { Checkbox } from "../../../../components/ui/checkbox"
+import { Label } from "../../../../components/ui/label"
 import {
   ArrowUpRight,
   Calendar,
@@ -41,8 +43,8 @@ export default function ManagerProfilePage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isStarred, setIsStarred] = useState(false)
   const [connectingUsers, setConnectingUsers] = useState<string[]>([])
-  const [selectedMessageContact, setSelectedMessageContact] = useState<string>("")
-  const [selectedScheduleContact, setSelectedScheduleContact] = useState<string>("")
+  const [selectedMessageContacts, setSelectedMessageContacts] = useState<string[]>([])
+  const [selectedScheduleContacts, setSelectedScheduleContacts] = useState<string[]>([])
   const { toast } = useToast()
 
   // Mock contacts data for BlackRock
@@ -99,207 +101,42 @@ export default function ManagerProfilePage() {
   }
 
   const handleSendMessage = () => {
-    setSelectedMessageContact(managerContacts[0].id)
+    setSelectedMessageContacts([managerContacts[0].id])
     setIsMessageModalOpen(true)
   }
 
   const handleScheduleMeeting = () => {
-    setSelectedScheduleContact(managerContacts[0].id)
+    setSelectedScheduleContacts([managerContacts[0].id])
     setIsMeetingModalOpen(true)
   }
 
-  const handleDownloadDocument = (documentName: string) => {
-    // Create document content based on the document name
-    let documentContent = ""
-    const timestamp = new Date().toISOString()
-    
-    switch (documentName) {
-      case "2023 Firm Overview":
-        documentContent = `BLACKROCK - 2023 FIRM OVERVIEW
-
-Company: BlackRock, Inc.
-Document Type: Firm Overview
-Generated: ${timestamp}
-
-EXECUTIVE SUMMARY
-BlackRock is the world's largest asset manager with $9.5 trillion in assets under management as of 2023. Founded in 1988, the firm serves institutional and retail investors worldwide through a comprehensive range of investment solutions.
-
-KEY HIGHLIGHTS
-• Total AUM: $9.5 Trillion
-• Founded: 1988
-• Headquarters: New York, NY
-• Employees: 18,000+
-• Global Presence: 30+ countries
-
-INVESTMENT CAPABILITIES
-• Public Equity
-• Fixed Income
-• Private Equity
-• Real Estate
-• Infrastructure
-• Private Credit
-• Multi-Asset Solutions
-
-PERFORMANCE HIGHLIGHTS
-• Consistent track record of delivering strong risk-adjusted returns
-• Industry-leading technology platform (Aladdin)
-• Comprehensive ESG integration across all strategies
-• Global scale and local expertise
-
-This document contains confidential information and is intended for authorized recipients only.`
-        break
-      case "ESG Policy Statement":
-        documentContent = `BLACKROCK - ESG POLICY STATEMENT
-
-Company: BlackRock, Inc.
-Document Type: ESG Policy Statement
-Generated: ${timestamp}
-
-ENVIRONMENTAL, SOCIAL, AND GOVERNANCE (ESG) POLICY
-
-MISSION STATEMENT
-BlackRock is committed to integrating ESG considerations into our investment processes and engaging with companies to promote sustainable business practices.
-
-ENVIRONMENTAL FOCUS
-• Climate risk assessment and management
-• Carbon footprint reduction initiatives
-• Renewable energy investment strategies
-• Sustainable infrastructure development
-
-SOCIAL RESPONSIBILITY
-• Diversity, equity, and inclusion programs
-• Community investment and philanthropy
-• Human rights and labor standards
-• Stakeholder engagement practices
-
-GOVERNANCE EXCELLENCE
-• Board diversity and independence
-• Executive compensation alignment
-• Risk management frameworks
-• Transparency and disclosure standards
-
-IMPLEMENTATION
-• ESG integration across all investment strategies
-• Active ownership and proxy voting
-• Regular ESG reporting and disclosure
-• Continuous improvement and innovation
-
-This policy statement reflects our commitment to sustainable investing and responsible stewardship of client assets.`
-        break
-      case "Corporate Responsibility Report":
-        documentContent = `BLACKROCK - CORPORATE RESPONSIBILITY REPORT
-
-Company: BlackRock, Inc.
-Document Type: Corporate Responsibility Report
-Generated: ${timestamp}
-
-CORPORATE RESPONSIBILITY HIGHLIGHTS 2023
-
-OUR COMMITMENT
-BlackRock's purpose is to help more and more people experience financial well-being. We believe this starts with being a responsible corporate citizen and contributing to the communities where we live and work.
-
-ENVIRONMENTAL INITIATIVES
-• Carbon Neutral Operations: Achieved carbon neutrality for our operations
-• Renewable Energy: 100% renewable electricity for our global offices
-• Sustainable Finance: $500+ billion in sustainable investment solutions
-• Climate Risk: Comprehensive climate risk assessment framework
-
-SOCIAL IMPACT
-• Community Investment: $50+ million in philanthropic giving
-• Employee Development: 2.5 million training hours completed
-• Diversity & Inclusion: 40% women in senior leadership roles
-• Financial Education: Reached 1+ million people through financial literacy programs
-
-GOVERNANCE EXCELLENCE
-• Board Diversity: 50% independent directors
-• Ethics & Compliance: Zero material compliance violations
-• Transparency: Comprehensive ESG disclosure and reporting
-• Stakeholder Engagement: Regular dialogue with investors, clients, and communities
-
-PERFORMANCE METRICS
-• Employee Satisfaction: 85% engagement score
-• Client Retention: 95% client retention rate
-• Innovation: $1.2 billion invested in technology and innovation
-• Sustainability: 25% reduction in operational carbon footprint
-
-This report demonstrates our ongoing commitment to responsible business practices and sustainable value creation.`
-        break
-      case "Annual Report 2022":
-        documentContent = `BLACKROCK - ANNUAL REPORT 2022
-
-Company: BlackRock, Inc.
-Document Type: Annual Report
-Generated: ${timestamp}
-
-2022 ANNUAL REPORT
-
-LETTER TO SHAREHOLDERS
-Dear Shareholders,
-
-2022 was a year of significant challenges and opportunities for BlackRock and the global financial markets. Despite market volatility and economic uncertainty, we remained focused on our mission to help more and more people experience financial well-being.
-
-FINANCIAL HIGHLIGHTS
-• Revenue: $17.9 billion (8% increase from 2021)
-• Net Income: $5.2 billion
-• Diluted EPS: $34.85
-• AUM Growth: $9.5 trillion (from $10.0 trillion in 2021)
-• Operating Margin: 42.5%
-
-STRATEGIC ACHIEVEMENTS
-• Technology Leadership: Continued investment in Aladdin platform
-• ESG Integration: Expanded sustainable investment offerings
-• Global Expansion: Strengthened presence in key international markets
-• Innovation: Launched new investment solutions and services
-
-INVESTMENT PERFORMANCE
-• 85% of assets outperformed benchmarks over 3 years
-• Strong performance across fixed income and alternatives
-• Continued leadership in ETF and index investing
-• Robust risk management and compliance framework
-
-OUTLOOK
-We remain optimistic about BlackRock's long-term prospects and our ability to deliver value for shareholders while serving our clients' evolving needs.
-
-Larry Fink
-Chairman and Chief Executive Officer
-
-This annual report provides a comprehensive overview of our 2022 performance and strategic direction.`
-        break
-      default:
-        documentContent = `DOCUMENT: ${documentName}
-
-Company: BlackRock, Inc.
-Document Type: General Document
-Generated: ${timestamp}
-
-This is a sample document for ${documentName}. Please contact BlackRock for the complete and official version of this document.
-
-For more information, please visit: www.blackrock.com
-Contact: contact@blackrock.com`
-    }
-
+  const handleDownloadDocument = async (documentName: string) => {
     try {
-      // Create a blob with the document content
-      const blob = new Blob([documentContent], { type: 'text/plain;charset=utf-8' })
-      const url = window.URL.createObjectURL(blob)
+      // Determine document type based on name
+      let documentType = 'general'
+      if (documentName.includes('Firm Overview')) documentType = 'firm overview'
+      else if (documentName.includes('ESG')) documentType = 'esg policy'
+      else if (documentName.includes('Annual Report')) documentType = 'annual report'
+      else if (documentName.includes('Corporate Responsibility')) documentType = 'annual report'
+
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
       
-      // Create a temporary download link
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `${documentName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`
-      link.style.display = 'none'
-      
-      // Add to document, click, and remove
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(url)
-      
-      toast({
-        title: "Download Complete",
-        description: `${documentName} has been downloaded successfully.`,
+      await downloadUtils.downloadDocument(documentName, documentType, {
+        onComplete: () => {
+          toast({
+            title: "Download Complete",
+            description: `${documentName} has been downloaded successfully.`,
+          })
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          toast({
+            title: "Download Failed",
+            description: "There was an error downloading the document. Please try again.",
+            variant: "destructive",
+          })
+        }
       })
     } catch (error) {
       console.error('Download error:', error)
@@ -429,11 +266,10 @@ Contact: contact@blackrock.com`
           {/* Manager Details */}
           <div className="w-full md:w-2/3 space-y-6">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="team">Team</TabsTrigger>
                 <TabsTrigger value="documents">Documents</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6 pt-4">
@@ -903,27 +739,48 @@ Contact: contact@blackrock.com`
       <SendMessageModal
         isOpen={isMessageModalOpen}
         onClose={() => setIsMessageModalOpen(false)}
-        recipientName={managerContacts.find(c => c.id === selectedMessageContact)?.name || managerInfo.primaryContact}
-        recipientEmail={managerContacts.find(c => c.id === selectedMessageContact)?.email || managerInfo.email}
+        recipientName={selectedMessageContacts.length > 0 ? managerContacts.find(c => c.id === selectedMessageContacts[0])?.name || managerInfo.primaryContact : managerInfo.primaryContact}
+        recipientEmail={selectedMessageContacts.length > 0 ? managerContacts.find(c => c.id === selectedMessageContacts[0])?.email || managerInfo.email : managerInfo.email}
         organizationName={managerInfo.name}
         contactSelector={
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select Contact</label>
-            <Select value={selectedMessageContact} onValueChange={setSelectedMessageContact}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a contact" />
-              </SelectTrigger>
-              <SelectContent>
+            <label className="text-sm font-medium">Select Contacts</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="select-all-message"
+                  checked={selectedMessageContacts.length === managerContacts.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedMessageContacts(managerContacts.map(c => c.id))
+                    } else {
+                      setSelectedMessageContacts([])
+                    }
+                  }}
+                />
+                <Label htmlFor="select-all-message" className="font-medium">Select All Contacts</Label>
+              </div>
+              <div className="border-t pt-2">
                 {managerContacts.map((contact) => (
-                  <SelectItem key={contact.id} value={contact.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{contact.name}</span>
-                      <span className="text-xs text-gray-500">{contact.title}</span>
-                    </div>
-                  </SelectItem>
+                  <div key={contact.id} className="flex items-center space-x-2 py-1">
+                    <Checkbox
+                      id={`message-contact-${contact.id}`}
+                      checked={selectedMessageContacts.includes(contact.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedMessageContacts(prev => [...prev, contact.id])
+                        } else {
+                          setSelectedMessageContacts(prev => prev.filter(id => id !== contact.id))
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`message-contact-${contact.id}`} className="text-sm">
+                      {contact.name} - {contact.title}
+                    </Label>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            </div>
           </div>
         }
       />
@@ -931,27 +788,48 @@ Contact: contact@blackrock.com`
       <ScheduleMeetingModal
         isOpen={isMeetingModalOpen}
         onClose={() => setIsMeetingModalOpen(false)}
-        recipientName={managerContacts.find(c => c.id === selectedScheduleContact)?.name || managerInfo.primaryContact}
-        recipientEmail={managerContacts.find(c => c.id === selectedScheduleContact)?.email || managerInfo.email}
+        recipientName={selectedScheduleContacts.length > 0 ? managerContacts.find(c => c.id === selectedScheduleContacts[0])?.name || managerInfo.primaryContact : managerInfo.primaryContact}
+        recipientEmail={selectedScheduleContacts.length > 0 ? managerContacts.find(c => c.id === selectedScheduleContacts[0])?.email || managerInfo.email : managerInfo.email}
         organizationName={managerInfo.name}
         contactSelector={
           <div className="space-y-2">
-            <label className="text-sm font-medium">Select Contact</label>
-            <Select value={selectedScheduleContact} onValueChange={setSelectedScheduleContact}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a contact" />
-              </SelectTrigger>
-              <SelectContent>
+            <label className="text-sm font-medium">Select Contacts</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="select-all-schedule"
+                  checked={selectedScheduleContacts.length === managerContacts.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedScheduleContacts(managerContacts.map(c => c.id))
+                    } else {
+                      setSelectedScheduleContacts([])
+                    }
+                  }}
+                />
+                <Label htmlFor="select-all-schedule" className="font-medium">Select All Contacts</Label>
+              </div>
+              <div className="border-t pt-2">
                 {managerContacts.map((contact) => (
-                  <SelectItem key={contact.id} value={contact.id}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{contact.name}</span>
-                      <span className="text-xs text-gray-500">{contact.title}</span>
-                    </div>
-                  </SelectItem>
+                  <div key={contact.id} className="flex items-center space-x-2 py-1">
+                    <Checkbox
+                      id={`schedule-contact-${contact.id}`}
+                      checked={selectedScheduleContacts.includes(contact.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedScheduleContacts(prev => [...prev, contact.id])
+                        } else {
+                          setSelectedScheduleContacts(prev => prev.filter(id => id !== contact.id))
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`schedule-contact-${contact.id}`} className="text-sm">
+                      {contact.name} - {contact.title}
+                    </Label>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            </div>
           </div>
         }
       />
