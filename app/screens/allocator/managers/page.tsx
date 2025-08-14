@@ -15,6 +15,13 @@ import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { ScheduleMeetingModal } from "@/components/profile-modals/ScheduleMeetingModal"
 import { useRouter } from "next/navigation"
 
+interface Contact {
+  name: string
+  title: string
+  role: string
+  email: string
+}
+
 interface Manager {
   id: string
   name: string
@@ -34,8 +41,9 @@ interface Manager {
     multiple: string
   }
   description: string
-  contactPerson: string // Added contact person
-  contactTitle: string // Added contact title
+  contactPerson: string
+  contactTitle: string
+  contacts: Contact[]
 }
 
 const mockManagers: Manager[] = [
@@ -59,8 +67,28 @@ const mockManagers: Manager[] = [
     },
     description:
       "Experienced investment manager with 18+ years in private equity and growth capital, focusing on technology and healthcare sectors.",
-    contactPerson: "David Rodriguez", // Added contact person
-    contactTitle: "Managing Partner", // Added contact title
+    contactPerson: "David Rodriguez",
+    contactTitle: "Managing Partner",
+    contacts: [
+      {
+        name: "David Rodriguez",
+        title: "Managing Partner",
+        role: "Primary Contact",
+        email: "david.rodriguez@growthcapital.com",
+      },
+      {
+        name: "Sarah Johnson",
+        title: "Senior Vice President",
+        role: "Investment Contact",
+        email: "sarah.johnson@growthcapital.com",
+      },
+      {
+        name: "Michael Chen",
+        title: "Director of Investor Relations",
+        role: "IR Contact",
+        email: "michael.chen@growthcapital.com",
+      },
+    ],
   },
   {
     id: "2",
@@ -81,8 +109,22 @@ const mockManagers: Manager[] = [
       multiple: "1.9x",
     },
     description: "ESG-focused portfolio manager specializing in sustainable equity strategies and impact investing.",
-    contactPerson: "Sarah Chen", // Added contact person
-    contactTitle: "Portfolio Manager", // Added contact title
+    contactPerson: "Sarah Chen",
+    contactTitle: "Portfolio Manager",
+    contacts: [
+      {
+        name: "Sarah Chen",
+        title: "Portfolio Manager",
+        role: "Primary Contact",
+        email: "sarah.chen@sustainableequity.com",
+      },
+      {
+        name: "Lisa Thompson",
+        title: "ESG Director",
+        role: "ESG Contact",
+        email: "lisa.thompson@sustainableequity.com",
+      },
+    ],
   },
   {
     id: "3",
@@ -104,8 +146,34 @@ const mockManagers: Manager[] = [
     },
     description:
       "Infrastructure investment specialist with extensive experience in debt and equity investments across global markets.",
-    contactPerson: "Michael Thompson", // Added contact person
-    contactTitle: "Senior Managing Director", // Added contact title
+    contactPerson: "Michael Thompson",
+    contactTitle: "Senior Managing Director",
+    contacts: [
+      {
+        name: "Michael Thompson",
+        title: "Senior Managing Director",
+        role: "Primary Contact",
+        email: "michael.thompson@infrastructurecapital.com",
+      },
+      {
+        name: "Emma Wilson",
+        title: "Head of Infrastructure",
+        role: "Infrastructure Contact",
+        email: "emma.wilson@infrastructurecapital.com",
+      },
+      {
+        name: "James Anderson",
+        title: "Director of Real Estate",
+        role: "Real Estate Contact",
+        email: "james.anderson@infrastructurecapital.com",
+      },
+      {
+        name: "Rachel Green",
+        title: "Investor Relations Manager",
+        role: "IR Contact",
+        email: "rachel.green@infrastructurecapital.com",
+      },
+    ],
   },
   {
     id: "4",
@@ -126,8 +194,22 @@ const mockManagers: Manager[] = [
       multiple: "3.2x",
     },
     description: "Early-stage venture capital investor focused on technology startups and emerging growth companies.",
-    contactPerson: "Jennifer Park", // Added contact person
-    contactTitle: "Founding Partner", // Added contact title
+    contactPerson: "Jennifer Park",
+    contactTitle: "Founding Partner",
+    contacts: [
+      {
+        name: "Jennifer Park",
+        title: "Founding Partner",
+        role: "Primary Contact",
+        email: "jennifer.park@venturedynamics.com",
+      },
+      {
+        name: "Alex Rodriguez",
+        title: "Partner",
+        role: "Investment Contact",
+        email: "alex.rodriguez@venturedynamics.com",
+      },
+    ],
   },
   {
     id: "5",
@@ -148,8 +230,28 @@ const mockManagers: Manager[] = [
       multiple: "1.4x",
     },
     description: "Fixed income specialist with deep expertise in credit markets and alternative lending strategies.",
-    contactPerson: "Robert Williams", // Added contact person
-    contactTitle: "Chief Investment Officer", // Added contact title
+    contactPerson: "Robert Williams",
+    contactTitle: "Chief Investment Officer",
+    contacts: [
+      {
+        name: "Robert Williams",
+        title: "Chief Investment Officer",
+        role: "Primary Contact",
+        email: "robert.williams@fixedincomestrategies.com",
+      },
+      {
+        name: "Maria Garcia",
+        title: "Head of Credit",
+        role: "Credit Contact",
+        email: "maria.garcia@fixedincomestrategies.com",
+      },
+      {
+        name: "David Lee",
+        title: "Director of Private Placements",
+        role: "Private Placements Contact",
+        email: "david.lee@fixedincomestrategies.com",
+      },
+    ],
   },
   {
     id: "6",
@@ -170,8 +272,22 @@ const mockManagers: Manager[] = [
       multiple: "2.1x",
     },
     description: "Real estate investment professional specializing in commercial properties and mortgage lending.",
-    contactPerson: "Lisa Anderson", // Added contact person
-    contactTitle: "Managing Director", // Added contact title
+    contactPerson: "Lisa Anderson",
+    contactTitle: "Managing Director",
+    contacts: [
+      {
+        name: "Lisa Anderson",
+        title: "Managing Director",
+        role: "Primary Contact",
+        email: "lisa.anderson@realestateventures.com",
+      },
+      {
+        name: "Tom Martinez",
+        title: "Head of Acquisitions",
+        role: "Acquisitions Contact",
+        email: "tom.martinez@realestateventures.com",
+      },
+    ],
   },
 ]
 
@@ -207,95 +323,117 @@ export default function AllocatorManagersPage() {
     setIsMeetingModalOpen(true)
   }
 
-  const handleFiltersChange = (newFilters: {
-    assetClasses: string[]
-    strategies: string[]
-    organizationTypes?: string[]
-    experience?: string[]
-  }) => {
-    setFilters({
-      assetClasses: newFilters.assetClasses,
-      strategies: newFilters.strategies,
-      organizationTypes: newFilters.organizationTypes || [],
-      experience: newFilters.experience || [],
-    })
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    filterManagers(value, sortBy, filters)
+  }
 
-    const filtered = mockManagers.filter((manager) => {
-      const matchesSearch =
-        manager.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        manager.firm.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        manager.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
+    filterManagers(searchTerm, value, filters)
+  }
 
-      const matchesAssetClass =
-        newFilters.assetClasses.length === 0 || newFilters.assetClasses.some((ac) => manager.assetClasses.includes(ac))
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
+    filterManagers(searchTerm, sortBy, newFilters)
+  }
 
-      const matchesStrategy =
-        newFilters.strategies.length === 0 || newFilters.strategies.some((s) => manager.strategies.includes(s))
+  const filterManagers = (search: string, sort: string, filterOptions: any) => {
+    let filtered = [...mockManagers]
 
-      const matchesOrgType =
-        !newFilters.organizationTypes ||
-        newFilters.organizationTypes.length === 0 ||
-        newFilters.organizationTypes.includes(manager.firmType)
+    // Search filter
+    if (search) {
+      const searchLower = search.toLowerCase()
+      filtered = filtered.filter(
+        (manager) =>
+          manager.firm.toLowerCase().includes(searchLower) ||
+          manager.contactPerson.toLowerCase().includes(searchLower) ||
+          manager.description.toLowerCase().includes(searchLower) ||
+          manager.assetClasses.some((ac) => ac.toLowerCase().includes(searchLower)) ||
+          manager.strategies.some((s) => s.toLowerCase().includes(searchLower))
+      )
+    }
 
-      const matchesExperience =
-        !newFilters.experience ||
-        newFilters.experience.length === 0 ||
-        newFilters.experience.some((exp) => {
-          const years = Number.parseInt(manager.experience)
-          switch (exp) {
-            case "0-5 years":
-              return years <= 5
-            case "5-10 years":
-              return years > 5 && years <= 10
-            case "10-15 years":
-              return years > 10 && years <= 15
-            case "15-20 years":
-              return years > 15 && years <= 20
-            case "20+ years":
-              return years > 20
-            default:
-              return false
-          }
+    // Asset class filter
+    if (filterOptions.assetClasses.length > 0) {
+      filtered = filtered.filter((manager) =>
+        filterOptions.assetClasses.some((ac: string) => manager.assetClasses.includes(ac))
+      )
+    }
+
+    // Strategy filter
+    if (filterOptions.strategies.length > 0) {
+      filtered = filtered.filter((manager) =>
+        filterOptions.strategies.some((s: string) => manager.strategies.includes(s))
+      )
+    }
+
+    // Organization type filter
+    if (filterOptions.organizationTypes.length > 0) {
+      filtered = filtered.filter((manager) => filterOptions.organizationTypes.includes(manager.firmType))
+    }
+
+    // Experience filter
+    if (filterOptions.experience.length > 0) {
+      filtered = filtered.filter((manager) => filterOptions.experience.includes(manager.experience))
+    }
+
+    // Sort
+    switch (sort) {
+      case "name":
+        filtered.sort((a, b) => a.firm.localeCompare(b.firm))
+        break
+      case "name-desc":
+        filtered.sort((a, b) => b.firm.localeCompare(a.firm))
+        break
+      case "aum":
+        filtered.sort((a, b) => {
+          const aumA = parseFloat(a.aum.replace(/[^0-9.]/g, ""))
+          const aumB = parseFloat(b.aum.replace(/[^0-9.]/g, ""))
+          return aumB - aumA
         })
-
-      return matchesSearch && matchesAssetClass && matchesStrategy && matchesOrgType && matchesExperience
-    })
-
-    // Apply sorting
-    if (sortBy === "aum") {
-      filtered.sort((a, b) => {
-        const aumA = Number.parseFloat(a.aum.replace(/[$B]/g, ""))
-        const aumB = Number.parseFloat(b.aum.replace(/[$B]/g, ""))
-        return aumB - aumA
-      })
-    } else if (sortBy === "experience") {
-      filtered.sort((a, b) => Number.parseInt(b.experience) - Number.parseInt(a.experience))
-    } else if (sortBy === "name") {
-      filtered.sort((a, b) => a.name.localeCompare(b.name))
-    } else if (sortBy === "connections") {
-      filtered.sort((a, b) => b.connections - a.connections)
+        break
+      case "aum-desc":
+        filtered.sort((a, b) => {
+          const aumA = parseFloat(a.aum.replace(/[^0-9.]/g, ""))
+          const aumB = parseFloat(b.aum.replace(/[^0-9.]/g, ""))
+          return aumA - aumB
+        })
+        break
+      case "experience":
+        filtered.sort((a, b) => {
+          const expA = parseInt(a.experience.replace(/[^0-9]/g, ""))
+          const expB = parseInt(b.experience.replace(/[^0-9]/g, ""))
+          return expB - expA
+        })
+        break
+      case "experience-desc":
+        filtered.sort((a, b) => {
+          const expA = parseInt(a.experience.replace(/[^0-9]/g, ""))
+          const expB = parseInt(b.experience.replace(/[^0-9]/g, ""))
+          return expA - expB
+        })
+        break
+      case "connections":
+        filtered.sort((a, b) => b.connections - a.connections)
+        break
+      case "connections-desc":
+        filtered.sort((a, b) => a.connections - b.connections)
+        break
+      default:
+        filtered.sort((a, b) => a.firm.localeCompare(b.firm))
     }
 
     setFilteredManagers(filtered)
   }
 
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value)
-    handleFiltersChange(filters)
-  }
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value)
-    handleFiltersChange(filters)
-  }
-
   return (
     <Screen>
-      <div className="container py-8 max-w-7xl">
-        <div className="flex items-center justify-between mb-6">
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-semibold text-deepBrand">Investment Managers</h1>
-            <p className="text-baseGray mt-1">Discover and connect with investment managers</p>
+            <h1 className="text-2xl font-bold text-deepBrand">My Managers</h1>
+            <p className="text-baseGray">Manage your investment manager relationships</p>
           </div>
           <ExportButton
             data={filteredManagers}
@@ -323,9 +461,13 @@ export default function AllocatorManagersPage() {
                       onChange={handleSortChange}
                       options={[
                         { value: "name", label: "Name A-Z" },
+                        { value: "name-desc", label: "Name Z-A" },
                         { value: "aum", label: "Largest AUM" },
+                        { value: "aum-desc", label: "Smallest AUM" },
                         { value: "experience", label: "Most Experience" },
+                        { value: "experience-desc", label: "Least Experience" },
                         { value: "connections", label: "Most Connections" },
+                        { value: "connections-desc", label: "Least Connections" },
                       ]}
                     />
                   </div>
@@ -368,8 +510,13 @@ export default function AllocatorManagersPage() {
                     <div className="flex-1 min-w-0">
                       <CardTitle className="text-xl text-deepBrand mb-2 font-semibold">{manager.firm}</CardTitle>
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-gray-900">{manager.contactPerson}</p>
-                        <p className="text-xs text-baseGray">{manager.contactTitle}</p>
+                        <p className="text-sm font-medium text-gray-900">{manager.contacts[0].name}</p>
+                        <p className="text-xs text-baseGray">{manager.contacts[0].title}</p>
+                        {manager.contacts.length > 1 && (
+                          <p className="text-xs text-electric-blue font-medium">
+                            + {manager.contacts.length - 1} other contact{manager.contacts.length > 2 ? 's' : ''} at this firm
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-1 mt-1">
                         <Building2 className="h-3 w-3 text-baseGray flex-shrink-0" />
@@ -477,17 +624,15 @@ export default function AllocatorManagersPage() {
           <SendMessageModal
             isOpen={isMessageModalOpen}
             onClose={() => setIsMessageModalOpen(false)}
-            recipientName={selectedManager.contactPerson}
-            recipientTitle={selectedManager.contactTitle}
+            recipientName={selectedManager.contacts[0].name}
+            recipientTitle={selectedManager.contacts[0].title}
             organizationName={selectedManager.firm}
           />
           <ScheduleMeetingModal
             isOpen={isMeetingModalOpen}
             onClose={() => setIsMeetingModalOpen(false)}
-            recipientName={selectedManager.contactPerson}
-            recipientEmail={`${selectedManager.contactPerson
-              .toLowerCase()
-              .replace(/\s+/g, ".")}@${selectedManager.firm.toLowerCase().replace(/\s+/g, "")}.com`}
+            recipientName={selectedManager.contacts[0].name}
+            recipientEmail={selectedManager.contacts[0].email}
             organizationName={selectedManager.firm}
           />
         </>

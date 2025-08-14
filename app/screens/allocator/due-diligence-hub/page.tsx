@@ -93,7 +93,9 @@ export default function AllocatorDueDiligenceHubPage() {
   const [selectedDDQ, setSelectedDDQ] = useState(null)
   const [messageContent, setMessageContent] = useState("")
   const [messageTopic, setMessageTopic] = useState("")
+  const [selectedManagersForMessage, setSelectedManagersForMessage] = useState<string[]>([])
   const [showMeetingModal, setShowMeetingModal] = useState(false)
+  const [selectedManagersForMeeting, setSelectedManagersForMeeting] = useState<string[]>([])
   const [meetingDetails, setMeetingDetails] = useState({
     topic: "",
     purpose: "",
@@ -301,6 +303,85 @@ export default function AllocatorDueDiligenceHubPage() {
   const showNotification = (message: string) => {
     setNotification(message)
     setTimeout(() => setNotification(""), 3000)
+  }
+
+  // Filter active DDQs based on search, strategy, and status
+  const filteredActiveDDQs = activeDDQs.filter((ddq) => {
+    const matchesSearch = searchQuery === "" || 
+      ddq.templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ddq.managerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ddq.contactName.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesStrategy = selectedStrategy === "All" || ddq.strategy === selectedStrategy
+    const matchesStatus = selectedStatus === "All" || ddq.status === selectedStatus
+    
+    return matchesSearch && matchesStrategy && matchesStatus
+  })
+
+  const handleExportDDQ = (ddq: any) => {
+    try {
+      // Create DDQ content
+      const ddqContent = `Due Diligence Questionnaire Export
+Generated: ${new Date().toLocaleDateString()}
+Template: ${ddq.templateName}
+Manager: ${ddq.managerName}
+Contact: ${ddq.contactName}
+Status: ${ddq.status}
+Strategy: ${ddq.strategy}
+Investment Type: ${ddq.investmentType}
+Fund Size: ${ddq.fundSize}
+Vintage: ${ddq.vintage}
+Due Date: ${ddq.dueDate}
+
+SECTIONS AND QUESTIONS:
+${ddq.sections?.map((section: any) => `
+${section.name.toUpperCase()}:
+${section.questions?.map((question: any) => `
+Q: ${question.question}
+A: ${question.answer || 'Not answered'}
+Type: ${question.type}
+Answered: ${question.answeredAt ? new Date(question.answeredAt).toLocaleDateString() : 'Not answered'}
+
+`).join('') || 'No questions in this section'}
+`).join('') || 'No sections available'}
+
+BRANCHING QUESTIONS:
+${ddq.sections?.flatMap((section: any) => 
+  section.questions?.flatMap((question: any) => 
+    question.branches?.map((branch: any) => `
+Branch Question: ${branch.question}
+Type: ${branch.type}
+Status: ${branch.status}
+Created by: ${branch.createdBy}
+Created: ${new Date(branch.createdAt).toLocaleDateString()}
+Reasoning: ${branch.reasoning}
+
+`).join('') || []
+  ) || []
+) || 'No branching questions'}
+
+REVIEWERS: ${ddq.reviewers?.join(', ') || 'None assigned'}
+Last Activity: ${ddq.lastActivity}
+Progress: ${ddq.progress}%
+Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
+`
+
+      // Create and download file
+      const blob = new Blob([ddqContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `DDQ_${ddq.templateName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      showNotification(`DDQ exported successfully: ${ddq.templateName}`)
+    } catch (error) {
+      console.error('Error exporting DDQ:', error)
+      showNotification('Error exporting DDQ. Please try again.')
+    }
   }
 
   // Active DDQs - Allocator sending to managers
@@ -1270,11 +1351,11 @@ export default function AllocatorDueDiligenceHubPage() {
       
       // Use window.location for more reliable navigation with error handling
       try {
-        window.location.href = '/allocator/informal-due-diligence'
+        window.location.href = '/screens/allocator/informal-due-diligence'
       } catch (navigationError) {
         console.error("Navigation error:", navigationError)
         // Fallback: try router.push
-        router.push('/allocator/informal-due-diligence')
+        router.push('/screens/allocator/informal-due-diligence')
       }
       
     } catch (error) {
@@ -1615,6 +1696,16 @@ const handleUseTemplate = () => {
     }
   }
 
+  const handleViewCompletedDDQ = (ddq: any) => {
+    setSelectedDDQForReview(ddq)
+    setShowReviewModal(true)
+    setViewMode("overview") // Reset to overview when opening
+    setCurrentQuestionIndex(0)
+    setCurrentSectionIndex(0)
+    setActiveSection("firm") // Reset to first section
+    showNotification(`Opening completed DDQ: ${ddq?.contactName} - ${ddq?.templateName}`)
+  }
+
   const handleUpdateQuestions = (updatedQuestions: any[]) => {
     if (selectedDDQForReview) {
       setSelectedDDQForReview((prev) => ({
@@ -1638,28 +1729,35 @@ const handleUseTemplate = () => {
   }
 
   const handleSendMessage = () => {
-    if (!messageContent.trim() || !messageTopic.trim()) {
-      showNotification("Please fill in all required fields")
+    if (!messageContent.trim() || !messageTopic.trim() || selectedManagersForMessage.length === 0) {
+      showNotification("Please fill in all required fields and select at least one manager")
       return
     }
 
-    console.log("Sending message to:", selectedDDQ?.contactName)
+    const selectedDDQs = activeDDQs.filter(ddq => selectedManagersForMessage.includes(ddq.id))
+    const managerNames = selectedDDQs.map(ddq => `${ddq.contactName} at ${ddq.managerName}`).join(", ")
+
+    console.log("Sending message to:", managerNames)
     console.log("Message content:", messageContent)
 
-    showNotification(`Message sent to ${selectedDDQ?.contactName} at ${selectedDDQ?.managerName}`)
+    showNotification(`Message sent to ${selectedDDQs.length} manager(s): ${managerNames}`)
     setShowMessageModal(false)
     setSelectedDDQ(null)
     setMessageContent("")
     setMessageTopic("")
+    setSelectedManagersForMessage([])
   }
 
   const handleScheduleMeeting = () => {
-    if (!meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time) {
-      showNotification("Please fill in all required fields")
+    if (!meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time || selectedManagersForMeeting.length === 0) {
+      showNotification("Please fill in all required fields and select at least one manager")
       return
     }
 
-    showNotification(`Check-in meeting scheduled with ${selectedDDQ?.contactName} at ${selectedDDQ?.managerName}`)
+    const selectedDDQs = activeDDQs.filter(ddq => selectedManagersForMeeting.includes(ddq.id))
+    const managerNames = selectedDDQs.map(ddq => `${ddq.contactName} at ${ddq.managerName}`).join(", ")
+
+    showNotification(`Check-in meeting scheduled with ${selectedDDQs.length} manager(s): ${managerNames}`)
     setShowMeetingModal(false)
     setSelectedDDQ(null)
     setMeetingDetails({
@@ -1670,6 +1768,7 @@ const handleUseTemplate = () => {
       duration: "60",
       type: "video",
     })
+    setSelectedManagersForMeeting([])
   }
 
   const closeMessageModal = () => {
@@ -1677,6 +1776,7 @@ const handleUseTemplate = () => {
     setSelectedDDQ(null)
     setMessageContent("")
     setMessageTopic("")
+    setSelectedManagersForMessage([])
   }
 
   const closeMeetingModal = () => {
@@ -1690,6 +1790,7 @@ const handleUseTemplate = () => {
       duration: "60",
       type: "video",
     })
+    setSelectedManagersForMeeting([])
   }
 
   const getStatusBadge = (status: string) => {
@@ -2786,7 +2887,7 @@ const handleUseTemplate = () => {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Send Message</h3>
                 <p className="text-sm text-gray-600">
-                  To: {selectedDDQ.contactName} at {selectedDDQ.managerName}
+                  Select managers to send message to
                 </p>
               </div>
               <Button variant="outline" onClick={closeMessageModal}>
@@ -2795,6 +2896,47 @@ const handleUseTemplate = () => {
             </div>
 
             <div className="space-y-4">
+              {/* Manager Selection */}
+              <div className="space-y-2">
+                <Label>Select Managers *</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="select-all-managers-message"
+                      checked={selectedManagersForMessage.length === filteredActiveDDQs.length}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedManagersForMessage(filteredActiveDDQs.map(ddq => ddq.id))
+                        } else {
+                          setSelectedManagersForMessage([])
+                        }
+                      }}
+                    />
+                    <Label htmlFor="select-all-managers-message" className="font-medium">Select All Managers</Label>
+                  </div>
+                  <div className="border-t pt-2">
+                    {filteredActiveDDQs.map((ddq) => (
+                      <div key={ddq.id} className="flex items-center space-x-2 py-1">
+                        <Checkbox
+                          id={`manager-${ddq.id}-message`}
+                          checked={selectedManagersForMessage.includes(ddq.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedManagersForMessage(prev => [...prev, ddq.id])
+                            } else {
+                              setSelectedManagersForMessage(prev => prev.filter(id => id !== ddq.id))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`manager-${ddq.id}-message`} className="text-sm">
+                          {ddq.contactName} at {ddq.managerName} ({ddq.strategy})
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="messageTopic">Subject *</Label>
                 <Input
@@ -2821,7 +2963,12 @@ const handleUseTemplate = () => {
               <Button variant="outline" onClick={closeMessageModal}>
                 Cancel
               </Button>
-              <Button onClick={handleSendMessage}>Send Message</Button>
+              <Button 
+                onClick={handleSendMessage} 
+                disabled={selectedManagersForMessage.length === 0 || !messageTopic.trim() || !messageContent.trim()}
+              >
+                Send Message
+              </Button>
             </div>
           </div>
         </div>
@@ -2835,7 +2982,7 @@ const handleUseTemplate = () => {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Schedule Check-in Meeting</h3>
                 <p className="text-sm text-gray-600">
-                  With: {selectedDDQ.contactName} at {selectedDDQ.managerName}
+                  Select managers to schedule meeting with
                 </p>
               </div>
               <Button variant="outline" onClick={closeMeetingModal}>
@@ -2844,6 +2991,47 @@ const handleUseTemplate = () => {
             </div>
 
             <div className="space-y-4">
+              {/* Manager Selection */}
+              <div className="space-y-2">
+                <Label>Select Managers *</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="select-all-managers-meeting"
+                      checked={selectedManagersForMeeting.length === filteredActiveDDQs.length}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedManagersForMeeting(filteredActiveDDQs.map(ddq => ddq.id))
+                        } else {
+                          setSelectedManagersForMeeting([])
+                        }
+                      }}
+                    />
+                    <Label htmlFor="select-all-managers-meeting" className="font-medium">Select All Managers</Label>
+                  </div>
+                  <div className="border-t pt-2">
+                    {filteredActiveDDQs.map((ddq) => (
+                      <div key={ddq.id} className="flex items-center space-x-2 py-1">
+                        <Checkbox
+                          id={`manager-${ddq.id}-meeting`}
+                          checked={selectedManagersForMeeting.includes(ddq.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedManagersForMeeting(prev => [...prev, ddq.id])
+                            } else {
+                              setSelectedManagersForMeeting(prev => prev.filter(id => id !== ddq.id))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`manager-${ddq.id}-meeting`} className="text-sm">
+                          {ddq.contactName} at {ddq.managerName} ({ddq.strategy})
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="meetingTopic">Meeting Topic *</Label>
                 <Input
@@ -2934,7 +3122,12 @@ const handleUseTemplate = () => {
               <Button variant="outline" onClick={closeMeetingModal}>
                 Cancel
               </Button>
-              <Button onClick={handleScheduleMeeting}>Schedule Meeting</Button>
+              <Button 
+                onClick={handleScheduleMeeting}
+                disabled={selectedManagersForMeeting.length === 0 || !meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time}
+              >
+                Schedule Meeting
+              </Button>
             </div>
           </div>
         </div>
@@ -3043,7 +3236,7 @@ const handleUseTemplate = () => {
 
             {/* DDQ List */}
             <div className="space-y-4">
-              {activeDDQs.map((ddq) => (
+              {filteredActiveDDQs.map((ddq) => (
                 <Card key={ddq.id} className="border border-gray-200 hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -3124,7 +3317,7 @@ const handleUseTemplate = () => {
                             },
                             {
                               label: "Export DDQ",
-                              onClick: () => showNotification(`Exporting DDQ: ${ddq.templateName}`),
+                              onClick: () => handleExportDDQ(ddq),
                             },
                           ]}
                         />
@@ -3179,7 +3372,7 @@ const handleUseTemplate = () => {
                         <Badge variant="outline">{ddq.vintage}</Badge>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleViewCompletedDDQ(ddq)}>
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
@@ -3196,7 +3389,6 @@ const handleUseTemplate = () => {
             {/* Vestira Standard Templates */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Star className="h-5 w-5 text-yellow-500" />
                 <h3 className="text-lg font-semibold text-gray-900">Vestira Standard Templates</h3>
                 <Badge className="bg-blue-100 text-blue-800">Recommended</Badge>
               </div>
@@ -3685,6 +3877,181 @@ const handleUseTemplate = () => {
                   Done
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit DDQ Modal */}
+      {showEditDDQModal && editingDDQ && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Edit DDQ</h2>
+              <Button variant="outline" size="sm" onClick={handleCancelEditDDQ}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              {/* DDQ Name */}
+              <div>
+                <Label htmlFor="ddqName">DDQ Name</Label>
+                <Input
+                  id="ddqName"
+                  value={editDDQForm.ddqName}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, ddqName: e.target.value })}
+                  placeholder="Enter DDQ name"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={editDDQForm.description}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, description: e.target.value })}
+                  placeholder="Enter description"
+                  rows={3}
+                />
+              </div>
+
+              {/* Due Date */}
+              <div>
+                <Label htmlFor="dueDate">Due Date</Label>
+                <Input
+                  id="dueDate"
+                  type="date"
+                  value={editDDQForm.dueDate}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, dueDate: e.target.value })}
+                />
+              </div>
+
+              {/* Manager Selection */}
+              <div>
+                <Label>Manager</Label>
+                <Select
+                  value={editDDQForm.selectedManagers[0] || ""}
+                  onValueChange={(value) => setEditDDQForm({ ...editDDQForm, selectedManagers: [value] })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select manager" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableManagers.map((manager) => (
+                      <SelectItem key={manager.id} value={manager.id}>
+                        {manager.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Strategy */}
+              <div>
+                <Label>Strategy</Label>
+                <Select
+                  value={editDDQForm.strategies[0] || ""}
+                  onValueChange={(value) => setEditDDQForm({ ...editDDQForm, strategies: [value] })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select strategy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Private Equity">Private Equity</SelectItem>
+                    <SelectItem value="Venture Capital">Venture Capital</SelectItem>
+                    <SelectItem value="Real Estate">Real Estate</SelectItem>
+                    <SelectItem value="Infrastructure">Infrastructure</SelectItem>
+                    <SelectItem value="Hedge Fund">Hedge Fund</SelectItem>
+                    <SelectItem value="Credit">Credit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Fund Types */}
+              <div>
+                <Label>Investment Type</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="fund"
+                      checked={editDDQForm.fundTypes.fund}
+                      onCheckedChange={(checked) =>
+                        setEditDDQForm({
+                          ...editDDQForm,
+                          fundTypes: { ...editDDQForm.fundTypes, fund: checked as boolean }
+                        })
+                      }
+                    />
+                    <Label htmlFor="fund">Fund</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="sma"
+                      checked={editDDQForm.fundTypes.sma}
+                      onCheckedChange={(checked) =>
+                        setEditDDQForm({
+                          ...editDDQForm,
+                          fundTypes: { ...editDDQForm.fundTypes, sma: checked as boolean }
+                        })
+                      }
+                    />
+                    <Label htmlFor="sma">SMA</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="other"
+                      checked={editDDQForm.fundTypes.other}
+                      onCheckedChange={(checked) =>
+                        setEditDDQForm({
+                          ...editDDQForm,
+                          fundTypes: { ...editDDQForm.fundTypes, other: checked as boolean }
+                        })
+                      }
+                    />
+                    <Label htmlFor="other">Other</Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fund Size */}
+              <div>
+                <Label htmlFor="fundSize">Fund Size</Label>
+                <Input
+                  id="fundSize"
+                  value={editDDQForm.fundSize}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, fundSize: e.target.value })}
+                  placeholder="e.g., $100M - $500M"
+                />
+              </div>
+
+              {/* Visibility */}
+              <div>
+                <Label>Visibility</Label>
+                <Select
+                  value={editDDQForm.visibility}
+                  onValueChange={(value) => setEditDDQForm({ ...editDDQForm, visibility: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-4 mt-6 pt-6 border-t">
+              <Button variant="outline" onClick={handleCancelEditDDQ}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEditDDQ}>
+                Save Changes
+              </Button>
             </div>
           </div>
         </div>
