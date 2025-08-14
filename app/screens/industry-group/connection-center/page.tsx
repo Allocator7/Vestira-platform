@@ -97,17 +97,17 @@ export default function IndustryGroupConnectionCenterPage() {
   // Route to appropriate profile based on connection type
   const handleViewProfile = (connection: any) => {
     try {
-      // Route to appropriate profile based on connection type and contact person
-      if (connection.contactPersonId) {
-        // Route to the correct profile page based on the contact person
-        router.push(`/screens/general/allocator-profile?id=${connection.contactPersonId}`)
+      // Route to appropriate profile based on connection type
+      if (connection.type === "partner" || connection.contactPersonId === "4" || connection.contactPersonId === "5" || connection.contactPersonId === "6") {
+        // Route to manager profile for partners and specific IDs
+        router.push(`/screens/general/manager-profile?id=${connection.contactPersonId}`)
       } else {
-        // Fallback routing
-        router.push(`/screens/general/allocator-profile?id=${connection.id}`)
+        // Route to allocator profile for members and sponsors
+        router.push(`/screens/general/allocator-profile?id=${connection.contactPersonId}`)
       }
     } catch (error) {
       console.error("Error navigating to profile:", error)
-      // Fallback to a default profile page
+      // Fallback to allocator profile page
       router.push("/screens/general/allocator-profile")
     }
   }
@@ -140,51 +140,51 @@ export default function IndustryGroupConnectionCenterPage() {
   const connections = [
     {
       id: 1,
-      name: "Metropolitan Pension Fund",
-      contactPerson: "Jennifer Walsh", // Added personal contact
-      contactPersonId: "jennifer-walsh", // Added for routing
+      name: "Sovereign Wealth Fund",
+      contactPerson: "Sarah Chen",
+      contactPersonId: "1", // Maps to allocator profile ID 1
       type: "member",
       logo: "/FI_logo.png",
       category: "Premium Member",
-      location: "New York, NY",
-      aum: "$75B+",
-      focus: ["Alternative Investments", "ESG", "Risk Management"],
+      location: "Singapore",
+      aum: "$320B+",
+      focus: ["Alternative Assets", "Global Markets", "Long-term"],
       status: "connected",
       lastInteraction: "May 10, 2025",
     },
     {
       id: 2,
-      name: "Pacific Asset Management",
-      contactPerson: "Robert Chen", // Added personal contact
-      contactPersonId: "robert-chen", // Added for routing
+      name: "Global Pension Alliance",
+      contactPerson: "Michael Johnson",
+      contactPersonId: "2", // Maps to allocator profile ID 2
       type: "sponsor",
       logo: "/trp-symbol.png",
       category: "Gold Sponsor",
-      location: "San Francisco, CA",
-      aum: "$25B+",
+      location: "London, UK",
+      aum: "$180B+",
       focus: ["Private Equity", "Venture Capital", "Growth Equity"],
       status: "connected",
       lastInteraction: "May 5, 2025",
     },
     {
-      id: 6,
-      name: "Global Insurance Group",
-      contactPerson: "Sarah Martinez", // Added personal contact
-      contactPersonId: "sarah-martinez", // Added for routing
+      id: 3,
+      name: "University Endowment Foundation",
+      contactPerson: "David Kim",
+      contactPersonId: "3", // Maps to allocator profile ID 3
       type: "member",
       logo: "/stylized-wm.png",
-      category: "Corporate Member",
-      location: "Chicago, IL",
-      aum: "$15B+",
-      focus: ["Fixed Income", "Insurance Linked Securities", "Credit"],
+      category: "Academic Member",
+      location: "Boston, MA",
+      aum: "$45B+",
+      focus: ["Endowment Management", "Long-term Growth", "Impact Investing"],
       status: "connected",
       lastInteraction: "May 8, 2025",
     },
     {
-      id: 9,
+      id: 4,
       name: "Strategic Investment Advisors",
-      contactPerson: "David Kim", // Added personal contact
-      contactPersonId: "david-kim", // Added for routing
+      contactPerson: "Lisa Thompson",
+      contactPersonId: "4", // Maps to manager profile ID 4
       type: "partner",
       logo: "/abstract-profile.png",
       category: "Strategic Partner",
@@ -197,25 +197,10 @@ export default function IndustryGroupConnectionCenterPage() {
       lastInteraction: "May 7, 2025",
     },
     {
-      id: 14,
-      name: "University Endowment Fund",
-      contactPerson: "Lisa Thompson", // Added personal contact
-      contactPersonId: "lisa-thompson", // Added for routing
-      type: "member",
-      logo: "/medical-resonance-image.png",
-      category: "Academic Member",
-      location: "Boston, MA",
-      aum: "$8.2B+",
-      focus: ["Endowment Management", "Long-term Growth", "Impact Investing"],
-      status: "pending",
-      direction: "incoming",
-      lastInteraction: "May 12, 2025",
-    },
-    {
-      id: 15,
+      id: 5,
       name: "Event Management Solutions",
-      contactPerson: "Emily Zhang", // Added personal contact
-      contactPersonId: "emily-zhang", // Added for routing
+      contactPerson: "Emily Zhang",
+      contactPersonId: "5", // Maps to manager profile ID 5
       type: "partner",
       logo: "/abstract-profile.png",
       category: "Service Partner",
@@ -227,6 +212,21 @@ export default function IndustryGroupConnectionCenterPage() {
       status: "pending",
       direction: "incoming",
       lastInteraction: "May 11, 2025",
+    },
+    {
+      id: 6,
+      name: "Quantum Capital Partners",
+      contactPerson: "Robert Chen",
+      contactPersonId: "6", // Maps to manager profile ID 6
+      type: "member",
+      logo: "/medical-resonance-image.png",
+      category: "Corporate Member",
+      location: "San Francisco, CA",
+      aum: "$25B+",
+      focus: ["Technology Investments", "Growth Equity", "Venture Capital"],
+      status: "pending",
+      direction: "incoming",
+      lastInteraction: "May 12, 2025",
     },
   ]
 
