@@ -458,6 +458,12 @@ function AllocatorInsightsPage() {
     setSelectedInsight(insight)
   }
 
+  // Handle share insight
+  const handleShareInsight = (insight: any) => {
+    setSelectedInsight(insight)
+    setShowShareDialog(true)
+  }
+
   // Remove individual filter
   const removeFilter = (section: string, filterId: string) => {
     setSelectedFilters((prev) => ({
@@ -749,7 +755,12 @@ function AllocatorInsightsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredInsights.length > 0 ? (
                 filteredInsights.map((insight) => (
-                  <StandardInsightCard key={insight.id} insight={insight} onReadMore={() => handleReadMore(insight)} />
+                  <StandardInsightCard 
+                    key={insight.id} 
+                    insight={insight} 
+                    onReadMore={() => handleReadMore(insight)}
+                    onShare={() => handleShareInsight(insight)}
+                  />
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
@@ -767,7 +778,12 @@ function AllocatorInsightsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredInsights.length > 0 ? (
                 filteredInsights.map((insight) => (
-                  <StandardInsightCard key={insight.id} insight={insight} onReadMore={() => handleReadMore(insight)} />
+                  <StandardInsightCard 
+                    key={insight.id} 
+                    insight={insight} 
+                    onReadMore={() => handleReadMore(insight)}
+                    onShare={() => handleShareInsight(insight)}
+                  />
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">
@@ -783,7 +799,12 @@ function AllocatorInsightsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredInsights.length > 0 ? (
                 filteredInsights.map((insight) => (
-                  <StandardInsightCard key={insight.id} insight={insight} onReadMore={() => handleReadMore(insight)} />
+                  <StandardInsightCard 
+                    key={insight.id} 
+                    insight={insight} 
+                    onReadMore={() => handleReadMore(insight)}
+                    onShare={() => handleShareInsight(insight)}
+                  />
                 ))
               ) : (
                 <div className="col-span-full text-center py-12">

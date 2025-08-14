@@ -164,6 +164,7 @@ export default function ConnectionCenterPage() {
     focusAreas: [] as string[],
     locations: [] as string[],
     companyTypes: [] as string[],
+    companies: [] as string[],
     sizes: [] as string[],
     statuses: [] as string[],
   })
@@ -367,6 +368,21 @@ export default function ConnectionCenterPage() {
     "Insurance",
   ]
 
+  const companyOptions = [
+    "Sovereign Wealth Fund",
+    "Global Pension Alliance",
+    "University Endowment Foundation",
+    "Quantum Capital Partners",
+    "Cambridge Associates",
+    "Strategic Investment Advisors",
+    "Event Management Solutions",
+    "Metropolitan Pension Fund",
+    "Apex Capital Management",
+    "Strategic Investment Consultants",
+    "National Insurance Corp",
+    "Municipal Retirement Fund",
+  ]
+
   const sizeOptions = ["Under $1B", "$1B - $5B", "$5B - $25B", "$25B - $100B", "Over $100B"]
 
   const categories = ["All", "Allocator", "Manager", "Consultant"]
@@ -380,6 +396,7 @@ export default function ConnectionCenterPage() {
     filters.focusAreas.length +
     filters.locations.length +
     filters.companyTypes.length +
+    filters.companies.length +
     filters.sizes.length +
     filters.statuses.length +
     (selectedCategory !== "All" ? 1 : 0)
@@ -399,11 +416,11 @@ export default function ConnectionCenterPage() {
 
   // Filter connections based on search query and selected filters
   const filteredConnections = connectionsState.filter((connection) => {
-    // Filter by search query
+    // Filter by search query - prioritize contact person search
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase()
-      const nameMatch = connection.name.toLowerCase().includes(searchLower)
       const contactMatch = connection.contactPerson.toLowerCase().includes(searchLower)
+      const nameMatch = connection.name.toLowerCase().includes(searchLower)
       const categoryMatch = connection.category.toLowerCase().includes(searchLower)
       const locationMatch = connection.location.toLowerCase().includes(searchLower)
 
@@ -421,8 +438,8 @@ export default function ConnectionCenterPage() {
         (connection as any).services?.some((s: string) => s.toLowerCase().includes(searchLower))
 
       if (
-        !nameMatch &&
         !contactMatch &&
+        !nameMatch &&
         !categoryMatch &&
         !locationMatch &&
         !focusMatch &&
@@ -443,6 +460,8 @@ export default function ConnectionCenterPage() {
 
     const matchesCompanyType = filters.companyTypes.length === 0 || filters.companyTypes.includes(connection.category)
 
+    const matchesCompany = filters.companies.length === 0 || filters.companies.includes(connection.name)
+
     const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(connection.status)
 
     // Size filter
@@ -453,7 +472,7 @@ export default function ConnectionCenterPage() {
       return filters.sizes.includes(connectionSize)
     })()
 
-    return matchesCategory && matchesFocusArea && matchesLocation && matchesCompanyType && matchesStatus && matchesSize
+    return matchesCategory && matchesFocusArea && matchesLocation && matchesCompanyType && matchesCompany && matchesStatus && matchesSize
   })
 
   // Sort connections
@@ -478,6 +497,7 @@ export default function ConnectionCenterPage() {
       focusAreas: [],
       locations: [],
       companyTypes: [],
+      companies: [],
       sizes: [],
       statuses: [],
     })
@@ -521,6 +541,8 @@ export default function ConnectionCenterPage() {
 
     filters.companyTypes.forEach((type) => active.push({ type: "companyTypes", value: type, label: `Type: ${type}` }))
 
+    filters.companies.forEach((company) => active.push({ type: "companies", value: company, label: `Company: ${company}` }))
+
     filters.sizes.forEach((size) => active.push({ type: "sizes", value: size, label: `Size: ${size}` }))
 
     filters.statuses.forEach((status) => active.push({ type: "statuses", value: status, label: `Status: ${status}` }))
@@ -558,8 +580,8 @@ export default function ConnectionCenterPage() {
                 <AvatarFallback>{connection.name.split(" ").map((n) => n[0])}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-medium text-base leading-tight">{connection.name}</h3>
-                <p className="text-sm text-gray-600">{connection.contactPerson}</p>
+                <h3 className="font-medium text-base leading-tight">{connection.contactPerson}</h3>
+                <p className="text-sm text-gray-600">{connection.name}</p>
                 <div className="flex items-center mt-2">
                   <Badge className={typeBadgeClass}>{typeLabel}</Badge>
                   <Badge
@@ -796,7 +818,7 @@ export default function ConnectionCenterPage() {
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search connections..."
+                    placeholder="Search contacts or companies..."
                     className="pl-10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -909,6 +931,34 @@ export default function ConnectionCenterPage() {
                             />
                             <Label htmlFor={`companytype-${type}`} className="text-sm">
                               {type}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Company Filter */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Company</Label>
+                      <div className="space-y-2 max-h-24 overflow-y-auto border rounded p-2 bg-white">
+                        {companyOptions.map((company) => (
+                          <div key={company} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`company-${company}`}
+                              checked={filters.companies.includes(company)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setFilters((prev) => ({ ...prev, companies: [...prev.companies, company] }))
+                                } else {
+                                  setFilters((prev) => ({
+                                    ...prev,
+                                    companies: prev.companies.filter((c) => c !== company),
+                                  }))
+                                }
+                              }}
+                            />
+                            <Label htmlFor={`company-${company}`} className="text-sm">
+                              {company}
                             </Label>
                           </div>
                         ))}
@@ -1113,8 +1163,8 @@ export default function ConnectionCenterPage() {
                                     <AvatarFallback>{connection.name.split(" ").map((n) => n[0])}</AvatarFallback>
                                   </Avatar>
                                   <div>
-                                    <h3 className="font-medium">{connection.name}</h3>
-                                    <p className="text-sm text-gray-600">{connection.contactPerson}</p>
+                                    <h3 className="font-medium">{connection.contactPerson}</h3>
+                                    <p className="text-sm text-gray-600">{connection.name}</p>
                                     <div className="flex items-center mt-1">
                                       <Badge
                                         className={
@@ -1199,8 +1249,8 @@ export default function ConnectionCenterPage() {
                                     <AvatarFallback>{connection.name.split(" ").map((n) => n[0])}</AvatarFallback>
                                   </Avatar>
                                   <div>
-                                    <h3 className="font-medium">{connection.name}</h3>
-                                    <p className="text-sm text-gray-600">{connection.contactPerson}</p>
+                                    <h3 className="font-medium">{connection.contactPerson}</h3>
+                                    <p className="text-sm text-gray-600">{connection.name}</p>
                                     <div className="flex items-center mt-1">
                                       <Badge
                                         className={

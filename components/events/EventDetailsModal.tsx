@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, MapPin, Clock, Users, Star, Building, Mail, Phone } from "lucide-react"
+import { Calendar, MapPin, Clock, Users, Building, Mail, Phone } from "lucide-react"
 
 interface EventDetailsModalProps {
   event: any
@@ -60,14 +60,9 @@ export function EventDetailsModal({ event, isOpen, onClose, onRegister }: EventD
               </div>
 
               <div>
-                <h3 className="font-semibold text-lg mb-2">Event Type & Rating</h3>
+                <h3 className="font-semibold text-lg mb-2">Event Type</h3>
                 <div className="flex items-center gap-3">
                   <Badge variant="secondary">{event.type}</Badge>
-                  <div className="flex items-center gap-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{event.rating}</span>
-                    <span className="text-gray-500 text-sm">rating</span>
-                  </div>
                 </div>
               </div>
 

@@ -54,6 +54,7 @@ export default function IndustryGroupConnectionCenterPage() {
     focusAreas: [] as string[],
     locations: [] as string[],
     companyTypes: [] as string[],
+    companies: [] as string[],
     sizes: [] as string[],
     statuses: [] as string[],
   })
