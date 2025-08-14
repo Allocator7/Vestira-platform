@@ -670,66 +670,6 @@ export default function ManagerProfilePage() {
                   </CardContent>
                 </Card>
               </TabsContent>
-
-              <TabsContent value="activity" className="pt-4">
-                <Card className="vestira-card-minimal">
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>Latest document and data room activity</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Document Viewed</p>
-                          <p className="text-xs text-muted-foreground">
-                            "Global Equity Fund - Q2 2023 Performance Report"
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                          <FolderOpen className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Data Room Accessed</p>
-                          <p className="text-xs text-muted-foreground">"Global Equity Fund" data room</p>
-                          <p className="text-xs text-muted-foreground mt-1">1 week ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Document Downloaded</p>
-                          <p className="text-xs text-muted-foreground">
-                            "ESG Integration: Best Practices for Institutional Investors"
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">2 weeks ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                          <FolderOpen className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Data Room Accessed</p>
-                          <p className="text-xs text-muted-foreground">"Sustainable Fixed Income" data room</p>
-                          <p className="text-xs text-muted-foreground mt-1">1 month ago</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
           </div>
         </div>
@@ -762,7 +702,7 @@ export default function ManagerProfilePage() {
               </div>
               <div className="border-t pt-2">
                 {managerContacts.map((contact) => (
-                  <div key={contact.id} className="flex items-center space-x-2 py-1">
+                  <div key={contact.id} className="flex items-start space-x-2 py-2">
                     <Checkbox
                       id={`message-contact-${contact.id}`}
                       checked={selectedMessageContacts.includes(contact.id)}
@@ -774,9 +714,12 @@ export default function ManagerProfilePage() {
                         }
                       }}
                     />
-                    <Label htmlFor={`message-contact-${contact.id}`} className="text-sm">
-                      {contact.name} - {contact.title}
-                    </Label>
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor={`message-contact-${contact.id}`} className="text-sm font-medium cursor-pointer">
+                        {contact.name}
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-0.5">{contact.title}</p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -811,7 +754,7 @@ export default function ManagerProfilePage() {
               </div>
               <div className="border-t pt-2">
                 {managerContacts.map((contact) => (
-                  <div key={contact.id} className="flex items-center space-x-2 py-1">
+                  <div key={contact.id} className="flex items-start space-x-2 py-2">
                     <Checkbox
                       id={`schedule-contact-${contact.id}`}
                       checked={selectedScheduleContacts.includes(contact.id)}
@@ -823,9 +766,12 @@ export default function ManagerProfilePage() {
                         }
                       }}
                     />
-                    <Label htmlFor={`schedule-contact-${contact.id}`} className="text-sm">
-                      {contact.name} - {contact.title}
-                    </Label>
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor={`schedule-contact-${contact.id}`} className="text-sm font-medium cursor-pointer">
+                        {contact.name}
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-0.5">{contact.title}</p>
+                    </div>
                   </div>
                 ))}
               </div>

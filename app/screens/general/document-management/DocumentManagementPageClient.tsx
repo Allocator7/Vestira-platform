@@ -335,10 +335,10 @@ export default function DocumentManagementPageClient() {
     })
 
     try {
-      // Simulate file preparation and download process
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Create a more realistic document content based on the document type
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create document content based on classification
       let documentContent = ""
       const timestamp = new Date().toISOString()
       
@@ -356,37 +356,32 @@ export default function DocumentManagementPageClient() {
           documentContent = `DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nGenerated: ${timestamp}`
       }
 
-      // Create a blob URL for the download
-      const blob = new Blob([documentContent], {
-        type: "text/plain;charset=utf-8",
-      })
-      const url = window.URL.createObjectURL(blob)
-
-      // Create temporary download link
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`
-      link.style.display = "none"
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(url)
-
-      notify({
-        title: "Download Complete",
-        description: `${document.title} has been downloaded successfully. Check your downloads folder.`,
+      await downloadUtils.downloadText(documentContent, `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`, {
+        onComplete: () => {
+          setIsDownloading(false)
+          notify({
+            title: "Download Complete",
+            description: `${document.title} has been downloaded successfully. Check your downloads folder.`,
+          })
+        },
+        onError: (error) => {
+          console.error("Download error:", error)
+          setIsDownloading(false)
+          notify({
+            title: "Download Failed",
+            description: "There was an error downloading the document. Please try again.",
+            variant: "destructive",
+          })
+        }
       })
     } catch (error) {
       console.error("Download error:", error)
+      setIsDownloading(false)
       notify({
         title: "Download Failed",
         description: "There was an error downloading the document. Please try again.",
         variant: "destructive",
       })
-    } finally {
-      setIsDownloading(false)
     }
   }
 
