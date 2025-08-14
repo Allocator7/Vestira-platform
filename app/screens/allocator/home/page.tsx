@@ -195,12 +195,12 @@ Our emerging markets strategy focuses on companies with strong competitive posit
             </Link>
 
             <Link href="/screens/allocator/due-diligence-hub">
-              <div className="group flex items-center gap-3 p-4 rounded-lg bg-purple-500/5 hover:bg-purple-500/10 border border-purple-500/20 hover:border-purple-500/30 transition-all duration-300 min-h-[80px]">
+              <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
                 <div className="p-2 rounded-full bg-white shadow-sm">
-                  <FileSearch className="h-5 w-5 text-purple-500" />
+                  <FileSearch className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand group-hover:text-purple-500 transition-colors">
+                  <h3 className="font-medium text-deep-brand group-hover:text-electric-blue transition-colors">
                     Due Diligence
                   </h3>
                   <p className="text-sm text-base-gray">Launch and manage due diligence processes</p>
@@ -209,12 +209,12 @@ Our emerging markets strategy focuses on companies with strong competitive posit
             </Link>
 
             <Link href="/screens/allocator/data-rooms">
-              <div className="group flex items-center gap-3 p-4 rounded-lg bg-green-500/5 hover:bg-green-500/10 border border-green-500/20 hover:border-green-500/30 transition-all duration-300 min-h-[80px]">
+              <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
                 <div className="p-2 rounded-full bg-white shadow-sm">
-                  <FolderOpen className="h-5 w-5 text-green-500" />
+                  <FolderOpen className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand group-hover:text-green-500 transition-colors">
+                  <h3 className="font-medium text-deep-brand group-hover:text-electric-blue transition-colors">
                     Data Rooms
                   </h3>
                   <p className="text-sm text-base-gray">Access manager documents and materials</p>
@@ -223,12 +223,12 @@ Our emerging markets strategy focuses on companies with strong competitive posit
             </Link>
 
             <Link href="/screens/allocator/events">
-              <div className="group flex items-center gap-3 p-4 rounded-lg bg-orange-500/5 hover:bg-orange-500/10 border border-orange-500/20 hover:border-orange-500/30 transition-all duration-300 min-h-[80px]">
+              <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
                 <div className="p-2 rounded-full bg-white shadow-sm">
-                  <Calendar className="h-5 w-5 text-orange-500" />
+                  <Calendar className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand group-hover:text-orange-500 transition-colors">
+                  <h3 className="font-medium text-deep-brand group-hover:text-electric-blue transition-colors">
                     Events
                   </h3>
                   <p className="text-sm text-base-gray">Browse and register for industry events</p>
@@ -257,8 +257,8 @@ Our emerging markets strategy focuses on companies with strong competitive posit
           <Card className="vestira-card-minimal">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-purple-500/10">
-                  <FileText className="h-5 w-5 text-purple-500" />
+                <div className="p-2 rounded-full bg-electric-blue/10">
+                  <FileText className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-deep-brand">156</p>
@@ -271,8 +271,8 @@ Our emerging markets strategy focuses on companies with strong competitive posit
           <Card className="vestira-card-minimal">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-green-500/10">
-                  <Briefcase className="h-5 w-5 text-green-500" />
+                <div className="p-2 rounded-full bg-electric-blue/10">
+                  <Briefcase className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-deep-brand">8</p>
@@ -285,8 +285,8 @@ Our emerging markets strategy focuses on companies with strong competitive posit
           <Card className="vestira-card-minimal">
             <CardContent className="p-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-orange-500/10">
-                  <MessageSquare className="h-5 w-5 text-orange-500" />
+                <div className="p-2 rounded-full bg-electric-blue/10">
+                  <MessageSquare className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-deep-brand">12</p>
