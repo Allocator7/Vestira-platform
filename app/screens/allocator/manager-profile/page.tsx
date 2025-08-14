@@ -9,6 +9,7 @@ import { Button } from "../../../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Separator } from "../../../../components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
 import {
   ArrowUpRight,
   Calendar,
@@ -21,6 +22,7 @@ import {
   Share2,
   Star,
   Users,
+  ChevronDown,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -39,7 +41,34 @@ export default function ManagerProfilePage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isStarred, setIsStarred] = useState(false)
   const [connectingUsers, setConnectingUsers] = useState<string[]>([])
+  const [selectedMessageContact, setSelectedMessageContact] = useState<string>("")
+  const [selectedScheduleContact, setSelectedScheduleContact] = useState<string>("")
   const { toast } = useToast()
+
+  // Mock contacts data for BlackRock
+  const managerContacts = [
+    {
+      id: "1",
+      name: "Robert Williams",
+      title: "Chief Investment Officer",
+      email: "robert.williams@blackrock.com",
+      role: "Primary Contact"
+    },
+    {
+      id: "2", 
+      name: "James Thompson",
+      title: "Client Relationship Manager",
+      email: "james.thompson@blackrock.com",
+      role: "Client Relations"
+    },
+    {
+      id: "3",
+      name: "Lisa Parker", 
+      title: "Investment Specialist",
+      email: "lisa.parker@blackrock.com",
+      role: "Investment Team"
+    }
+  ]
 
   const managerInfo = {
     name: "BlackRock",
@@ -67,6 +96,16 @@ export default function ManagerProfilePage() {
         description: `Your connection request has been sent to ${personName}.`,
       })
     }, 1000)
+  }
+
+  const handleSendMessage = () => {
+    setSelectedMessageContact(managerContacts[0].id)
+    setIsMessageModalOpen(true)
+  }
+
+  const handleScheduleMeeting = () => {
+    setSelectedScheduleContact(managerContacts[0].id)
+    setIsMeetingModalOpen(true)
   }
 
   const handleDownloadDocument = (documentName: string) => {
@@ -330,23 +369,23 @@ Contact: contact@blackrock.com`
                 <Separator />
 
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Key Information</h3>
+                  <h3 className="text-sm font-medium">Key Metrics</h3>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="text-xs text-muted-foreground">AUM</p>
-                      <p className="text-sm font-medium">$9.5 Trillion</p>
+                      <p className="text-xs text-muted-foreground"># of Clients</p>
+                      <p className="text-sm font-medium">2,500+</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Active Funds</p>
+                      <p className="text-sm font-medium">150+</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Minimum SMA Size</p>
+                      <p className="text-sm font-medium">$50M</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Founded</p>
                       <p className="text-sm font-medium">1988</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Headquarters</p>
-                      <p className="text-sm font-medium">New York, NY</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Employees</p>
-                      <p className="text-sm font-medium">18,000+</p>
                     </div>
                   </div>
                 </div>
@@ -366,14 +405,14 @@ Contact: contact@blackrock.com`
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                  <Button className="w-full" onClick={() => setIsMessageModalOpen(true)}>
+                  <Button className="w-full" onClick={handleSendMessage}>
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Message
                   </Button>
                   <Button
                     variant="outline"
                     className="w-full bg-transparent"
-                    onClick={() => setIsMeetingModalOpen(true)}
+                    onClick={handleScheduleMeeting}
                   >
                     <Calendar className="mr-2 h-4 w-4" />
                     Schedule Meeting
@@ -864,15 +903,57 @@ Contact: contact@blackrock.com`
       <SendMessageModal
         isOpen={isMessageModalOpen}
         onClose={() => setIsMessageModalOpen(false)}
-        recipientName={managerInfo.primaryContact}
-        recipientEmail={managerInfo.email}
+        recipientName={managerContacts.find(c => c.id === selectedMessageContact)?.name || managerInfo.primaryContact}
+        recipientEmail={managerContacts.find(c => c.id === selectedMessageContact)?.email || managerInfo.email}
+        organizationName={managerInfo.name}
+        contactSelector={
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Contact</label>
+            <Select value={selectedMessageContact} onValueChange={setSelectedMessageContact}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a contact" />
+              </SelectTrigger>
+              <SelectContent>
+                {managerContacts.map((contact) => (
+                  <SelectItem key={contact.id} value={contact.id}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{contact.name}</span>
+                      <span className="text-xs text-gray-500">{contact.title}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        }
       />
 
       <ScheduleMeetingModal
         isOpen={isMeetingModalOpen}
         onClose={() => setIsMeetingModalOpen(false)}
-        recipientName={managerInfo.primaryContact}
-        recipientEmail={managerInfo.email}
+        recipientName={managerContacts.find(c => c.id === selectedScheduleContact)?.name || managerInfo.primaryContact}
+        recipientEmail={managerContacts.find(c => c.id === selectedScheduleContact)?.email || managerInfo.email}
+        organizationName={managerInfo.name}
+        contactSelector={
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Contact</label>
+            <Select value={selectedScheduleContact} onValueChange={setSelectedScheduleContact}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose a contact" />
+              </SelectTrigger>
+              <SelectContent>
+                {managerContacts.map((contact) => (
+                  <SelectItem key={contact.id} value={contact.id}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{contact.name}</span>
+                      <span className="text-xs text-gray-500">{contact.title}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        }
       />
 
       <ShareProfileModal
