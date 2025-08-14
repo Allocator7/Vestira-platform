@@ -79,6 +79,7 @@ function CustomDropdown({
 }
 
 export default function AllocatorDueDiligenceHubPage() {
+  console.log("Due Diligence Hub: Component starting")
   
   // All state hooks must be at the top level
   const [activeTab, setActiveTab] = useState("active")
