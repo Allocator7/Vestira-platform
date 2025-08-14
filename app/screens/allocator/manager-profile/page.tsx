@@ -266,10 +266,10 @@ export default function ManagerProfilePage() {
           {/* Manager Details */}
           <div className="w-full md:w-2/3 space-y-6">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="flex w-full">
-                <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-                <TabsTrigger value="team" className="flex-1">Team</TabsTrigger>
-                <TabsTrigger value="documents" className="flex-1">Documents</TabsTrigger>
+              <TabsList className="flex w-full !w-full">
+                <TabsTrigger value="overview" className="flex-1 !flex-1">Overview</TabsTrigger>
+                <TabsTrigger value="team" className="flex-1 !flex-1">Team</TabsTrigger>
+                <TabsTrigger value="documents" className="flex-1 !flex-1">Documents</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6 pt-4">
