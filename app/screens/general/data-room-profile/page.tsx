@@ -185,32 +185,61 @@ export default function DataRoomProfilePage() {
   const [showDocumentViewer, setShowDocumentViewer] = useState(false)
 
   const handleDownloadAll = async () => {
-    setIsDownloading(true)
+    try {
+      setIsDownloading(true)
 
-    // Simulate downloading all documents
-    for (let i = 0; i < filteredDocuments.length; i++) {
-      const doc = filteredDocuments[i]
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create a combined document with all documents
+      const combinedContent = `DATA ROOM DOCUMENTS - ${dataRoomName}
 
-      // Create a blob with document content
-      const content = `Document: ${doc.name}\nType: ${doc.type}\nSize: ${doc.size}\nCategory: ${doc.category}\nStatus: ${doc.status}`
-      const blob = new Blob([content], { type: "text/plain" })
-      const url = URL.createObjectURL(blob)
+Total Documents: ${filteredDocuments.length}
+Generated: ${new Date().toISOString()}
 
-      // Create download link
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `${doc.name.replace(/\s+/g, "_")}.txt`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+${filteredDocuments.map((doc, index) => `
+DOCUMENT ${index + 1}:
+Name: ${doc.name}
+Type: ${doc.type}
+Size: ${doc.size}
+Category: ${doc.category}
+Status: ${doc.status}
+Last Modified: ${doc.lastModified}
+Description: ${doc.description || 'No description available'}
 
-      // Add delay between downloads
-      await new Promise((resolve) => setTimeout(resolve, 500))
+Content:
+This is the content for ${doc.name}. In a real implementation, this would contain the actual document content.
+
+${'='.repeat(50)}
+`).join('\n')}`
+
+      await downloadUtils.downloadText(combinedContent, `${dataRoomName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_all_documents.txt`, {
+        onComplete: () => {
+          setIsDownloading(false)
+          toast({
+            title: "Download Complete",
+            description: `Successfully downloaded ${filteredDocuments.length} documents`,
+          })
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          setIsDownloading(false)
+          toast({
+            title: "Download Failed",
+            description: "There was an error downloading the documents. Please try again.",
+            variant: "destructive",
+          })
+        }
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      setIsDownloading(false)
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the documents. Please try again.",
+        variant: "destructive",
+      })
     }
-
-    setIsDownloading(false)
-    alert(`Successfully downloaded ${filteredDocuments.length} documents`)
   }
 
   const handleViewDocument = (document: any) => {
@@ -224,21 +253,50 @@ export default function DataRoomProfilePage() {
   }
 
   const handleDownloadDocument = async (doc: any) => {
-    // Simulate downloading individual document
-    const content = `Document: ${doc.name}\nType: ${doc.type}\nSize: ${doc.size}\nCategory: ${doc.category}\nStatus: ${doc.status}\nLast Modified: ${doc.lastModified}`
-    const blob = new Blob([content], { type: "text/plain" })
-    const url = URL.createObjectURL(blob)
+    try {
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create document content
+      const content = `DOCUMENT DETAILS
 
-    // Create download link
-    const link = window.document.createElement("a")
-    link.href = url
-    link.download = `${doc.name.replace(/\s+/g, "_")}.txt`
-    window.document.body.appendChild(link)
-    link.click()
-    window.document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+Name: ${doc.name}
+Type: ${doc.type}
+Size: ${doc.size}
+Category: ${doc.category}
+Status: ${doc.status}
+Last Modified: ${doc.lastModified}
+Description: ${doc.description || 'No description available'}
 
-    alert(`Downloaded ${doc.name}`)
+CONTENT:
+This is the content for ${doc.name}. In a real implementation, this would contain the actual document content.
+
+Generated: ${new Date().toISOString()}`
+
+      await downloadUtils.downloadText(content, `${doc.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`, {
+        onComplete: () => {
+          toast({
+            title: "Download Complete",
+            description: `Successfully downloaded ${doc.name}`,
+          })
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          toast({
+            title: "Download Failed",
+            description: "There was an error downloading the document. Please try again.",
+            variant: "destructive",
+          })
+        }
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the document. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleSendMessage = (participant: any) => {

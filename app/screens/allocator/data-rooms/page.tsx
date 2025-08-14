@@ -237,36 +237,64 @@ export default function AllocatorDataRoomsPage() {
     }
   }
 
-  const handleDownload = (room: any) => {
-    // Check if user has download permission
-    const currentUser = getCurrentUser() // This would be implemented to get current user info
-    const userPermission = getUserDataRoomPermission(room.id, currentUser?.id)
+  const handleDownload = async (room: any) => {
+    try {
+      // Check if user has download permission
+      const currentUser = getCurrentUser() // This would be implemented to get current user info
+      const userPermission = getUserDataRoomPermission(room.id, currentUser?.id)
 
-    if (userPermission === "view-only") {
-      showNotification("Download not permitted - you have view-only access to this data room", "error")
-      return
-    }
+      if (userPermission === "view-only") {
+        showNotification("Download not permitted - you have view-only access to this data room", "error")
+        return
+      }
 
-    setSelectedRoom(room)
-    setDownloadingRoom(room.id)
-    setDownloadProgress(0)
-    setShowModal("download")
+      setSelectedRoom(room)
+      setDownloadingRoom(room.id)
+      setDownloadProgress(0)
+      setShowModal("download")
 
-    // Simulate download progress
-    const interval = setInterval(() => {
-      setDownloadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setTimeout(() => {
-            setDownloadingRoom(null)
-            closeModal()
-            showNotification(`${room.name} documents downloaded successfully`)
-          }, 500)
-          return 100
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create data room summary content
+      const content = `DATA ROOM SUMMARY
+
+Room Name: ${room.name}
+Manager: ${room.manager}
+Type: ${room.type}
+Status: ${room.status}
+Documents: ${room.documentsCount}
+Last Updated: ${room.lastUpdated}
+Deadline: ${room.deadline}
+Tags: ${room.tags.join(', ')}
+
+DOCUMENT LIST:
+${room.documents?.map((doc: any, index: number) => 
+  `${index + 1}. ${doc.name} (${doc.type}) - ${doc.size}`
+).join('\n') || 'No documents available'}
+
+Generated: ${new Date().toISOString()}`
+
+      await downloadUtils.downloadText(content, `${room.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_summary.txt`, {
+        onProgress: (progress) => setDownloadProgress(progress),
+        onComplete: () => {
+          setDownloadingRoom(null)
+          closeModal()
+          showNotification(`${room.name} documents downloaded successfully`)
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          setDownloadingRoom(null)
+          closeModal()
+          showNotification("Download failed. Please try again.", "error")
         }
-        return prev + 10
       })
-    }, 300)
+    } catch (error) {
+      console.error('Download error:', error)
+      setDownloadingRoom(null)
+      closeModal()
+      showNotification("Download failed. Please try again.", "error")
+    }
   }
 
   const handleEnterRoom = (room: any) => {
