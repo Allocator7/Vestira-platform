@@ -208,9 +208,13 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Check for tab parameter on mount
   useEffect(() => {
-    const tab = searchParams.get("tab")
-    if (tab === "active") {
-      setActiveTab("active")
+    try {
+      const tab = searchParams?.get("tab")
+      if (tab === "active") {
+        setActiveTab("active")
+      }
+    } catch (error) {
+      console.error("Error accessing search params:", error)
     }
   }, [searchParams])
 
@@ -241,110 +245,7 @@ export default function AllocatorDueDiligenceHubPage() {
     }
   }, [])
 
-  // Real manager data from the system
-  const availableManagers = [
-    { 
-      id: "1", 
-      name: "Growth Capital Partners", 
-      contact: "David Rodriguez", 
-      title: "Managing Partner",
-      firm: "Growth Capital Partners",
-      firmType: "Private Equity",
-      location: "San Francisco, CA",
-      aum: "$2.5B",
-      email: "david.rodriguez@growthcapital.com"
-    },
-    { 
-      id: "2", 
-      name: "Sustainable Equity Fund", 
-      contact: "Sarah Chen", 
-      title: "Portfolio Manager",
-      firm: "Sustainable Equity Fund",
-      firmType: "Hedge Fund",
-      location: "New York, NY",
-      aum: "$1.2B",
-      email: "sarah.chen@sustainableequity.com"
-    },
-    { 
-      id: "3", 
-      name: "Global Infrastructure Partners", 
-      contact: "Michael Thompson", 
-      title: "Investment Director",
-      firm: "Global Infrastructure Partners",
-      firmType: "Infrastructure",
-      location: "London, UK",
-      aum: "$4.8B",
-      email: "michael.thompson@globalinfra.com"
-    },
-    { 
-      id: "4", 
-      name: "Emerging Markets Capital", 
-      contact: "Lisa Park", 
-      title: "Senior Portfolio Manager",
-      firm: "Emerging Markets Capital",
-      firmType: "Emerging Markets",
-      location: "Singapore",
-      aum: "$3.1B",
-      email: "lisa.park@emcapital.com"
-    },
-    { 
-      id: "5", 
-      name: "Real Estate Investment Trust", 
-      contact: "James Wilson", 
-      title: "Chief Investment Officer",
-      firm: "Real Estate Investment Trust",
-      firmType: "Real Estate",
-      location: "Chicago, IL",
-      aum: "$6.2B",
-      email: "james.wilson@reit.com"
-    }
-  ]
 
-  // Vestira standard templates
-  const vestiraTemplates = [
-    {
-      id: "vestira-standard",
-      name: "Vestira Standard DDQ",
-      description: "Comprehensive due diligence questionnaire covering all major areas",
-      category: "General",
-      questionCount: 120,
-      estimatedTime: "3-4 hours",
-      lastUpdated: "2024-01-15",
-      version: "2.1",
-      isVestiraStandard: true,
-      usage: "Completed by 85% of Allocators",
-      compliance: "SOC 2 Compliant",
-      questions: []
-    },
-    {
-      id: "vestira-esg",
-      name: "Vestira ESG DDQ",
-      description: "Environmental, social, and governance focused questionnaire",
-      category: "ESG",
-      questionCount: 75,
-      estimatedTime: "2-3 hours",
-      lastUpdated: "2024-01-10",
-      version: "1.8",
-      isVestiraStandard: true,
-      usage: "Completed by 45% of Allocators",
-      compliance: "SOC 2 Compliant",
-      questions: []
-    },
-    {
-      id: "vestira-infrastructure",
-      name: "Vestira Infrastructure DDQ",
-      description: "Specialized questionnaire for infrastructure investments",
-      category: "Infrastructure",
-      questionCount: 90,
-      estimatedTime: "2.5-3.5 hours",
-      lastUpdated: "2024-01-12",
-      version: "1.5",
-      isVestiraStandard: true,
-      usage: "Completed by 68% of Managers",
-      compliance: "SOC 2 Compliant",
-      questions: []
-    },
-  ]
 
   // Custom templates
   const [customTemplates, setCustomTemplates] = useState([
@@ -364,16 +265,20 @@ export default function AllocatorDueDiligenceHubPage() {
     },
   ])
   
+  // Get context and router with fallbacks
+  let userRole = null
+  let currentPersonProfile = null
+  
   try {
-    console.log('Due Diligence Hub: Starting component initialization')
-    
-    // Get context and router with fallbacks
-    const { userRole, currentPersonProfile } = useApp() || { userRole: null, currentPersonProfile: null }
-    console.log('Due Diligence Hub: Context loaded', { userRole, currentPersonProfile })
-    
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    console.log('Due Diligence Hub: Router and search params loaded')
+    const appContext = useApp()
+    userRole = appContext?.userRole || null
+    currentPersonProfile = appContext?.currentPersonProfile || null
+  } catch (error) {
+    console.error("Error accessing app context:", error)
+  }
+  
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Real manager data from the system
   const availableManagers = [
@@ -432,6 +337,52 @@ export default function AllocatorDueDiligenceHubPage() {
       aum: "$4.2B",
       email: "robert.wilson@fixedincome.com"
     }
+  ]
+
+  // Vestira standard templates
+  const vestiraTemplates = [
+    {
+      id: "vestira-standard",
+      name: "Vestira Standard DDQ",
+      description: "Comprehensive due diligence questionnaire covering all major areas",
+      category: "General",
+      questionCount: 120,
+      estimatedTime: "3-4 hours",
+      lastUpdated: "2024-01-15",
+      version: "2.1",
+      isVestiraStandard: true,
+      usage: "Completed by 85% of Allocators",
+      compliance: "SOC 2 Compliant",
+      questions: []
+    },
+    {
+      id: "vestira-esg",
+      name: "Vestira ESG DDQ",
+      description: "Environmental, social, and governance focused questionnaire",
+      category: "ESG",
+      questionCount: 75,
+      estimatedTime: "2-3 hours",
+      lastUpdated: "2024-01-10",
+      version: "1.8",
+      isVestiraStandard: true,
+      usage: "Completed by 45% of Allocators",
+      compliance: "SOC 2 Compliant",
+      questions: []
+    },
+    {
+      id: "vestira-infrastructure",
+      name: "Vestira Infrastructure DDQ",
+      description: "Specialized questionnaire for infrastructure investments",
+      category: "Infrastructure",
+      questionCount: 90,
+      estimatedTime: "2.5-3.5 hours",
+      lastUpdated: "2024-01-12",
+      version: "1.5",
+      isVestiraStandard: true,
+      usage: "Completed by 68% of Managers",
+      compliance: "SOC 2 Compliant",
+      questions: []
+    },
   ]
 
   // Available strategies
@@ -1045,61 +996,7 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
     },
   ]
 
-  // Vestira Standard Templates - Featured prominently
-  const [vestiraTemplates, setVestiraTemplates] = useState([
-    {
-      id: "vestira-1",
-      name: "Vestira Infrastructure Fund DDQ",
-      description: "Comprehensive due diligence questionnaire for infrastructure investment strategies",
-      category: "Infrastructure",
-      questionCount: 127,
-      estimatedTime: "4-6 hours",
-      lastUpdated: "2024-01-15",
-      version: "3.2",
-      isVestiraStandard: true,
-      usage: "Completed by 89% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-    {
-      id: "vestira-2",
-      name: "Vestira Private Equity Fund DDQ",
-      description: "Standard due diligence questionnaire for private equity fund evaluation",
-      category: "Private Equity",
-      questionCount: 98,
-      estimatedTime: "3-4 hours",
-      lastUpdated: "2024-01-10",
-      version: "2.8",
-      isVestiraStandard: true,
-      usage: "Completed by 92% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-    {
-      id: "vestira-3",
-      name: "Vestira Real Estate Fund DDQ",
-      description: "Specialized questionnaire for real estate investment strategies",
-      category: "Real Estate",
-      questionCount: 115,
-      estimatedTime: "4-5 hours",
-      lastUpdated: "2024-01-08",
-      version: "2.1",
-      isVestiraStandard: true,
-      usage: "Completed by 76% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-    {
-      id: "vestira-4",
-      name: "Vestira Credit Fund DDQ",
-      description: "Comprehensive questionnaire for credit and debt strategies",
-      category: "Credit",
-      questionCount: 89,
-      estimatedTime: "3-4 hours",
-      lastUpdated: "2024-01-12",
-      version: "1.9",
-      isVestiraStandard: true,
-      usage: "Completed by 68% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-  ])
+
 
   // Custom templates
   // const [customTemplates, setCustomTemplates] = useState([
@@ -4204,15 +4101,4 @@ const handleUseTemplate = () => {
       )}
     </Screen>
   )
-  } catch (err) {
-    console.error('Error in Due Diligence Hub:', err)
-    console.error('Error stack:', err instanceof Error ? err.stack : 'No stack trace')
-    console.error('Error details:', {
-      name: err instanceof Error ? err.name : 'Unknown',
-      message: err instanceof Error ? err.message : String(err),
-      type: typeof err
-    })
-    setError(err instanceof Error ? err.message : 'An unexpected error occurred')
-    return null
-  }
 }
