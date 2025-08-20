@@ -209,9 +209,11 @@ export default function AllocatorDueDiligenceHubPage() {
   // Check for tab parameter on mount
   useEffect(() => {
     try {
-      const tab = searchParams?.get("tab")
-      if (tab === "active") {
-        setActiveTab("active")
+      if (searchParams) {
+        const tab = searchParams.get("tab")
+        if (tab === "active") {
+          setActiveTab("active")
+        }
       }
     } catch (error) {
       console.error("Error accessing search params:", error)
@@ -220,12 +222,14 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Load custom templates from localStorage on mount
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('custom-ddq-templates')
-    if (savedTemplates) {
+    if (typeof window !== 'undefined') {
       try {
-        const parsedTemplates = JSON.parse(savedTemplates)
-        // Update the customTemplates array with saved templates
-        setCustomTemplates(prev => [...prev, ...parsedTemplates])
+        const savedTemplates = localStorage.getItem('custom-ddq-templates')
+        if (savedTemplates) {
+          const parsedTemplates = JSON.parse(savedTemplates)
+          // Update the customTemplates array with saved templates
+          setCustomTemplates(prev => [...prev, ...parsedTemplates])
+        }
       } catch (error) {
         console.error("Error loading custom templates:", error)
       }
@@ -234,11 +238,13 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Load current DDQ questions from localStorage on mount
   useEffect(() => {
-    const savedQuestions = localStorage.getItem('current-ddq-questions')
-    if (savedQuestions) {
+    if (typeof window !== 'undefined') {
       try {
-        const parsedQuestions = JSON.parse(savedQuestions)
-        setCurrentDDQQuestions(parsedQuestions)
+        const savedQuestions = localStorage.getItem('current-ddq-questions')
+        if (savedQuestions) {
+          const parsedQuestions = JSON.parse(savedQuestions)
+          setCurrentDDQQuestions(parsedQuestions)
+        }
       } catch (error) {
         console.error("Error loading current DDQ questions:", error)
       }
@@ -278,7 +284,14 @@ export default function AllocatorDueDiligenceHubPage() {
   }
   
   const router = useRouter()
-  const searchParams = useSearchParams()
+  
+  // Handle useSearchParams with proper error handling
+  let searchParams = null
+  try {
+    searchParams = useSearchParams()
+  } catch (error) {
+    console.error("Error accessing search params:", error)
+  }
 
   // Real manager data from the system
   const availableManagers = [
