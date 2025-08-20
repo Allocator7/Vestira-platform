@@ -81,6 +81,9 @@ function CustomDropdown({
 export default function AllocatorDueDiligenceHubPage() {
   console.log("Due Diligence Hub: Component starting")
   
+  // Error boundary for component
+  try {
+  
   // All state hooks must be at the top level
   const [activeTab, setActiveTab] = useState("active")
   const [searchQuery, setSearchQuery] = useState("")
@@ -195,36 +198,53 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Check for tab parameter on mount
   useEffect(() => {
-    const tab = searchParams.get("tab")
-    if (tab === "active") {
-      setActiveTab("active")
+    try {
+      const tab = searchParams?.get("tab")
+      if (tab === "active") {
+        setActiveTab("active")
+      }
+    } catch (error) {
+      console.error("Error accessing search params:", error)
     }
   }, [searchParams])
 
   // Load custom templates from localStorage on mount
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('custom-ddq-templates')
-    if (savedTemplates) {
-      try {
-        const parsedTemplates = JSON.parse(savedTemplates)
-        // Update the customTemplates array with saved templates
-        setCustomTemplates(prev => [...prev, ...parsedTemplates])
-      } catch (error) {
-        console.error("Error loading custom templates:", error)
+    try {
+      const savedTemplates = localStorage.getItem('custom-ddq-templates')
+      if (savedTemplates) {
+        try {
+          const parsedTemplates = JSON.parse(savedTemplates)
+          // Update the customTemplates array with saved templates
+          setCustomTemplates(prev => [...prev, ...parsedTemplates])
+        } catch (error) {
+          console.error("Error parsing custom templates:", error)
+        }
       }
+    } catch (error) {
+      console.error("Error accessing localStorage for custom templates:", error)
     }
   }, [])
 
+  // Update filteredDDQs when activeDDQs changes
+  useEffect(() => {
+    setFilteredDDQs(activeDDQs)
+  }, [activeDDQs])
+
   // Load current DDQ questions from localStorage on mount
   useEffect(() => {
-    const savedQuestions = localStorage.getItem('current-ddq-questions')
-    if (savedQuestions) {
-      try {
-        const parsedQuestions = JSON.parse(savedQuestions)
-        setCurrentDDQQuestions(parsedQuestions)
-      } catch (error) {
-        console.error("Error loading current DDQ questions:", error)
+    try {
+      const savedQuestions = localStorage.getItem('current-ddq-questions')
+      if (savedQuestions) {
+        try {
+          const parsedQuestions = JSON.parse(savedQuestions)
+          setCurrentDDQQuestions(parsedQuestions)
+        } catch (error) {
+          console.error("Error parsing current DDQ questions:", error)
+        }
       }
+    } catch (error) {
+      console.error("Error accessing localStorage for current DDQ questions:", error)
     }
   }, [])
 
@@ -407,7 +427,7 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
   }
 
   // Active DDQs - Allocator sending to managers
-  const activeDDQs = [
+  const [activeDDQs, setActiveDDQs] = useState([
     {
       id: "ddq-1",
       templateName: "Vestira Infrastructure Fund DDQ",
@@ -755,9 +775,9 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
       lastUpdated: "2024-01-16T12:30:00Z",
       sections: [],
     },
-  ]
+  ])
 
-  const [filteredDDQs, setFilteredDDQs] = useState(activeDDQs)
+  const [filteredDDQs, setFilteredDDQs] = useState([])
   const [showDueSoon, setShowDueSoon] = useState(false)
   const [showCompleted, setShowCompleted] = useState(false)
 
@@ -1939,8 +1959,15 @@ const handleUseTemplate = () => {
       return ddq
     })
 
+    // Update state
+    setActiveDDQs(updatedDDQs)
+
     // Update localStorage
-    localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
+    try {
+      localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
+    } catch (error) {
+      console.error("Error saving to localStorage:", error)
+    }
     
     showNotification("DDQ updated successfully")
     setShowEditDDQModal(false)
@@ -4062,5 +4089,20 @@ const handleUseTemplate = () => {
       )}
     </Screen>
   )
-
+  } catch (error) {
+    console.error("Error in AllocatorDueDiligenceHubPage:", error)
+    return (
+      <Screen>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
+            <p className="text-gray-600 mb-4">We encountered an unexpected error. Please try again or contact support if the problem persists.</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </Screen>
+    )
+  }
 }
