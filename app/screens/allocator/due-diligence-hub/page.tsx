@@ -81,9 +81,6 @@ function CustomDropdown({
 export default function AllocatorDueDiligenceHubPage() {
   console.log("Due Diligence Hub: Component starting")
   
-  // Error boundary for component
-  try {
-  
   // All state hooks must be at the top level
   const [activeTab, setActiveTab] = useState("active")
   const [searchQuery, setSearchQuery] = useState("")
@@ -347,18 +344,7 @@ export default function AllocatorDueDiligenceHubPage() {
     setTimeout(() => setNotification(""), 3000)
   }
 
-  // Filter active DDQs based on search, strategy, and status
-  const filteredActiveDDQs = activeDDQs.filter((ddq) => {
-    const matchesSearch = searchQuery === "" || 
-      ddq.templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ddq.managerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ddq.contactName.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesStrategy = selectedStrategy === "All" || ddq.strategy === selectedStrategy
-    const matchesStatus = selectedStatus === "All" || ddq.status === selectedStatus
-    
-    return matchesSearch && matchesStrategy && matchesStatus
-  })
+
 
   const handleExportDDQ = (ddq: any) => {
     try {
@@ -780,6 +766,21 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
   const [filteredDDQs, setFilteredDDQs] = useState([])
   const [showDueSoon, setShowDueSoon] = useState(false)
   const [showCompleted, setShowCompleted] = useState(false)
+
+  // Filter active DDQs based on search, strategy, and status
+  const filteredActiveDDQs = activeDDQs?.filter((ddq) => {
+    if (!ddq) return false
+    
+    const matchesSearch = searchQuery === "" || 
+      (ddq.templateName?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+      (ddq.managerName?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
+      (ddq.contactName?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+    
+    const matchesStrategy = selectedStrategy === "All" || ddq.strategy === selectedStrategy
+    const matchesStatus = selectedStatus === "All" || ddq.status === selectedStatus
+    
+    return matchesSearch && matchesStrategy && matchesStatus
+  }) || []
 
   // Add completed searches data
   const completedDDQs = [
@@ -1707,7 +1708,7 @@ const handleUseTemplate = () => {
   }
 
   const handleReviewDDQ = (ddqId: string) => {
-    const ddq = activeDDQs.find((d) => d.id === ddqId)
+    const ddq = activeDDQs?.find((d) => d.id === ddqId)
     if (ddq) {
       setSelectedDDQForReview(ddq)
       setShowReviewModal(true)
@@ -1758,7 +1759,7 @@ const handleUseTemplate = () => {
       return
     }
 
-    const selectedDDQs = activeDDQs.filter(ddq => selectedManagersForMessage.includes(ddq.id))
+    const selectedDDQs = activeDDQs?.filter(ddq => selectedManagersForMessage.includes(ddq.id)) || []
     const managerNames = selectedDDQs.map(ddq => `${ddq.contactName} at ${ddq.managerName}`).join(", ")
 
     console.log("Sending message to:", managerNames)
@@ -1778,7 +1779,7 @@ const handleUseTemplate = () => {
       return
     }
 
-    const selectedDDQs = activeDDQs.filter(ddq => selectedManagersForMeeting.includes(ddq.id))
+    const selectedDDQs = activeDDQs?.filter(ddq => selectedManagersForMeeting.includes(ddq.id)) || []
     const managerNames = selectedDDQs.map(ddq => `${ddq.contactName} at ${ddq.managerName}`).join(", ")
 
     showNotification(`Check-in meeting scheduled with ${selectedDDQs.length} manager(s): ${managerNames}`)
@@ -1846,12 +1847,18 @@ const handleUseTemplate = () => {
   }
 
   // Calculate actual counts
-  const dueSoonCount = activeDDQs.filter((ddq) => {
-    const dueDate = new Date(ddq.dueDate)
-    const today = new Date()
-    const daysDiff = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24))
-    return daysDiff <= 7
-  }).length
+  const dueSoonCount = activeDDQs?.filter((ddq) => {
+    if (!ddq || !ddq.dueDate) return false
+    try {
+      const dueDate = new Date(ddq.dueDate)
+      const today = new Date()
+      const daysDiff = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 3600 * 24))
+      return daysDiff <= 7
+    } catch (error) {
+      console.error("Error calculating due date:", error)
+      return false
+    }
+  }).length || 0
 
   // Question-by-question navigation functions
   const getAllQuestions = () => {
@@ -1898,7 +1905,7 @@ const handleUseTemplate = () => {
   }
 
   const handleContinueDDQ = (ddqId: string) => {
-    const ddq = activeDDQs.find((d) => d.id === ddqId)
+    const ddq = activeDDQs?.find((d) => d.id === ddqId)
     if (ddq) {
       setSelectedDDQForReview(ddq)
       setShowReviewModal(true)
@@ -1912,7 +1919,7 @@ const handleUseTemplate = () => {
 
   // DDQ Editing Functions
   const handleEditDDQ = (ddqId: string) => {
-    const ddq = activeDDQs.find((d) => d.id === ddqId)
+    const ddq = activeDDQs?.find((d) => d.id === ddqId)
     if (ddq) {
       setEditingDDQ(ddq)
       setEditDDQForm({
@@ -1940,7 +1947,7 @@ const handleUseTemplate = () => {
     }
 
     // Update the DDQ in the activeDDQs array
-    const updatedDDQs = activeDDQs.map(ddq => {
+    const updatedDDQs = activeDDQs?.map(ddq => {
       if (ddq.id === editingDDQ.id) {
         return {
           ...ddq,
@@ -2007,7 +2014,7 @@ const handleUseTemplate = () => {
     })
   }
 
-  console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
+  console.log("Allocator Due Diligence Hub rendered with", activeDDQs?.length || 0, "DDQs")
 
   return (
     <Screen>
@@ -4089,20 +4096,4 @@ const handleUseTemplate = () => {
       )}
     </Screen>
   )
-  } catch (error) {
-    console.error("Error in AllocatorDueDiligenceHubPage:", error)
-    return (
-      <Screen>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
-            <p className="text-gray-600 mb-4">We encountered an unexpected error. Please try again or contact support if the problem persists.</p>
-            <Button onClick={() => window.location.reload()}>
-              Try Again
-            </Button>
-          </div>
-        </div>
-      </Screen>
-    )
-  }
 }
