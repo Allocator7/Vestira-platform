@@ -79,9 +79,10 @@ function CustomDropdown({
 }
 
 export default function AllocatorDueDiligenceHubPage() {
-  const { userRole, currentPersonProfile } = useApp()
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  try {
+    const { userRole, currentPersonProfile } = useApp()
+    const router = useRouter()
+    const searchParams = useSearchParams()
 
   const [activeTab, setActiveTab] = useState("active")
   const [searchQuery, setSearchQuery] = useState("")
@@ -194,36 +195,48 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Check for tab parameter on mount
   useEffect(() => {
-    const tab = searchParams.get("tab")
-    if (tab === "active") {
-      setActiveTab("active")
+    try {
+      const tab = searchParams?.get("tab")
+      if (tab === "active") {
+        setActiveTab("active")
+      }
+    } catch (error) {
+      console.error("Error accessing search params:", error)
     }
   }, [searchParams])
 
   // Load custom templates from localStorage on mount
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('custom-ddq-templates')
-    if (savedTemplates) {
-      try {
-        const parsedTemplates = JSON.parse(savedTemplates)
-        // Update the customTemplates array with saved templates
-        setCustomTemplates(prev => [...prev, ...parsedTemplates])
-      } catch (error) {
-        console.error("Error loading custom templates:", error)
+    try {
+      const savedTemplates = localStorage.getItem('custom-ddq-templates')
+      if (savedTemplates) {
+        try {
+          const parsedTemplates = JSON.parse(savedTemplates)
+          // Update the customTemplates array with saved templates
+          setCustomTemplates(prev => [...prev, ...parsedTemplates])
+        } catch (error) {
+          console.error("Error parsing custom templates:", error)
+        }
       }
+    } catch (error) {
+      console.error("Error accessing localStorage for custom templates:", error)
     }
   }, [])
 
   // Load current DDQ questions from localStorage on mount
   useEffect(() => {
-    const savedQuestions = localStorage.getItem('current-ddq-questions')
-    if (savedQuestions) {
-      try {
-        const parsedQuestions = JSON.parse(savedQuestions)
-        setCurrentDDQQuestions(parsedQuestions)
-      } catch (error) {
-        console.error("Error loading current DDQ questions:", error)
+    try {
+      const savedQuestions = localStorage.getItem('current-ddq-questions')
+      if (savedQuestions) {
+        try {
+          const parsedQuestions = JSON.parse(savedQuestions)
+          setCurrentDDQQuestions(parsedQuestions)
+        } catch (error) {
+          console.error("Error parsing current DDQ questions:", error)
+        }
       }
+    } catch (error) {
+      console.error("Error accessing localStorage for current DDQ questions:", error)
     }
   }, [])
 
@@ -3857,4 +3870,21 @@ const handleUseTemplate = () => {
       )}
     </Screen>
   )
+  } catch (error) {
+    console.error("Error in AllocatorDueDiligenceHubPage:", error)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
+          <p className="text-gray-600 mb-4">We encountered an unexpected error. Please try again or contact support if the problem persists.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
 }
