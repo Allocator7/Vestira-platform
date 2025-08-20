@@ -1102,22 +1102,22 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
   ])
 
   // Custom templates
-  const [customTemplates, setCustomTemplates] = useState([
-    {
-      id: "custom-1",
-      name: "ESG Assessment Questionnaire",
-      description: "Environmental, social, and governance evaluation template",
-      category: "ESG",
-      questionCount: 65,
-      estimatedTime: "2-3 hours",
-      lastUpdated: "2024-01-05",
-      version: "1.2",
-      isVestiraStandard: false,
-      usage: "Custom template",
-      compliance: "Internal Use",
-      questions: []
-    },
-  ])
+  // const [customTemplates, setCustomTemplates] = useState([
+  //     {
+  //       id: "custom-1",
+  //       name: "ESG Assessment Questionnaire",
+  //       description: "Environmental, social, and governance evaluation template",
+  //       category: "ESG",
+  //       questionCount: 65,
+  //       estimatedTime: "2-3 hours",
+  //       lastUpdated: "2024-01-05",
+  //       version: "1.2",
+  //       isVestiraStandard: false,
+  //       usage: "Custom template",
+  //       compliance: "Internal Use",
+  //       questions: []
+  //     },
+  // ])
 
   // Enhanced file upload handler for DDQ creation
   const handleDDQFileUpload = (event) => {
