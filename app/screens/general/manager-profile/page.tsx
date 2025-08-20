@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Screen } from "@/components/Screen"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -27,6 +27,8 @@ import {
   Calendar,
   Video,
   Clock,
+  Users,
+  UserPlus,
 } from "lucide-react"
 import {
   Dialog,
@@ -42,8 +44,18 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 
+interface Contact {
+  name: string
+  title: string
+  role: string
+  email: string
+  phone: string
+  isConnected: boolean
+}
+
 export default function ManagerProfilePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const managerId = searchParams.get("id")
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
@@ -52,6 +64,10 @@ export default function ManagerProfilePage() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showMessageModal, setShowMessageModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [showConnectionModal, setShowConnectionModal] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
+  const [selectedMessageContact, setSelectedMessageContact] = useState<Contact | null>(null)
+  const [selectedScheduleContact, setSelectedScheduleContact] = useState<Contact | null>(null)
 
   // Share modal states
   const [shareEmail, setShareEmail] = useState("")
@@ -74,6 +90,10 @@ export default function ManagerProfilePage() {
   const [meetingLocation, setMeetingLocation] = useState("")
   const [meetingAgenda, setMeetingAgenda] = useState("")
   const [scheduleSuccess, setScheduleSuccess] = useState(false)
+
+  // Connection modal states
+  const [connectionMessage, setConnectionMessage] = useState("")
+  const [connectionSuccess, setConnectionSuccess] = useState(false)
 
   // Sample manager profiles data
   const managerProfiles = {
@@ -105,6 +125,32 @@ export default function ManagerProfilePage() {
         multiple: "2.8x",
         totalReturns: "$1.2B",
       },
+      contacts: [
+        {
+          name: "David Rodriguez",
+          title: "Managing Partner",
+          role: "Primary Contact",
+          email: "david.rodriguez@growthcapital.com",
+          phone: "+1 (415) 555-0123",
+          isConnected: true,
+        },
+        {
+          name: "Sarah Johnson",
+          title: "Senior Vice President",
+          role: "Investment Contact",
+          email: "sarah.johnson@growthcapital.com",
+          phone: "+1 (415) 555-0124",
+          isConnected: false,
+        },
+        {
+          name: "Michael Chen",
+          title: "Director of Investor Relations",
+          role: "IR Contact",
+          email: "michael.chen@growthcapital.com",
+          phone: "+1 (415) 555-0125",
+          isConnected: false,
+        },
+      ],
       recentActivity: [
         {
           date: "2024-01-15",
@@ -197,43 +243,75 @@ export default function ManagerProfilePage() {
         multiple: "1.9x",
         totalReturns: "$450M",
       },
+      contacts: [
+        {
+          name: "Sarah Chen",
+          title: "Portfolio Manager",
+          role: "Primary Contact",
+          email: "sarah.chen@sustainableequity.com",
+          phone: "+1 (212) 555-0456",
+          isConnected: true,
+        },
+        {
+          name: "Lisa Thompson",
+          title: "ESG Director",
+          role: "ESG Contact",
+          email: "lisa.thompson@sustainableequity.com",
+          phone: "+1 (212) 555-0457",
+          isConnected: false,
+        },
+      ],
       recentActivity: [
         {
           date: "2024-01-14",
-          activity: "Published ESG Impact Report 2023",
-          type: "Report",
+          activity: "Published Q4 ESG Impact Report",
+          type: "Reporting",
         },
         {
-          date: "2024-01-07",
-          activity: "Increased position in renewable energy sector",
-          type: "Investment",
+          date: "2024-01-10",
+          activity: "Launched new sustainable bond fund",
+          type: "Fund Launch",
+        },
+        {
+          date: "2024-01-05",
+          activity: "Achieved carbon neutrality across portfolio",
+          type: "ESG Milestone",
         },
       ],
       investments: [
         {
-          company: "CleanTech Corp",
-          sector: "Clean Energy",
+          company: "GreenTech Solutions",
+          sector: "Clean Technology",
           stage: "Public",
-          investment: "$30M",
+          investment: "$75M",
           status: "Active",
-          multiple: "2.3x",
+          multiple: "1.6x",
         },
         {
-          company: "Sustainable Materials",
-          sector: "Materials",
+          company: "Solar Energy Corp",
+          sector: "Renewable Energy",
           stage: "Public",
-          investment: "$20M",
+          investment: "$120M",
           status: "Active",
-          multiple: "1.7x",
+          multiple: "2.3x",
         },
       ],
       documents: [
         {
           id: "doc3",
-          name: "ESG Integration Framework",
-          type: "Framework",
-          category: "ESG",
-          size: "5.1 MB",
+          name: "ESG Investment Policy",
+          type: "Document",
+          category: "Policy",
+          size: "2.1 MB",
+          lastModified: "2024-01-12",
+          status: "Active",
+        },
+        {
+          id: "doc4",
+          name: "Q4 Impact Report",
+          type: "Report",
+          category: "Reporting",
+          size: "8.7 MB",
           lastModified: "2024-01-14",
           status: "Active",
         },
@@ -246,45 +324,116 @@ export default function ManagerProfilePage() {
       firmType: "Infrastructure",
       location: "London, UK",
       website: "https://infrastructurecapital.com",
-      email: "m.thompson@infracap.com",
-      phone: "+44 20 7555 0789",
+      email: "m.thompson@infrastructurecapital.com",
+      phone: "+44 20 7123 4567",
       avatar: "/placeholder-user.jpg",
       aum: "$3.8B",
-      founded: "2005",
-      yearsInBusiness: 19,
+      founded: "2002",
+      yearsInBusiness: 22,
       experience: "22 years",
-      focus: ["Infrastructure Debt", "Real Estate Debt", "Project Finance"],
+      focus: ["Infrastructure Debt", "Real Estate Debt", "Transportation", "Utilities"],
       about:
-        "Michael Thompson is a Senior Managing Director at Infrastructure Capital, with over 22 years of experience in infrastructure and real estate debt investments across global markets.",
+        "Michael Thompson is a Senior Managing Director at Infrastructure Capital, with over 22 years of experience in infrastructure investment and debt financing across global markets.",
       keyMetrics: {
-        totalFunds: 5,
-        activeInvestments: 34,
-        portfolioCompanies: 78,
-        geographicFocus: ["Europe", "North America", "Asia-Pacific"],
+        totalFunds: 6,
+        activeInvestments: 78,
+        portfolioCompanies: 156,
+        geographicFocus: ["Europe", "North America", "Asia Pacific"],
       },
       trackRecord: {
         irr: "12.8%",
         multiple: "1.7x",
-        totalReturns: "$890M",
+        totalReturns: "$2.1B",
       },
+      contacts: [
+        {
+          name: "Michael Thompson",
+          title: "Senior Managing Director",
+          role: "Primary Contact",
+          email: "michael.thompson@infrastructurecapital.com",
+          phone: "+44 20 7123 4567",
+          isConnected: true,
+        },
+        {
+          name: "Emma Wilson",
+          title: "Head of Infrastructure",
+          role: "Infrastructure Contact",
+          email: "emma.wilson@infrastructurecapital.com",
+          phone: "+44 20 7123 4568",
+          isConnected: false,
+        },
+        {
+          name: "James Anderson",
+          title: "Director of Real Estate",
+          role: "Real Estate Contact",
+          email: "james.anderson@infrastructurecapital.com",
+          phone: "+44 20 7123 4569",
+          isConnected: false,
+        },
+        {
+          name: "Rachel Green",
+          title: "Investor Relations Manager",
+          role: "IR Contact",
+          email: "rachel.green@infrastructurecapital.com",
+          phone: "+44 20 7123 4570",
+          isConnected: false,
+        },
+      ],
       recentActivity: [
         {
           date: "2024-01-13",
-          activity: "Closed £200M infrastructure debt facility",
+          activity: "Closed €800M infrastructure debt fund",
+          type: "Fundraising",
+        },
+        {
+          date: "2024-01-08",
+          activity: "Acquired major toll road concession",
           type: "Investment",
+        },
+        {
+          date: "2024-01-03",
+          activity: "Refinanced renewable energy portfolio",
+          type: "Refinancing",
         },
       ],
       investments: [
         {
-          company: "European Wind Farm",
-          sector: "Infrastructure",
-          stage: "Debt",
-          investment: "£150M",
+          company: "European Toll Roads",
+          sector: "Transportation",
+          stage: "Infrastructure",
+          investment: "€200M",
           status: "Active",
           multiple: "1.4x",
         },
+        {
+          company: "Solar Farm Network",
+          sector: "Renewable Energy",
+          stage: "Infrastructure",
+          investment: "€150M",
+          status: "Active",
+          multiple: "1.8x",
+        },
       ],
-      documents: [],
+      documents: [
+        {
+          id: "doc5",
+          name: "Infrastructure Fund V PPM",
+          type: "Document",
+          category: "Fund Materials",
+          size: "15.2 MB",
+          lastModified: "2024-01-13",
+          status: "Active",
+        },
+        {
+          id: "doc6",
+          name: "Geographic Investment Strategy",
+          type: "Document",
+          category: "Strategy",
+          size: "4.8 MB",
+          lastModified: "2024-01-09",
+          status: "Active",
+        },
+      ],
     },
     4: {
       name: "Jennifer Park",
@@ -294,44 +443,99 @@ export default function ManagerProfilePage() {
       location: "Palo Alto, CA",
       website: "https://venturedynamics.com",
       email: "j.park@venturedynamics.com",
-      phone: "+1 (650) 555-0321",
+      phone: "+1 (650) 555-0789",
       avatar: "/placeholder-user.jpg",
       aum: "$800M",
-      founded: "2012",
-      yearsInBusiness: 12,
+      founded: "2009",
+      yearsInBusiness: 15,
       experience: "15 years",
-      focus: ["Venture Capital", "Early Stage", "Technology", "SaaS"],
+      focus: ["Venture Capital", "Growth Equity", "Technology", "AI/ML"],
       about:
-        "Jennifer Park is the Founding Partner of Venture Dynamics, focusing on early-stage technology investments. She has 15 years of experience in venture capital and startup ecosystems.",
+        "Jennifer Park is a Founding Partner at Venture Dynamics, focusing on early-stage technology investments with particular expertise in artificial intelligence and machine learning startups.",
       keyMetrics: {
         totalFunds: 3,
         activeInvestments: 67,
         portfolioCompanies: 89,
-        geographicFocus: ["North America"],
+        geographicFocus: ["Silicon Valley", "Global"],
       },
       trackRecord: {
         irr: "28.4%",
         multiple: "3.2x",
-        totalReturns: "$320M",
+        totalReturns: "$750M",
       },
+      contacts: [
+        {
+          name: "Jennifer Park",
+          title: "Founding Partner",
+          role: "Primary Contact",
+          email: "jennifer.park@venturedynamics.com",
+          phone: "+1 (650) 555-0789",
+          isConnected: true,
+        },
+        {
+          name: "Alex Rodriguez",
+          title: "Partner",
+          role: "Investment Contact",
+          email: "alex.rodriguez@venturedynamics.com",
+          phone: "+1 (650) 555-0790",
+          isConnected: false,
+        },
+      ],
       recentActivity: [
         {
           date: "2024-01-12",
-          activity: "Led $10M Series A in AI startup",
+          activity: "Led $25M Series A in AI startup",
           type: "Investment",
+        },
+        {
+          date: "2024-01-07",
+          activity: "Exited cybersecurity company for 5.2x return",
+          type: "Exit",
+        },
+        {
+          date: "2024-01-02",
+          activity: "Launched Fund III with $300M target",
+          type: "Fundraising",
         },
       ],
       investments: [
         {
-          company: "AI Solutions",
-          sector: "Technology",
+          company: "AI Solutions Inc",
+          sector: "Artificial Intelligence",
           stage: "Series A",
-          investment: "$10M",
+          investment: "$25M",
           status: "Active",
-          multiple: "4.1x",
+          multiple: "2.8x",
+        },
+        {
+          company: "CyberSecure",
+          sector: "Cybersecurity",
+          stage: "Series B",
+          investment: "$40M",
+          status: "Exited",
+          multiple: "5.2x",
         },
       ],
-      documents: [],
+      documents: [
+        {
+          id: "doc7",
+          name: "Fund III Investment Thesis",
+          type: "Document",
+          category: "Strategy",
+          size: "6.3 MB",
+          lastModified: "2024-01-12",
+          status: "Active",
+        },
+        {
+          id: "doc8",
+          name: "AI Investment Landscape Report",
+          type: "Report",
+          category: "Research",
+          size: "9.1 MB",
+          lastModified: "2024-01-10",
+          status: "Active",
+        },
+      ],
     },
     5: {
       name: "Robert Williams",
@@ -340,20 +544,20 @@ export default function ManagerProfilePage() {
       firmType: "Credit",
       location: "Chicago, IL",
       website: "https://fixedincomestrategies.com",
-      email: "r.williams@fixedincome.com",
-      phone: "+1 (312) 555-0654",
+      email: "r.williams@fixedincomestrategies.com",
+      phone: "+1 (312) 555-0234",
       avatar: "/placeholder-user.jpg",
       aum: "$4.2B",
-      founded: "2001",
-      yearsInBusiness: 23,
+      founded: "1999",
+      yearsInBusiness: 25,
       experience: "25 years",
       focus: ["High Yield Bonds", "Corporate Private Placements", "Direct Lending"],
       about:
-        "Robert Williams is the Chief Investment Officer at Fixed Income Strategies, with 25 years of experience in credit markets and alternative lending strategies.",
+        "Robert Williams serves as Chief Investment Officer at Fixed Income Strategies, with 25 years of experience in credit markets and alternative lending strategies.",
       keyMetrics: {
-        totalFunds: 6,
-        activeInvestments: 156,
-        portfolioCompanies: 234,
+        totalFunds: 8,
+        activeInvestments: 234,
+        portfolioCompanies: 456,
         geographicFocus: ["North America", "Europe"],
       },
       trackRecord: {
@@ -361,24 +565,87 @@ export default function ManagerProfilePage() {
         multiple: "1.4x",
         totalReturns: "$1.8B",
       },
+      contacts: [
+        {
+          name: "Robert Williams",
+          title: "Chief Investment Officer",
+          role: "Primary Contact",
+          email: "robert.williams@fixedincomestrategies.com",
+          phone: "+1 (312) 555-0234",
+          isConnected: true,
+        },
+        {
+          name: "Maria Garcia",
+          title: "Head of Credit",
+          role: "Credit Contact",
+          email: "maria.garcia@fixedincomestrategies.com",
+          phone: "+1 (312) 555-0235",
+          isConnected: false,
+        },
+        {
+          name: "David Lee",
+          title: "Director of Private Placements",
+          role: "Private Placements Contact",
+          email: "david.lee@fixedincomestrategies.com",
+          phone: "+1 (312) 555-0236",
+          isConnected: false,
+        },
+      ],
       recentActivity: [
         {
           date: "2024-01-11",
-          activity: "Completed $100M direct lending facility",
+          activity: "Closed $500M direct lending fund",
+          type: "Fundraising",
+        },
+        {
+          date: "2024-01-06",
+          activity: "Originated $75M private placement",
           type: "Investment",
+        },
+        {
+          date: "2024-01-01",
+          activity: "Refinanced high-yield bond portfolio",
+          type: "Refinancing",
         },
       ],
       investments: [
         {
           company: "Manufacturing Corp",
           sector: "Industrial",
-          stage: "Credit",
+          stage: "Private Placement",
           investment: "$75M",
+          status: "Active",
+          multiple: "1.2x",
+        },
+        {
+          company: "Healthcare Services",
+          sector: "Healthcare",
+          stage: "Direct Lending",
+          investment: "$50M",
           status: "Active",
           multiple: "1.3x",
         },
       ],
-      documents: [],
+      documents: [
+        {
+          id: "doc9",
+          name: "Direct Lending Fund PPM",
+          type: "Document",
+          category: "Fund Materials",
+          size: "18.7 MB",
+          lastModified: "2024-01-11",
+          status: "Active",
+        },
+        {
+          id: "doc10",
+          name: "Credit Risk Management Policy",
+          type: "Document",
+          category: "Policy",
+          size: "3.9 MB",
+          lastModified: "2024-01-08",
+          status: "Active",
+        },
+      ],
     },
     6: {
       name: "Lisa Anderson",
@@ -387,141 +654,164 @@ export default function ManagerProfilePage() {
       firmType: "Real Estate",
       location: "Los Angeles, CA",
       website: "https://realestateventures.com",
-      email: "l.anderson@reventures.com",
-      phone: "+1 (310) 555-0987",
+      email: "l.anderson@realestateventures.com",
+      phone: "+1 (310) 555-0567",
       avatar: "/placeholder-user.jpg",
       aum: "$1.9B",
-      founded: "2010",
-      yearsInBusiness: 14,
+      founded: "2008",
+      yearsInBusiness: 16,
       experience: "16 years",
-      focus: ["Real Estate Equity", "Commercial Mortgage Loans", "Development"],
+      focus: ["Real Estate Equity", "Commercial Mortgage Loans", "Multifamily", "Office"],
       about:
-        "Lisa Anderson is the Managing Director at Real Estate Ventures, specializing in commercial real estate investments and development projects with 16 years of experience.",
+        "Lisa Anderson is Managing Director at Real Estate Ventures, specializing in commercial real estate investments and mortgage lending across major metropolitan markets.",
       keyMetrics: {
-        totalFunds: 4,
-        activeInvestments: 28,
-        portfolioCompanies: 52,
-        geographicFocus: ["North America"],
+        totalFunds: 5,
+        activeInvestments: 89,
+        portfolioCompanies: 167,
+        geographicFocus: ["United States", "Canada"],
       },
       trackRecord: {
         irr: "14.2%",
         multiple: "2.1x",
-        totalReturns: "$680M",
+        totalReturns: "$850M",
       },
+      contacts: [
+        {
+          name: "Lisa Anderson",
+          title: "Managing Director",
+          role: "Primary Contact",
+          email: "lisa.anderson@realestateventures.com",
+          phone: "+1 (310) 555-0567",
+          isConnected: true,
+        },
+        {
+          name: "Tom Martinez",
+          title: "Head of Acquisitions",
+          role: "Acquisitions Contact",
+          email: "tom.martinez@realestateventures.com",
+          phone: "+1 (310) 555-0568",
+          isConnected: false,
+        },
+      ],
       recentActivity: [
         {
           date: "2024-01-10",
-          activity: "Acquired office complex in downtown LA",
+          activity: "Acquired $200M office portfolio",
           type: "Investment",
+        },
+        {
+          date: "2024-01-05",
+          activity: "Refinanced multifamily portfolio",
+          type: "Refinancing",
+        },
+        {
+          date: "2024-01-01",
+          activity: "Launched new real estate fund",
+          type: "Fund Launch",
         },
       ],
       investments: [
         {
-          company: "Downtown Office Complex",
-          sector: "Real Estate",
+          company: "Downtown Office Tower",
+          sector: "Commercial Real Estate",
           stage: "Acquisition",
-          investment: "$120M",
+          investment: "$200M",
           status: "Active",
-          multiple: "1.6x",
+          multiple: "1.9x",
+        },
+        {
+          company: "Multifamily Complex",
+          sector: "Residential Real Estate",
+          stage: "Development",
+          investment: "$150M",
+          status: "Active",
+          multiple: "2.3x",
         },
       ],
-      documents: [],
+      documents: [
+        {
+          id: "doc11",
+          name: "Real Estate Fund IV PPM",
+          type: "Document",
+          category: "Fund Materials",
+          size: "22.1 MB",
+          lastModified: "2024-01-10",
+          status: "Active",
+        },
+        {
+          id: "doc12",
+          name: "Market Analysis Report",
+          type: "Report",
+          category: "Research",
+          size: "7.4 MB",
+          lastModified: "2024-01-07",
+          status: "Active",
+        },
+      ],
     },
   }
 
   const [manager, setManager] = useState<any>(null)
 
   useEffect(() => {
-    if (managerId) {
-      const profile = managerProfiles[Number(managerId) as keyof typeof managerProfiles]
-      if (profile) {
-        setManager(profile)
-        setShareMessage(`I wanted to share ${profile.name}'s profile with you.`)
-      }
+    if (managerId && managerProfiles[managerId as keyof typeof managerProfiles]) {
+      setManager(managerProfiles[managerId as keyof typeof managerProfiles])
     }
   }, [managerId])
 
-  // Share functionality
-  const handleCopyLink = async () => {
-    try {
-      const profileUrl = `${window.location.origin}/screens/general/manager-profile?id=${managerId}`
-      await navigator.clipboard.writeText(profileUrl)
-      setCopied(true)
-      toast({
-        title: "Link Copied",
-        description: "Profile link has been copied to clipboard.",
-      })
-      setTimeout(() => setCopied(false), 2000)
-    } catch (err) {
-      toast({
-        title: "Copy Failed",
-        description: "Failed to copy link to clipboard.",
-        variant: "destructive",
-      })
+  const handleSendMessage = () => {
+    setSelectedMessageContact(manager.contacts[0])
+    setShowMessageModal(true)
+  }
+
+  const handleScheduleMeeting = () => {
+    setSelectedScheduleContact(manager.contacts[0])
+    setShowScheduleModal(true)
+  }
+
+  const handleShare = () => {
+    setShowShareModal(true)
+  }
+
+  const handleRequestConnection = (contact: Contact) => {
+    setSelectedContact(contact)
+    setShowConnectionModal(true)
+  }
+
+  const handleConnectionSubmit = () => {
+    if (selectedContact) {
+      setConnectionSuccess(true)
+      setTimeout(() => {
+        setShowConnectionModal(false)
+        setConnectionSuccess(false)
+        setConnectionMessage("")
+        setSelectedContact(null)
+        toast({
+          title: "Connection Request Sent",
+          description: `Your connection request to ${selectedContact.name} has been sent successfully.`,
+        })
+      }, 2000)
     }
   }
 
-  const handleEmailShare = async () => {
-    if (!shareEmail.trim()) {
-      toast({
-        title: "Missing Email",
-        description: "Please enter an email address.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setShareSuccess(true)
-
-    setTimeout(() => {
-      setShowShareModal(false)
-      setShareSuccess(false)
-      setShareEmail("")
-      setShareMessage(`I wanted to share ${manager?.name}'s profile with you.`)
-    }, 1500)
-  }
-
-  // Message functionality
-  const handleSendMessage = async () => {
-    if (!messageSubject.trim() || !messageContent.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in both subject and message fields.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+  const handleMessageSubmit = () => {
     setMessageSuccess(true)
-
     setTimeout(() => {
       setShowMessageModal(false)
       setMessageSuccess(false)
       setMessageSubject("")
       setMessageContent("")
       setMessagePriority("normal")
-    }, 1500)
+      setSelectedMessageContact(null)
+      toast({
+        title: "Message Sent",
+        description: `Your message has been sent to ${selectedMessageContact?.name || manager.name}.`,
+      })
+    }, 2000)
   }
 
-  // Schedule functionality
-  const handleScheduleMeeting = async () => {
-    if (!meetingTitle.trim() || !meetingDate || !meetingTime) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in meeting title, date, and time.",
-        variant: "destructive",
-      })
-      return
-    }
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+  const handleScheduleSubmit = () => {
     setScheduleSuccess(true)
-
     setTimeout(() => {
       setShowScheduleModal(false)
       setScheduleSuccess(false)
@@ -532,124 +822,103 @@ export default function ManagerProfilePage() {
       setMeetingType("video")
       setMeetingLocation("")
       setMeetingAgenda("")
-    }, 1500)
+      setSelectedScheduleContact(null)
+      toast({
+        title: "Meeting Scheduled",
+        description: `Your meeting with ${selectedScheduleContact?.name || manager.name} has been scheduled successfully.`,
+      })
+    }, 2000)
+  }
+
+  const handleShareSubmit = () => {
+    setShareSuccess(true)
+    setTimeout(() => {
+      setShowShareModal(false)
+      setShareSuccess(false)
+      setShareEmail("")
+      setShareMessage("")
+      toast({
+        title: "Profile Shared",
+        description: "The profile has been shared successfully.",
+      })
+    }, 2000)
+  }
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   if (!manager) {
     return (
       <Screen>
-        <div className="container py-8 max-w-6xl">
+        <div className="container py-8 max-w-7xl">
           <div className="text-center">
-            <h1 className="text-2xl font-bold mb-4">Manager Profile Not Found</h1>
-            <p className="text-gray-600">The requested manager profile could not be found.</p>
+            <h1 className="text-2xl font-semibold text-deepBrand mb-4">Manager Not Found</h1>
+            <p className="text-base-gray">The requested manager profile could not be found.</p>
           </div>
         </div>
       </Screen>
     )
   }
 
-  const profileUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/screens/general/manager-profile?id=${managerId}`
-
   return (
     <Screen>
-      <div className="container py-8 max-w-6xl">
-        {/* Profile Header */}
-        <Card className="mb-8">
-          <CardContent className="p-8">
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex flex-col items-center md:items-start">
-                <Avatar className="h-32 w-32 mb-4">
-                  <AvatarImage src={manager.avatar || "/placeholder.svg"} alt={manager.name} />
-                  <AvatarFallback className="text-2xl">
-                    {manager.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-
-              <div className="flex-1">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-4">
-                  <div>
-                    {/* Firm name now prominently displayed first */}
-                    <h1 className="text-3xl font-bold text-deep-brand mb-2">{manager.firm}</h1>
-                    <p className="text-lg text-base-gray mb-1">{manager.firmType}</p>
-
-                    {/* Individual contact section */}
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <h2 className="text-xl font-semibold text-deep-brand mb-1">{manager.name}</h2>
-                      <p className="text-base text-base-gray mb-4">{manager.title}</p>
+      <div className="container py-8 max-w-7xl">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex items-start gap-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={manager.avatar} alt={manager.name} />
+              <AvatarFallback className="text-2xl bg-electric-blue/10 text-electric-blue">
+                {manager.name.split(" ").map((n: string) => n[0]).join("")}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h1 className="text-3xl font-bold text-deepBrand mb-2">{manager.name}</h1>
+                  <p className="text-xl text-base-gray mb-1">{manager.title}</p>
+                  <p className="text-lg font-semibold text-deepBrand mb-3">{manager.firm}</p>
+                  <div className="flex items-center gap-4 text-sm text-base-gray">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      <span>{manager.location}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Building className="h-4 w-4" />
+                      <span>{manager.firmType}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <TrendingUp className="h-4 w-4" />
+                      <span>AUM: {manager.aum}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" onClick={() => setShowShareModal(true)}>
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      className="bg-electric-blue hover:bg-electric-blue/90 text-white"
-                      onClick={() => setShowMessageModal(true)}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Message
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-electric-blue text-electric-blue hover:bg-electric-blue hover:text-white bg-transparent"
-                      onClick={() => setShowScheduleModal(true)}
-                    >
-                      <CalendarDays className="h-4 w-4 mr-2" />
-                      Schedule
-                    </Button>
-                  </div>
                 </div>
-
-                <div className="grid md:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-center gap-2 text-base-gray">
-                    <MapPin className="h-4 w-4" />
-                    <span>{manager.location}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-base-gray">
-                    <Globe className="h-4 w-4" />
-                    <a href={manager.website} className="text-electric-blue hover:underline">
-                      {manager.website}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2 text-base-gray">
-                    <Mail className="h-4 w-4" />
-                    <span>{manager.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-base-gray">
-                    <Phone className="h-4 w-4" />
-                    <span>{manager.phone}</span>
-                  </div>
-                </div>
-
-                {/* Key Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{manager.aum}</p>
-                    <p className="text-sm text-base-gray">Assets Under Management</p>
-                  </div>
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{manager.trackRecord.irr}</p>
-                    <p className="text-sm text-base-gray">Net IRR</p>
-                  </div>
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{manager.trackRecord.multiple}</p>
-                    <p className="text-sm text-base-gray">Net Multiple</p>
-                  </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleShare}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                  <Button variant="outline" onClick={handleScheduleMeeting}>
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Schedule
+                  </Button>
+                  <Button onClick={handleSendMessage}>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        {/* Profile Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        {/* Tabs Section */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="activity">Recent Activity</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
@@ -677,7 +946,7 @@ export default function ManagerProfilePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {manager.focus.map((area, index) => (
+                    {manager.focus.map((area: string, index: number) => (
                       <Badge key={index} variant="outline" className="bg-blue-50 text-blue-700">
                         {area}
                       </Badge>
@@ -696,16 +965,16 @@ export default function ManagerProfilePage() {
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Total Funds:</span>
+                      <span className="text-base-gray"># of Clients:</span>
                       <span className="font-medium">{manager.keyMetrics.totalFunds}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Active Investments:</span>
+                      <span className="text-base-gray">Active Funds:</span>
                       <span className="font-medium">{manager.keyMetrics.activeInvestments}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Portfolio Companies:</span>
-                      <span className="font-medium">{manager.keyMetrics.portfolioCompanies}</span>
+                      <span className="text-base-gray">Minimum SMA Size:</span>
+                      <span className="font-medium">$5M</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-base-gray">Founded:</span>
@@ -724,7 +993,7 @@ export default function ManagerProfilePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
-                    {manager.keyMetrics.geographicFocus.map((region, index) => (
+                    {manager.keyMetrics.geographicFocus.map((region: string, index: number) => (
                       <Badge key={index} variant="outline">
                         {region}
                       </Badge>
@@ -732,60 +1001,47 @@ export default function ManagerProfilePage() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
 
-          <TabsContent value="performance" className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card>
+              <Card className="md:col-span-2">
                 <CardHeader>
-                  <CardTitle>Track Record</CardTitle>
-                  <CardDescription>Historical performance metrics</CardDescription>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    Contacts
+                  </CardTitle>
+                  <CardDescription>Team members and contact information</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-base-gray">Net IRR:</span>
-                      <span className="text-2xl font-bold text-green-600">{manager.trackRecord.irr}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-base-gray">Net Multiple:</span>
-                      <span className="text-2xl font-bold text-blue-600">{manager.trackRecord.multiple}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-base-gray">Total Returns:</span>
-                      <span className="text-xl font-semibold">{manager.trackRecord.totalReturns}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Key Investments</CardTitle>
-                  <CardDescription>Notable portfolio companies</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {manager.investments?.map((investment, index) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-semibold">{investment.company}</h4>
-                          <Badge
-                            className={
-                              investment.status === "Exited"
-                                ? "bg-green-100 text-green-800"
-                                : "bg-blue-100 text-blue-800"
-                            }
-                          >
-                            {investment.status}
-                          </Badge>
+                    {manager.contacts.map((contact: Contact, index: number) => (
+                      <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="h-12 w-12">
+                            <AvatarFallback className="bg-electric-blue/10 text-electric-blue">
+                              {contact.name.split(" ").map((n: string) => n[0]).join("")}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h4 className="font-medium text-deepBrand">{contact.name}</h4>
+                            <p className="text-sm text-base-gray">{contact.title}</p>
+                            <p className="text-xs text-electric-blue font-medium">{contact.role}</p>
+                          </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-sm text-base-gray">
-                          <span>Sector: {investment.sector}</span>
-                          <span>Stage: {investment.stage}</span>
-                          <span>Investment: {investment.investment}</span>
-                          <span>Multiple: {investment.multiple}</span>
+                        <div className="flex items-center gap-2">
+                          {contact.isConnected ? (
+                            <Badge className="bg-green-100 text-green-800">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              Connected
+                            </Badge>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleRequestConnection(contact)}
+                            >
+                              <UserPlus className="h-3 w-3 mr-1" />
+                              Connect
+                            </Button>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -910,8 +1166,8 @@ export default function ManagerProfilePage() {
                 <div className="space-y-3">
                   <Label className="text-sm font-medium">Profile Link</Label>
                   <div className="flex gap-2">
-                    <Input value={profileUrl} readOnly className="flex-1" />
-                    <Button variant="outline" onClick={handleCopyLink} className="shrink-0 bg-transparent">
+                    <Input value={`${typeof window !== "undefined" ? window.location.origin : ""}/screens/general/manager-profile?id=${managerId}`} readOnly className="flex-1" />
+                    <Button variant="outline" onClick={copyToClipboard} className="shrink-0 bg-transparent">
                       {copied ? <CheckCircle2 className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </Button>
                   </div>
@@ -952,7 +1208,7 @@ export default function ManagerProfilePage() {
                 Cancel
               </Button>
               {!shareSuccess && (
-                <Button onClick={handleEmailShare}>
+                <Button onClick={handleShareSubmit}>
                   <Mail className="h-4 w-4 mr-2" />
                   Share via Email
                 </Button>
@@ -970,7 +1226,7 @@ export default function ManagerProfilePage() {
                 Send Message
               </DialogTitle>
               <DialogDescription>
-                Send a message to {manager.name} at {manager.firm}
+                Send a message to a contact at {manager.firm}
               </DialogDescription>
             </DialogHeader>
 
@@ -980,14 +1236,31 @@ export default function ManagerProfilePage() {
                   <CheckCircle2 className="h-8 w-8 text-green-600" />
                 </div>
                 <p className="text-lg font-medium text-center">Message sent successfully!</p>
-                <p className="text-sm text-center mt-1 text-base-gray">Your message has been sent to {manager.name}.</p>
+                <p className="text-sm text-center mt-1 text-base-gray">Your message has been sent to {selectedMessageContact?.name || manager.name}.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="to">To</Label>
-                    <Input id="to" value={`${manager.name} <${manager.email}>`} disabled />
+                    <Label htmlFor="contact">Contact</Label>
+                    <Select value={selectedMessageContact?.name || ""} onValueChange={(value) => {
+                      const contact = manager.contacts.find(c => c.name === value)
+                      setSelectedMessageContact(contact || null)
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a contact" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {manager.contacts.map((contact, index) => (
+                          <SelectItem key={index} value={contact.name}>
+                            <div className="flex flex-col">
+                              <span className="font-medium">{contact.name}</span>
+                              <span className="text-xs text-gray-500">{contact.title} • {contact.role}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="priority">Priority</Label>
@@ -1004,6 +1277,13 @@ export default function ManagerProfilePage() {
                     </Select>
                   </div>
                 </div>
+
+                {selectedMessageContact && (
+                  <div className="space-y-2">
+                    <Label htmlFor="to">To</Label>
+                    <Input id="to" value={`${selectedMessageContact.name} <${selectedMessageContact.email}>`} disabled />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="subject">Subject</Label>
@@ -1033,7 +1313,7 @@ export default function ManagerProfilePage() {
                 Cancel
               </Button>
               {!messageSuccess && (
-                <Button onClick={handleSendMessage}>
+                <Button onClick={handleMessageSubmit} disabled={!selectedMessageContact}>
                   <Send className="h-4 w-4 mr-2" />
                   Send Message
                 </Button>
@@ -1050,7 +1330,7 @@ export default function ManagerProfilePage() {
                 <Calendar className="h-5 w-5" />
                 Schedule Meeting
               </DialogTitle>
-              <DialogDescription>Schedule a meeting with {manager.name}</DialogDescription>
+              <DialogDescription>Schedule a meeting with a contact at {manager.firm}</DialogDescription>
             </DialogHeader>
 
             {scheduleSuccess ? (
@@ -1058,34 +1338,67 @@ export default function ManagerProfilePage() {
                 <div className="rounded-full bg-green-100 p-3 mb-4">
                   <CheckCircle2 className="h-8 w-8 text-green-600" />
                 </div>
-                <p className="text-lg font-medium text-center">Meeting scheduled!</p>
-                <p className="text-sm text-center mt-1 text-base-gray">
-                  Your meeting with {manager.name} has been scheduled for {meetingDate} at {meetingTime}.
-                </p>
+                <p className="text-lg font-medium text-center">Meeting scheduled successfully!</p>
+                <p className="text-sm text-center mt-1 text-base-gray">Your meeting with {selectedScheduleContact?.name || manager.name} has been scheduled.</p>
               </div>
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="contact">Contact</Label>
+                  <Select value={selectedScheduleContact?.name || ""} onValueChange={(value) => {
+                    const contact = manager.contacts.find(c => c.name === value)
+                    setSelectedScheduleContact(contact || null)
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a contact" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {manager.contacts.map((contact, index) => (
+                        <SelectItem key={index} value={contact.name}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{contact.name}</span>
+                            <span className="text-xs text-gray-500">{contact.title} • {contact.role}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="title">Meeting Title</Label>
                   <Input
                     id="title"
-                    placeholder="e.g., Investment Discussion"
+                    placeholder="Enter meeting title..."
                     value={meetingTitle}
                     onChange={(e) => setMeetingTitle(e.target.value)}
                   />
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="date">Date</Label>
-                    <Input id="date" type="date" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)} />
+                    <Input
+                      id="date"
+                      type="date"
+                      value={meetingDate}
+                      onChange={(e) => setMeetingDate(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="time">Time</Label>
-                    <Input id="time" type="time" value={meetingTime} onChange={(e) => setMeetingTime(e.target.value)} />
+                    <Input
+                      id="time"
+                      type="time"
+                      value={meetingTime}
+                      onChange={(e) => setMeetingTime(e.target.value)}
+                    />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="duration">Duration (min)</Label>
+                    <Label htmlFor="duration">Duration</Label>
                     <Select value={meetingDuration} onValueChange={setMeetingDuration}>
                       <SelectTrigger>
                         <SelectValue />
@@ -1098,11 +1411,8 @@ export default function ManagerProfilePage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="meetingType">Meeting Type</Label>
+                    <Label htmlFor="type">Meeting Type</Label>
                     <Select value={meetingType} onValueChange={setMeetingType}>
                       <SelectTrigger>
                         <SelectValue />
@@ -1129,19 +1439,19 @@ export default function ManagerProfilePage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  {(meetingType === "in-person" || meetingType === "video") && (
-                    <div className="space-y-2">
-                      <Label htmlFor="location">{meetingType === "video" ? "Meeting Link" : "Location"}</Label>
-                      <Input
-                        id="location"
-                        placeholder={meetingType === "video" ? "Zoom/Teams link will be generated" : "Enter location"}
-                        value={meetingLocation}
-                        onChange={(e) => setMeetingLocation(e.target.value)}
-                        disabled={meetingType === "video"}
-                      />
-                    </div>
-                  )}
                 </div>
+                {(meetingType === "in-person" || meetingType === "video") && (
+                  <div className="space-y-2">
+                    <Label htmlFor="location">{meetingType === "video" ? "Meeting Link" : "Location"}</Label>
+                    <Input
+                      id="location"
+                      placeholder={meetingType === "video" ? "Zoom/Teams link will be generated" : "Enter location"}
+                      value={meetingLocation}
+                      onChange={(e) => setMeetingLocation(e.target.value)}
+                      disabled={meetingType === "video"}
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="agenda">Agenda (Optional)</Label>
@@ -1161,9 +1471,49 @@ export default function ManagerProfilePage() {
                 Cancel
               </Button>
               {!scheduleSuccess && (
-                <Button onClick={handleScheduleMeeting}>
+                <Button onClick={handleScheduleSubmit} disabled={!selectedScheduleContact}>
                   <Calendar className="h-4 w-4 mr-2" />
                   Schedule Meeting
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connection Request Modal */}
+        <Dialog open={showConnectionModal} onOpenChange={setShowConnectionModal}>
+          <DialogContent className="sm:max-w-[450px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5" />
+                Request Connection
+              </DialogTitle>
+              <DialogDescription>
+                Send a connection request to {selectedContact?.name}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="connectionMessage">Message (Optional)</Label>
+                <Textarea
+                  id="connectionMessage"
+                  placeholder="Add a personal message..."
+                  value={connectionMessage}
+                  onChange={(e) => setConnectionMessage(e.target.value)}
+                  rows={4}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectionModal(false)}>
+                Cancel
+              </Button>
+              {!connectionSuccess && (
+                <Button onClick={handleConnectionSubmit}>
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Request
                 </Button>
               )}
             </DialogFooter>

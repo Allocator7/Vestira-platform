@@ -300,6 +300,8 @@ export default function ManagerInbox() {
 
   // Compose form states
   const [composeTo, setComposeTo] = useState("")
+  const [composeCc, setComposeCc] = useState("")
+  const [composeBcc, setComposeBcc] = useState("")
   const [composeSubject, setComposeSubject] = useState("")
   const [composeMessage, setComposeMessage] = useState("")
   const [composeAttachments, setComposeAttachments] = useState<string[]>([])
@@ -429,6 +431,8 @@ export default function ManagerInbox() {
     })
 
     setComposeTo("")
+    setComposeCc("")
+    setComposeBcc("")
     setComposeSubject("")
     setComposeMessage("")
     setComposeAttachments([])
@@ -984,6 +988,24 @@ export default function ManagerInbox() {
                 placeholder="Enter recipient email"
                 value={composeTo}
                 onChange={(e) => setComposeTo(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="compose-cc">Cc</Label>
+              <Input
+                id="compose-cc"
+                placeholder="Enter CC recipients (optional)"
+                value={composeCc}
+                onChange={(e) => setComposeCc(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="compose-bcc">Bcc</Label>
+              <Input
+                id="compose-bcc"
+                placeholder="Enter BCC recipients (optional)"
+                value={composeBcc}
+                onChange={(e) => setComposeBcc(e.target.value)}
               />
             </div>
             <div>

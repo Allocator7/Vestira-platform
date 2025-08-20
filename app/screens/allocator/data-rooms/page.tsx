@@ -10,6 +10,25 @@ import { Input } from "../../../../components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
 import { Search, Filter, Calendar, FileText, Download, Eye, Clock, Star, MoreHorizontal, X } from "lucide-react"
 import { Progress } from "../../../../components/ui/progress"
+import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
+import { 
+  Search as SearchIcon, 
+  Filter as FilterIcon, 
+  MoreVertical, 
+  FileText as FileIcon, 
+  Clock as ClockIcon, 
+  Calendar as CalendarIcon, 
+  Download as DownloadIcon, 
+  Bookmark,
+  BookmarkCheck,
+  MessageSquare,
+  Eye as EyeIcon,
+  User,
+  Building2
+} from "lucide-react"
+
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic'
 
 const dataRooms = [
   {
@@ -18,7 +37,6 @@ const dataRooms = [
     manager: "BlackRock",
     type: "Infrastructure",
     status: "Active",
-    accessLevel: "Full Access",
     lastUpdated: "2 hours ago",
     documentsCount: 127,
     deadline: "Dec 15, 2024",
@@ -32,7 +50,6 @@ const dataRooms = [
     manager: "Vanguard",
     type: "Real Estate",
     status: "Pending Access",
-    accessLevel: "Requested",
     lastUpdated: "1 day ago",
     documentsCount: 89,
     deadline: "Jan 30, 2025",
@@ -46,7 +63,6 @@ const dataRooms = [
     manager: "Wellington Management",
     type: "Growth Equity",
     status: "Active",
-    accessLevel: "Limited Access",
     lastUpdated: "3 days ago",
     documentsCount: 156,
     deadline: "Nov 20, 2024",
@@ -59,8 +75,7 @@ const dataRooms = [
     name: "Fidelity Private Credit Strategy",
     manager: "Fidelity",
     type: "Private Credit",
-    status: "Completed",
-    accessLevel: "Full Access",
+    status: "Closed",
     lastUpdated: "1 week ago",
     documentsCount: 203,
     deadline: "Completed",
@@ -76,25 +91,14 @@ const getStatusColor = (status: string) => {
       return "bg-green-100 text-green-800"
     case "Pending Access":
       return "bg-yellow-100 text-yellow-800"
-    case "Completed":
+    case "Closed":
       return "bg-electric-blue/10 text-electric-blue"
     default:
       return "bg-gray-100 text-gray-800"
   }
 }
 
-const getAccessColor = (access: string) => {
-  switch (access) {
-    case "Full Access":
-      return "bg-green-100 text-green-800"
-    case "Limited Access":
-      return "bg-yellow-100 text-yellow-800"
-    case "Requested":
-      return "bg-orange-100 text-orange-800"
-    default:
-      return "bg-gray-100 text-gray-800"
-  }
-}
+// Removed access level concept - allocators don't need to know about access levels
 
 // Custom Dropdown Component
 function CustomDropdown({ room, onViewDetails, onContactManager, onRequestAccess, onExportDocuments }: any) {
@@ -198,6 +202,10 @@ export default function AllocatorDataRoomsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null)
   const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    assetClasses: [],
+    strategies: []
+  })
 
   const showNotification = (message: string, type: "success" | "error" = "success") => {
     setNotification({ message, type })
@@ -229,40 +237,68 @@ export default function AllocatorDataRoomsPage() {
     }
   }
 
-  const handleDownload = (room: any) => {
-    // Check if user has download permission
-    const currentUser = getCurrentUser() // This would be implemented to get current user info
-    const userPermission = getUserDataRoomPermission(room.id, currentUser?.id)
+  const handleDownload = async (room: any) => {
+    try {
+      // Check if user has download permission
+      const currentUser = getCurrentUser() // This would be implemented to get current user info
+      const userPermission = getUserDataRoomPermission(room.id, currentUser?.id)
 
-    if (userPermission === "view-only") {
-      showNotification("Download not permitted - you have view-only access to this data room", "error")
-      return
-    }
+      if (userPermission === "view-only") {
+        showNotification("Download not permitted - you have view-only access to this data room", "error")
+        return
+      }
 
-    setSelectedRoom(room)
-    setDownloadingRoom(room.id)
-    setDownloadProgress(0)
-    setShowModal("download")
+      setSelectedRoom(room)
+      setDownloadingRoom(room.id)
+      setDownloadProgress(0)
+      setShowModal("download")
 
-    // Simulate download progress
-    const interval = setInterval(() => {
-      setDownloadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setTimeout(() => {
-            setDownloadingRoom(null)
-            closeModal()
-            showNotification(`${room.name} documents downloaded successfully`)
-          }, 500)
-          return 100
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create data room summary content
+      const content = `DATA ROOM SUMMARY
+
+Room Name: ${room.name}
+Manager: ${room.manager}
+Type: ${room.type}
+Status: ${room.status}
+Documents: ${room.documentsCount}
+Last Updated: ${room.lastUpdated}
+Deadline: ${room.deadline}
+Tags: ${room.tags.join(', ')}
+
+DOCUMENT LIST:
+${room.documents?.map((doc: any, index: number) => 
+  `${index + 1}. ${doc.name} (${doc.type}) - ${doc.size}`
+).join('\n') || 'No documents available'}
+
+Generated: ${new Date().toISOString()}`
+
+      await downloadUtils.downloadText(content, `${room.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_summary.txt`, {
+        onProgress: (progress) => setDownloadProgress(progress),
+        onComplete: () => {
+          setDownloadingRoom(null)
+          closeModal()
+          showNotification(`${room.name} documents downloaded successfully`)
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          setDownloadingRoom(null)
+          closeModal()
+          showNotification("Download failed. Please try again.", "error")
         }
-        return prev + 10
       })
-    }, 300)
+    } catch (error) {
+      console.error('Download error:', error)
+      setDownloadingRoom(null)
+      closeModal()
+      showNotification("Download failed. Please try again.", "error")
+    }
   }
 
   const handleEnterRoom = (room: any) => {
-    if (room.accessLevel === "Requested") {
+    if (room.status === "Pending Access") {
       showNotification("Access request is still pending approval", "error")
       return
     }
@@ -331,7 +367,7 @@ export default function AllocatorDataRoomsPage() {
       manager: room.manager,
       type: room.type,
       status: room.status,
-      accessLevel: room.accessLevel,
+              // Removed accessLevel - allocators don't need to know about access levels
       documents: room.documentsCount,
       lastUpdated: room.lastUpdated,
       deadline: room.deadline,
@@ -364,6 +400,10 @@ export default function AllocatorDataRoomsPage() {
     URL.revokeObjectURL(url)
 
     showNotification("Data rooms list exported successfully!")
+  }
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
   }
 
   return (
@@ -429,10 +469,7 @@ export default function AllocatorDataRoomsPage() {
                       <p className="font-medium">Status</p>
                       <Badge className={getStatusColor(selectedRoom.status)}>{selectedRoom.status}</Badge>
                     </div>
-                    <div>
-                      <p className="font-medium">Access Level</p>
-                      <Badge className={getAccessColor(selectedRoom.accessLevel)}>{selectedRoom.accessLevel}</Badge>
-                    </div>
+                    {/* Access Level section removed - allocators don't need to know about access levels */}
                     <div>
                       <p className="font-medium">Documents</p>
                       <p>{selectedRoom.documentsCount} documents</p>
@@ -442,8 +479,8 @@ export default function AllocatorDataRoomsPage() {
                       <p>{selectedRoom.lastUpdated}</p>
                     </div>
                     <div>
-                      <p className="font-medium">Due Date</p>
-                      <p>{selectedRoom.deadline}</p>
+                      <p className="font-medium">Next Close</p>
+                      <p>{selectedRoom.deadline === "Completed" ? "On-Going" : selectedRoom.deadline}</p>
                     </div>
                   </div>
 
@@ -528,15 +565,6 @@ export default function AllocatorDataRoomsPage() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Access Type Needed</label>
-                    <select className="w-full p-2 border rounded-md">
-                      <option value="full">Full Access</option>
-                      <option value="download">Download Access</option>
-                      <option value="extended">Extended Time Access</option>
-                      <option value="team">Team Access</option>
-                    </select>
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium mb-1">Reason for Request</label>
                     <textarea
                       className="w-full min-h-[120px] p-3 border rounded-md"
@@ -598,44 +626,20 @@ export default function AllocatorDataRoomsPage() {
                 />
               </div>
               <select className="vestira-input w-full md:w-48">
-                <option value="all">All Types</option>
-                <option value="infrastructure">Infrastructure</option>
-                <option value="real-estate">Real Estate</option>
-                <option value="private-equity">Private Equity</option>
-                <option value="private-credit">Private Credit</option>
+                <option value="all">All Statuses</option>
+                <option value="active">Active</option>
+                <option value="pending">Pending Access</option>
+                <option value="closed">Closed</option>
               </select>
             </div>
 
             {showFilters && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Type</label>
-                  <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Types</option>
-                    <option value="infrastructure">Infrastructure</option>
-                    <option value="real-estate">Real Estate</option>
-                    <option value="private-equity">Private Equity</option>
-                    <option value="private-credit">Private Credit</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Status</label>
-                  <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Statuses</option>
-                    <option value="active">Active</option>
-                    <option value="pending">Pending Access</option>
-                    <option value="completed">Completed</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Access Level</label>
-                  <select className="w-full p-2 border rounded-md">
-                    <option value="all">All Access Levels</option>
-                    <option value="full">Full Access</option>
-                    <option value="limited">Limited Access</option>
-                    <option value="requested">Requested</option>
-                  </select>
-                </div>
+              <div className="mb-6">
+                <ComprehensiveFilters 
+                  onFiltersChange={handleFiltersChange} 
+                  initialFilters={filters} 
+                  showSectors={false}
+                />
               </div>
             )}
 
@@ -657,7 +661,13 @@ export default function AllocatorDataRoomsPage() {
                   value="closed"
                   className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-700"
                 >
-                  Closed Data Rooms ({dataRooms.filter((r) => r.status === "Completed").length})
+                  Closed Data Rooms ({dataRooms.filter((r) => r.status === "Closed").length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="bookmarked"
+                  className="data-[state=active]:bg-white data-[state=active]:text-gray-900 text-gray-700"
+                >
+                  Bookmarked ({bookmarkedRooms.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -667,7 +677,8 @@ export default function AllocatorDataRoomsPage() {
                     const matchesTab =
                       (activeTab === "active" && room.status === "Active") ||
                       (activeTab === "pending" && room.status === "Pending Access") ||
-                      (activeTab === "closed" && room.status === "Completed")
+                      (activeTab === "closed" && room.status === "Closed") ||
+                      (activeTab === "bookmarked" && bookmarkedRooms.includes(room.id))
 
                     if (!matchesTab) {
                       return null
@@ -692,7 +703,6 @@ export default function AllocatorDataRoomsPage() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Badge className={getStatusColor(room.status)}>{room.status}</Badge>
-                              <Badge className={getAccessColor(room.accessLevel)}>{room.accessLevel}</Badge>
                             </div>
                           </div>
 
@@ -707,7 +717,9 @@ export default function AllocatorDataRoomsPage() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4 text-baseGray" />
-                              <span className="text-baseGray">Due: {room.deadline}</span>
+                              <span className="text-baseGray">
+                                {room.deadline === "Completed" ? "On-Going" : `Next Close: ${room.deadline}`}
+                              </span>
                             </div>
                           </div>
 
@@ -767,7 +779,7 @@ export default function AllocatorDataRoomsPage() {
                                 onClick={() => handleEnterRoom(room)}
                               >
                                 <Eye className="h-4 w-4" />
-                                {room.accessLevel === "Requested" ? "Request Access" : "Enter Room"}
+                                {room.status === "Pending Access" ? "Request Access" : "Enter Room"}
                               </Button>
                               <CustomDropdown
                                 room={room}

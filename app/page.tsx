@@ -1,24 +1,21 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "../context/SessionContext"
 
 export default function HomePage() {
   const router = useRouter()
-  const { userRole, isLoading } = useSession()
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!isLoading) {
-      if (userRole) {
-        router.push(`/screens/${userRole}/home`)
-      } else {
-        router.push("/login")
-      }
-    }
-  }, [userRole, isLoading, router])
+    // Simple redirect to login page
+    router.push("/login")
+    setIsLoading(false)
+  }, [router])
 
-  // Simple loading screen
+
+
+  // Loading screen
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-canvas-bg to-white">
       <div className="text-center">

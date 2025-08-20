@@ -1,8 +1,10 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import {
   FileText,
   Users,
@@ -18,10 +20,16 @@ import {
   Network,
   MessageSquare,
   BarChart3,
+  X,
+  Share2,
+  Bookmark,
 } from "lucide-react"
 import Link from "next/link"
 
 export default function AllocatorHomePage() {
+  const [selectedInsight, setSelectedInsight] = useState<any>(null)
+  const [showInsightModal, setShowInsightModal] = useState(false)
+
   const recentActivity = [
     {
       id: 1,
@@ -80,6 +88,86 @@ export default function AllocatorHomePage() {
     },
   ]
 
+  // Sample insights data with full content
+  const insights = [
+    {
+      id: 1,
+      title: "Q4 Market Outlook: Navigating Volatility",
+      manager: "BlackRock Capital",
+      category: "Market Analysis",
+      publishedAt: "2 days ago",
+      readTime: "5 min read",
+      summary: "Our latest perspective on market conditions and positioning for Q4 2024.",
+      content: `As we approach the final quarter of 2024, market participants are grappling with a complex set of economic indicators and geopolitical developments. Our analysis suggests that while volatility may persist, there are strategic opportunities for allocators who maintain a disciplined approach.
+
+Key Themes for Q4:
+• Inflation dynamics and central bank policy responses
+• Corporate earnings resilience amid economic uncertainty
+• Sector rotation opportunities in technology and healthcare
+• International diversification benefits
+
+Our proprietary models indicate that a balanced approach to risk management, combined with selective exposure to growth-oriented sectors, may provide optimal positioning for the current environment. We recommend maintaining adequate liquidity while selectively deploying capital into areas of relative value.`,
+      author: "Dr. Sarah Chen",
+      authorTitle: "Chief Investment Strategist",
+      tags: ["Market Analysis", "Volatility", "Q4 Outlook"],
+    },
+    {
+      id: 2,
+      title: "ESG Integration in Private Equity",
+      manager: "Meridian Partners",
+      category: "ESG Strategy",
+      publishedAt: "1 week ago",
+      readTime: "8 min read",
+      summary: "How we're incorporating ESG factors into our investment process.",
+      content: `Environmental, Social, and Governance (ESG) considerations have become increasingly important in private equity investing. At Meridian Partners, we've developed a comprehensive framework for integrating ESG factors throughout our investment lifecycle.
+
+Our ESG Integration Framework:
+• Pre-investment ESG due diligence and scoring
+• Portfolio company ESG improvement programs
+• Regular ESG performance monitoring and reporting
+• Stakeholder engagement and transparency initiatives
+
+We've found that companies with strong ESG practices often demonstrate better long-term performance, lower risk profiles, and enhanced stakeholder relationships. Our approach focuses on creating value through ESG improvements while maintaining strong financial returns.
+
+Case Study: Our recent investment in GreenTech Solutions demonstrates how ESG integration can drive both impact and returns. Through our ESG improvement program, the company achieved a 30% reduction in carbon emissions while increasing operational efficiency by 15%.`,
+      author: "Michael Rodriguez",
+      authorTitle: "ESG Director",
+      tags: ["ESG", "Private Equity", "Sustainability"],
+    },
+    {
+      id: 3,
+      title: "Emerging Markets Opportunities",
+      manager: "Alpha Ventures",
+      category: "Investment Strategy",
+      publishedAt: "2 weeks ago",
+      readTime: "6 min read",
+      summary: "Identifying value in emerging market equities amid global uncertainty.",
+      content: `Emerging markets present unique opportunities for allocators willing to navigate the inherent complexities. Our research indicates that current market conditions have created attractive entry points in select emerging market equities.
+
+Investment Opportunities:
+• Technology adoption and digital transformation trends
+• Consumer growth driven by rising middle classes
+• Infrastructure development and urbanization
+• Natural resource and commodity exposure
+
+Risk Management Considerations:
+• Currency volatility and hedging strategies
+• Political and regulatory risk assessment
+• Liquidity constraints and exit planning
+• Diversification across regions and sectors
+
+Our emerging markets strategy focuses on companies with strong competitive positions, robust balance sheets, and exposure to secular growth trends. We maintain a disciplined approach to position sizing and risk management while seeking to capture the growth potential of these dynamic markets.`,
+      author: "Lisa Thompson",
+      authorTitle: "Emerging Markets Portfolio Manager",
+      tags: ["Emerging Markets", "Equities", "Global Strategy"],
+    },
+  ]
+
+  const handleInsightClick = (insight: any) => {
+    setSelectedInsight(insight)
+    setShowInsightModal(true)
+  }
+
   return (
     <div className="container mx-auto px-6 py-8 md:px-8 lg:px-10 max-w-7xl">
       <div className="space-y-8">
@@ -98,36 +186,25 @@ export default function AllocatorHomePage() {
                   <Search className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand text-sm">Find Managers</h3>
-                  <p className="text-xs text-base-gray">Search managers</p>
+                  <h3 className="font-medium text-deep-brand group-hover:text-electric-blue transition-colors">
+                    Find Managers
+                  </h3>
+                  <p className="text-sm text-base-gray">Search and connect with investment managers</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-            </Link>
-
-            <Link href="/screens/general/connection-center">
-              <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
-                <div className="p-2 rounded-full bg-white shadow-sm">
-                  <Network className="h-5 w-5 text-electric-blue" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand text-sm">Grow Network</h3>
-                  <p className="text-xs text-base-gray">Expand network</p>
-                </div>
-                <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </Link>
 
             <Link href="/screens/allocator/due-diligence-hub">
               <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
                 <div className="p-2 rounded-full bg-white shadow-sm">
-                  <PlusCircle className="h-5 w-5 text-electric-blue" />
+                  <FileSearch className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand text-sm">Due Diligence</h3>
-                  <p className="text-xs text-base-gray">Start due diligence</p>
+                  <h3 className="font-medium text-deep-brand group-hover:text-electric-blue transition-colors">
+                    Due Diligence
+                  </h3>
+                  <p className="text-sm text-base-gray">Launch and manage due diligence processes</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </Link>
 
@@ -137,175 +214,176 @@ export default function AllocatorHomePage() {
                   <FolderOpen className="h-5 w-5 text-electric-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-deep-brand text-sm">Data Rooms</h3>
-                  <p className="text-xs text-base-gray">Access documents</p>
+                  <h3 className="font-medium text-deep-brand group-hover:text-electric-blue transition-colors">
+                    Data Rooms
+                  </h3>
+                  <p className="text-sm text-base-gray">Access manager documents and materials</p>
                 </div>
-                <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
+              </div>
+            </Link>
+
+            <Link href="/screens/allocator/events">
+              <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
+                <div className="p-2 rounded-full bg-white shadow-sm">
+                  <Calendar className="h-5 w-5 text-electric-blue" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-deep-brand group-hover:text-electric-blue transition-colors">
+                    Events
+                  </h3>
+                  <p className="text-sm text-base-gray">Browse and register for industry events</p>
+                </div>
               </div>
             </Link>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Link href="/screens/allocator/managers">
-            <Card className="vestira-card-minimal hover:shadow-vestira-lg transition-all duration-300 cursor-pointer border-2 hover:border-electric-blue/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-base-gray">Total Managers</p>
-                    <p className="text-3xl font-bold text-deep-brand">24</p>
-                  </div>
-                  <div className="p-3 bg-electric-blue/10 rounded-full">
-                    <Briefcase className="h-6 w-6 text-electric-blue" />
-                  </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="vestira-card-minimal">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-electric-blue/10">
+                  <Users className="h-5 w-5 text-electric-blue" />
                 </div>
-                <p className="text-sm text-base-gray mt-2">Active relationships</p>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/screens/allocator/due-diligence-hub?tab=active">
-            <Card className="vestira-card-minimal hover:shadow-vestira-lg transition-all duration-300 cursor-pointer border-2 hover:border-electric-blue/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-base-gray">Active Searches</p>
-                    <p className="text-3xl font-bold text-deep-brand">8</p>
-                  </div>
-                  <div className="p-3 bg-electric-blue/10 rounded-full">
-                    <FileSearch className="h-6 w-6 text-electric-blue" />
-                  </div>
-                </div>
-                <p className="text-sm text-base-gray mt-2">Due diligence in progress</p>
-              </CardContent>
-            </Card>
-          </Link>
-
-          <Link href="/screens/general/connection-center?tab=pending">
-            <Card className="vestira-card-minimal hover:shadow-vestira-lg transition-all duration-300 cursor-pointer border-2 hover:border-electric-blue/20">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-base-gray">New Connection Requests</p>
-                    <p className="text-3xl font-bold text-deep-brand">3</p>
-                  </div>
-                  <div className="p-3 bg-electric-blue/10 rounded-full">
-                    <UserPlus className="h-6 w-6 text-electric-blue" />
-                  </div>
-                </div>
-                <p className="text-sm text-base-gray mt-2">Pending connections</p>
-              </CardContent>
-            </Card>
-          </Link>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 vestira-card-minimal">
-            <CardHeader>
-              <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-deep-brand">Recent Activity</CardTitle>
-                  <CardDescription className="text-base-gray">Your recent interactions with managers</CardDescription>
+                  <p className="text-2xl font-bold text-deep-brand">24</p>
+                  <p className="text-sm text-base-gray">Active Managers</p>
                 </div>
-                <Link href="/screens/allocator/activity-log">
-                  <Button variant="outline" size="sm">
-                    View All Activity
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivity.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-center gap-4 rounded-lg border border-gray-200 p-3 bg-white hover:border-electric-blue/30 transition-all duration-300"
-                  >
-                    <div className="flex-shrink-0">
-                      <div
-                        className={`p-2 rounded-full ${
-                          activity.type === "document"
-                            ? "bg-blue-100"
-                            : activity.type === "meeting"
-                              ? "bg-green-100"
-                              : activity.type === "alert"
-                                ? "bg-amber-100"
-                                : activity.type === "message"
-                                  ? "bg-purple-100"
-                                  : "bg-indigo-100"
-                        }`}
-                      >
-                        {activity.type === "document" && <FileText className="h-4 w-4 text-blue-600" />}
-                        {activity.type === "meeting" && <Users className="h-4 w-4 text-green-600" />}
-                        {activity.type === "alert" && <AlertTriangle className="h-4 w-4 text-amber-600" />}
-                        {activity.type === "message" && <MessageSquare className="h-4 w-4 text-purple-600" />}
-                        {activity.type === "insight" && <BarChart3 className="h-4 w-4 text-indigo-600" />}
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate text-deep-brand">{activity.title}</p>
-                      <p className="text-sm text-base-gray truncate">{activity.manager}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        className={
-                          activity.status === "new"
-                            ? "bg-blue-100 text-blue-800"
-                            : activity.status === "completed"
-                              ? "bg-green-100 text-green-800"
-                              : activity.status === "attention"
-                                ? "bg-amber-100 text-amber-800"
-                                : "bg-purple-100 text-purple-800"
-                        }
-                      >
-                        {activity.status}
-                      </Badge>
-                      <div className="text-sm text-base-gray">{activity.time}</div>
-                    </div>
-                  </div>
-                ))}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="col-span-3 vestira-card-minimal">
+          <Card className="vestira-card-minimal">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-electric-blue/10">
+                  <FileText className="h-5 w-5 text-electric-blue" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-deep-brand">156</p>
+                  <p className="text-sm text-base-gray">Documents</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="vestira-card-minimal">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-electric-blue/10">
+                  <Briefcase className="h-5 w-5 text-electric-blue" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-deep-brand">8</p>
+                  <p className="text-sm text-base-gray">Active DDQs</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="vestira-card-minimal">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-electric-blue/10">
+                  <MessageSquare className="h-5 w-5 text-electric-blue" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-deep-brand">12</p>
+                  <p className="text-sm text-base-gray">Unread Messages</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity and Upcoming Events */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Activity */}
+          <Card className="vestira-card-minimal">
+            <CardHeader>
+              <CardTitle className="text-deep-brand">Recent Activity</CardTitle>
+              <CardDescription className="text-base-gray">Latest updates from your portfolio</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {recentActivity.map((activity) => (
+                  <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="p-2 rounded-full bg-gray-100">
+                      {activity.type === "document" && <FileText className="h-4 w-4 text-blue-600" />}
+                      {activity.type === "meeting" && <Calendar className="h-4 w-4 text-green-600" />}
+                      {activity.type === "alert" && <AlertTriangle className="h-4 w-4 text-orange-600" />}
+                      {activity.type === "message" && <MessageSquare className="h-4 w-4 text-purple-600" />}
+                      {activity.type === "insight" && <BarChart3 className="h-4 w-4 text-indigo-600" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-deep-brand text-sm">{activity.title}</p>
+                      <p className="text-xs text-base-gray">{activity.manager}</p>
+                      <p className="text-xs text-base-gray">{activity.time}</p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className={
+                        activity.status === "new"
+                          ? "bg-blue-100 text-blue-800"
+                          : activity.status === "completed"
+                          ? "bg-green-100 text-green-800"
+                          : activity.status === "attention"
+                          ? "bg-orange-100 text-orange-800"
+                          : "bg-purple-100 text-purple-800"
+                      }
+                    >
+                      {activity.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <Link href="/screens/allocator/activity-log">
+                  <Button variant="outline" size="sm" className="w-full bg-transparent">
+                    <ArrowRight className="h-4 w-4 mr-2" />
+                    View All Activity
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Upcoming Events */}
+          <Card className="vestira-card-minimal">
             <CardHeader>
               <CardTitle className="text-deep-brand">Upcoming Events</CardTitle>
-              <CardDescription className="text-base-gray">Your registered events and conferences</CardDescription>
+              <CardDescription className="text-base-gray">Your registered events</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {upcomingEvents.length > 0 ? (
                   upcomingEvents.map((event) => (
-                    <div
-                      key={event.id}
-                      className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-300"
-                    >
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-electric-blue/10 rounded-md flex flex-col items-center justify-center text-electric-blue">
-                          <span className="text-xs font-medium">{event.date.split(" ")[0]}</span>
-                          <span className="text-xs">{event.date.split(" ")[1]}</span>
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium text-deep-brand">{event.title}</h4>
-                        <p className="text-sm text-base-gray">
-                          {event.organizer} • {event.location}
-                        </p>
-                        <p className="text-xs text-base-gray mt-1">{event.time}</p>
-                        <Badge
-                          className={
-                            event.type === "conference"
-                              ? "bg-blue-100 text-blue-800"
-                              : event.type === "workshop"
-                                ? "bg-green-100 text-green-800"
-                                : event.type === "summit"
-                                  ? "bg-purple-100 text-purple-800"
+                    <div key={event.id} className="p-4 rounded-lg border border-gray-200 hover:border-electric-blue/30 transition-all duration-300">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-deep-brand">{event.title}</h4>
+                            <p className="text-sm text-base-gray">{event.organizer}</p>
+                            <p className="text-sm text-base-gray">{event.location}</p>
+                            <p className="text-sm text-base-gray">{event.time}</p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-semibold text-electric-blue">{event.date}</div>
+                            <Badge
+                              variant="outline"
+                              className={
+                                event.type === "conference"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : event.type === "webinar"
+                                  ? "bg-green-100 text-green-800"
                                   : "bg-orange-100 text-orange-800"
-                          }
-                        >
-                          {event.type}
-                        </Badge>
+                              }
+                            >
+                              {event.type}
+                            </Badge>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -348,35 +426,11 @@ export default function AllocatorHomePage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[
-                {
-                  title: "Q4 Market Outlook: Navigating Volatility",
-                  manager: "BlackRock Capital",
-                  category: "Market Analysis",
-                  publishedAt: "2 days ago",
-                  readTime: "5 min read",
-                  summary: "Our latest perspective on market conditions and positioning for Q4 2024.",
-                },
-                {
-                  title: "ESG Integration in Private Equity",
-                  manager: "Meridian Partners",
-                  category: "ESG Strategy",
-                  publishedAt: "1 week ago",
-                  readTime: "8 min read",
-                  summary: "How we're incorporating ESG factors into our investment process.",
-                },
-                {
-                  title: "Emerging Markets Opportunities",
-                  manager: "Alpha Ventures",
-                  category: "Investment Strategy",
-                  publishedAt: "2 weeks ago",
-                  readTime: "6 min read",
-                  summary: "Identifying value in emerging market equities amid global uncertainty.",
-                },
-              ].map((insight, i) => (
+              {insights.map((insight, i) => (
                 <div
                   key={i}
-                  className="p-4 rounded-lg border border-gray-200 hover:border-electric-blue/30 transition-all duration-300 cursor-pointer"
+                  className="p-4 rounded-lg border border-gray-200 hover:border-electric-blue/30 transition-all duration-300 cursor-pointer hover:shadow-md"
+                  onClick={() => handleInsightClick(insight)}
                 >
                   <div className="space-y-3">
                     <div>
@@ -396,6 +450,84 @@ export default function AllocatorHomePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Insight Detail Modal */}
+      <Dialog open={showInsightModal} onOpenChange={setShowInsightModal}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <DialogTitle className="text-xl font-semibold text-deep-brand pr-4">
+                  {selectedInsight?.title}
+                </DialogTitle>
+                <div className="flex items-center gap-4 mt-2 text-sm text-base-gray">
+                  <span>{selectedInsight?.manager}</span>
+                  <span>•</span>
+                  <span>{selectedInsight?.publishedAt}</span>
+                  <span>•</span>
+                  <span>{selectedInsight?.readTime}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <Bookmark className="h-4 w-4 mr-2" />
+                  Save
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+            </div>
+          </DialogHeader>
+          <div className="space-y-6">
+            {selectedInsight && (
+              <>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-electric-blue/10 text-electric-blue">{selectedInsight.category}</Badge>
+                  {selectedInsight.tags.map((tag: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-medium text-deep-brand mb-2">Summary</h3>
+                    <p className="text-base-gray">{selectedInsight.summary}</p>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h3 className="font-medium text-deep-brand">Full Content</h3>
+                    <div className="prose prose-sm max-w-none">
+                      {selectedInsight.content.split('\n\n').map((paragraph: string, index: number) => (
+                        <p key={index} className="text-base-gray leading-relaxed mb-4">
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-electric-blue/10 flex items-center justify-center">
+                        <span className="text-electric-blue font-medium">
+                          {selectedInsight.author.split(' ').map((n: string) => n[0]).join('')}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium text-deep-brand">{selectedInsight.author}</p>
+                        <p className="text-sm text-base-gray">{selectedInsight.authorTitle}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

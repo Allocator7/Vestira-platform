@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Screen from "@/components/Screen"
+import { Screen } from "@/components/Screen"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -36,10 +36,119 @@ import { Separator } from "@/components/ui/separator"
 import { Send } from "lucide-react"
 
 export default function ConnectionCenterPage() {
+  // Sample connections data - UPDATED to match allocator profile data exactly
+  const connections = [
+    {
+      id: 1,
+      name: "Sovereign Wealth Fund",
+      contactPerson: "Sarah Chen",
+      contactPersonId: "sarah-chen",
+      type: "allocator",
+      logo: "/FI_logo.png",
+      category: "Sovereign Wealth Fund",
+      location: "Singapore",
+      aum: "$320B",
+      focus: ["Alternative Assets", "Global Markets", "Long-term"],
+      status: "connected",
+      lastInteraction: "May 10, 2025",
+    },
+    {
+      id: 2,
+      name: "Global Pension Alliance",
+      contactPerson: "Jennifer Park",
+      contactPersonId: "jennifer-park",
+      type: "allocator",
+      logo: "/trp-symbol.png",
+      category: "Pension Fund",
+      location: "Toronto, CA",
+      aum: "$180B",
+      focus: ["Private Markets & Real Assets"],
+      status: "connected",
+      lastInteraction: "May 5, 2025",
+    },
+    {
+      id: 3,
+      name: "University Endowment Foundation",
+      contactPerson: "Alex Kim",
+      contactPersonId: "alex-kim",
+      type: "allocator",
+      logo: "/trp-symbol.png",
+      category: "Endowment",
+      location: "Boston, MA",
+      aum: "$45B",
+      focus: ["Alternative Investments"],
+      status: "connected",
+      lastInteraction: "May 3, 2025",
+    },
+    {
+      id: 6,
+      name: "Quantum Capital Partners",
+      contactPerson: "James Wilson",
+      contactPersonId: "james-wilson",
+      type: "manager",
+      logo: "/stylized-wm.png",
+      category: "Hedge Fund",
+      location: "New York, NY",
+      aum: "$2.5B",
+      focus: ["Global Macro", "Fixed Income", "Currencies"],
+      status: "connected",
+      lastInteraction: "May 8, 2025",
+    },
+    {
+      id: 9,
+      name: "Cambridge Associates",
+      contactPerson: "David Kim",
+      contactPersonId: "david-kim",
+      type: "consultant",
+      logo: "/abstract-profile.png",
+      category: "Investment Consultant",
+      location: "Boston, MA",
+      clientCount: "450+",
+      yearsInBusiness: 50,
+      services: ["Manager Selection", "Asset Allocation", "Portfolio Construction"],
+      specializations: ["Endowments", "Foundations", "Pensions"],
+      status: "connected",
+      lastInteraction: "May 7, 2025",
+    },
+    {
+      id: 14,
+      name: "Healthcare Investment Group",
+      contactPerson: "Lisa Rodriguez",
+      contactPersonId: "lisa-rodriguez",
+      type: "manager",
+      logo: "/medical-resonance-image.png",
+      category: "Sector Specialist",
+      location: "Boston, MA",
+      aum: "$3.2B",
+      focus: ["Healthcare", "Biotechnology", "Medical Devices"],
+      status: "pending",
+      direction: "incoming",
+      lastInteraction: "May 12, 2025",
+    },
+    {
+      id: 15,
+      name: "Strategic Advisory Partners",
+      contactPerson: "Emily Zhang",
+      contactPersonId: "emily-zhang",
+      type: "consultant",
+      logo: "/abstract-profile.png",
+      category: "Boutique Consultant",
+      location: "Chicago, IL",
+      clientCount: "150+",
+      yearsInBusiness: 25,
+      services: ["Due Diligence", "Manager Selection", "Risk Assessment"],
+      specializations: ["Alternative Investments", "Private Markets", "ESG"],
+      status: "pending",
+      direction: "incoming",
+      lastInteraction: "May 11, 2025",
+    },
+  ]
+
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [sortBy, setSortBy] = useState("date")
   const [pendingView, setPendingView] = useState<"received" | "sent">("received")
+  const [connectionsState, setConnectionsState] = useState(connections)
 
   // New state variables
   const [userSearchQuery, setUserSearchQuery] = useState("")
@@ -55,6 +164,7 @@ export default function ConnectionCenterPage() {
     focusAreas: [] as string[],
     locations: [] as string[],
     companyTypes: [] as string[],
+    companies: [] as string[],
     sizes: [] as string[],
     statuses: [] as string[],
   })
@@ -95,11 +205,45 @@ export default function ConnectionCenterPage() {
     setIsMeetingModalOpen(true)
   }
 
-  // UPDATED: Route to personal profiles instead of organization profiles
+  // Handle Accept/Decline connection requests
+  const handleAcceptConnection = (connectionId: number) => {
+    setConnectionsState(prev => 
+      prev.map(conn => 
+        conn.id === connectionId 
+          ? { ...conn, status: "connected", direction: undefined }
+          : conn
+      )
+    )
+  }
+
+  const handleDeclineConnection = (connectionId: number) => {
+    setConnectionsState(prev => 
+      prev.filter(conn => conn.id !== connectionId)
+    )
+  }
+
+  const handleCancelRequest = (connectionId: number) => {
+    setConnectionsState(prev => 
+      prev.filter(conn => conn.id !== connectionId)
+    )
+  }
+
+  // Route to appropriate profile based on connection type
   const handleViewProfile = (connection: any) => {
-    // Route to personal profile using the contactPersonId
-    if (connection.contactPersonId) {
-      router.push(`/screens/general/person-profile?id=${connection.contactPersonId}`)
+    try {
+      if (connection.type === 'allocator') {
+        router.push(`/screens/general/allocator-profile?id=${connection.id}`)
+      } else if (connection.type === 'manager') {
+        router.push(`/screens/general/manager-profile?id=${connection.id}`)
+      } else if (connection.type === 'consultant') {
+        router.push(`/screens/general/consultant-profile?id=${connection.id}`)
+      } else {
+        console.error('Unknown connection type:', connection.type)
+      }
+    } catch (error) {
+      console.error('Error navigating to profile:', error)
+      // Fallback to a safe route
+      router.push('/screens/general/connection-center')
     }
   }
 
@@ -126,100 +270,6 @@ export default function ConnectionCenterPage() {
       setMeetingSuccess(false)
     }, 1500)
   }
-
-  // Sample connections data - UPDATED with personal contact information
-  const connections = [
-    {
-      id: 1,
-      name: "Foundation Investments",
-      contactPerson: "Sarah Johnson", // Added personal contact
-      contactPersonId: "sarah-johnson", // Added for routing
-      type: "allocator",
-      logo: "/FI_logo.png",
-      category: "Foundation",
-      location: "New York, NY",
-      aum: "$15B+",
-      focus: ["Private Equity", "Hedge Funds", "Real Estate"],
-      status: "connected",
-      lastInteraction: "May 10, 2025",
-    },
-    {
-      id: 2,
-      name: "State Pension Fund",
-      contactPerson: "Michael Chen", // Added personal contact
-      contactPersonId: "michael-chen", // Added for routing
-      type: "allocator",
-      logo: "/trp-symbol.png",
-      category: "Pension",
-      location: "Boston, MA",
-      aum: "$75B+",
-      focus: ["Fixed Income", "Public Equities", "Alternatives"],
-      status: "connected",
-      lastInteraction: "May 5, 2025",
-    },
-    {
-      id: 6,
-      name: "Quantum Capital Partners",
-      contactPerson: "James Wilson", // Added personal contact
-      contactPersonId: "james-wilson", // Added for routing
-      type: "manager",
-      logo: "/stylized-wm.png",
-      category: "Hedge Fund",
-      location: "New York, NY",
-      aum: "$2.5B+",
-      focus: ["Global Macro", "Fixed Income", "Currencies"],
-      status: "connected",
-      lastInteraction: "May 8, 2025",
-    },
-    {
-      id: 9,
-      name: "Cambridge Associates",
-      contactPerson: "David Kim", // Added personal contact
-      contactPersonId: "david-kim", // Added for routing
-      type: "consultant",
-      logo: "/abstract-profile.png",
-      category: "Investment Consultant",
-      location: "Boston, MA",
-      clientCount: "450+",
-      yearsInBusiness: 50,
-      services: ["Manager Selection", "Asset Allocation", "Portfolio Construction"],
-      specializations: ["Endowments", "Foundations", "Pensions"],
-      status: "connected",
-      lastInteraction: "May 7, 2025",
-    },
-    {
-      id: 14,
-      name: "Healthcare Investment Group",
-      contactPerson: "Lisa Rodriguez", // Added personal contact
-      contactPersonId: "lisa-rodriguez", // Added for routing
-      type: "manager",
-      logo: "/medical-resonance-image.png",
-      category: "Sector Specialist",
-      location: "Boston, MA",
-      aum: "$3.2B+",
-      focus: ["Healthcare", "Biotechnology", "Medical Devices"],
-      status: "pending",
-      direction: "incoming",
-      lastInteraction: "May 12, 2025",
-    },
-    {
-      id: 15,
-      name: "Strategic Advisory Partners",
-      contactPerson: "Emily Zhang", // Added personal contact
-      contactPersonId: "emily-zhang", // Added for routing
-      type: "consultant",
-      logo: "/abstract-profile.png",
-      category: "Boutique Consultant",
-      location: "Chicago, IL",
-      clientCount: "150+",
-      yearsInBusiness: 25,
-      services: ["Due Diligence", "Manager Selection", "Risk Assessment"],
-      specializations: ["Alternative Investments", "Private Markets", "ESG"],
-      status: "pending",
-      direction: "incoming",
-      lastInteraction: "May 11, 2025",
-    },
-  ]
 
   // Mock search results for Vestira users
   const mockSearchResults = [
@@ -315,6 +365,22 @@ export default function ConnectionCenterPage() {
     "Global Consultant",
     "Investment Advisory",
     "Boutique Consultant",
+    "Insurance",
+  ]
+
+  const companyOptions = [
+    "Sovereign Wealth Fund",
+    "Global Pension Alliance",
+    "University Endowment Foundation",
+    "Quantum Capital Partners",
+    "Cambridge Associates",
+    "Strategic Investment Advisors",
+    "Event Management Solutions",
+    "Metropolitan Pension Fund",
+    "Apex Capital Management",
+    "Strategic Investment Consultants",
+    "National Insurance Corp",
+    "Municipal Retirement Fund",
   ]
 
   const sizeOptions = ["Under $1B", "$1B - $5B", "$5B - $25B", "$25B - $100B", "Over $100B"]
@@ -322,14 +388,15 @@ export default function ConnectionCenterPage() {
   const categories = ["All", "Allocator", "Manager", "Consultant"]
 
   // Get unique values for filters
-  const locations = Array.from(new Set(connections.map((conn) => conn.location)))
-  const companyTypes = Array.from(new Set(connections.map((conn) => conn.category)))
+  const locations = Array.from(new Set(connectionsState.map((conn) => conn.location)))
+  const companyTypes = Array.from(new Set(connectionsState.map((conn) => conn.category)))
 
   // Count active filters
   const activeFilterCount =
     filters.focusAreas.length +
     filters.locations.length +
     filters.companyTypes.length +
+    filters.companies.length +
     filters.sizes.length +
     filters.statuses.length +
     (selectedCategory !== "All" ? 1 : 0)
@@ -348,12 +415,12 @@ export default function ConnectionCenterPage() {
   }
 
   // Filter connections based on search query and selected filters
-  const filteredConnections = connections.filter((connection) => {
-    // Filter by search query
+  const filteredConnections = connectionsState.filter((connection) => {
+    // Filter by search query - prioritize contact person search
     if (searchQuery) {
       const searchLower = searchQuery.toLowerCase()
-      const nameMatch = connection.name.toLowerCase().includes(searchLower)
       const contactMatch = connection.contactPerson.toLowerCase().includes(searchLower)
+      const nameMatch = connection.name.toLowerCase().includes(searchLower)
       const categoryMatch = connection.category.toLowerCase().includes(searchLower)
       const locationMatch = connection.location.toLowerCase().includes(searchLower)
 
@@ -371,8 +438,8 @@ export default function ConnectionCenterPage() {
         (connection as any).services?.some((s: string) => s.toLowerCase().includes(searchLower))
 
       if (
-        !nameMatch &&
         !contactMatch &&
+        !nameMatch &&
         !categoryMatch &&
         !locationMatch &&
         !focusMatch &&
@@ -393,6 +460,8 @@ export default function ConnectionCenterPage() {
 
     const matchesCompanyType = filters.companyTypes.length === 0 || filters.companyTypes.includes(connection.category)
 
+    const matchesCompany = filters.companies.length === 0 || filters.companies.includes(connection.name)
+
     const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(connection.status)
 
     // Size filter
@@ -403,7 +472,7 @@ export default function ConnectionCenterPage() {
       return filters.sizes.includes(connectionSize)
     })()
 
-    return matchesCategory && matchesFocusArea && matchesLocation && matchesCompanyType && matchesStatus && matchesSize
+    return matchesCategory && matchesFocusArea && matchesLocation && matchesCompanyType && matchesCompany && matchesStatus && matchesSize
   })
 
   // Sort connections
@@ -428,6 +497,7 @@ export default function ConnectionCenterPage() {
       focusAreas: [],
       locations: [],
       companyTypes: [],
+      companies: [],
       sizes: [],
       statuses: [],
     })
@@ -471,6 +541,8 @@ export default function ConnectionCenterPage() {
 
     filters.companyTypes.forEach((type) => active.push({ type: "companyTypes", value: type, label: `Type: ${type}` }))
 
+    filters.companies.forEach((company) => active.push({ type: "companies", value: company, label: `Company: ${company}` }))
+
     filters.sizes.forEach((size) => active.push({ type: "sizes", value: size, label: `Size: ${size}` }))
 
     filters.statuses.forEach((status) => active.push({ type: "statuses", value: status, label: `Status: ${status}` }))
@@ -479,9 +551,9 @@ export default function ConnectionCenterPage() {
   }
 
   // Count connections by type
-  const allocatorCount = connections.filter((c) => c.type === "allocator").length
-  const managerCount = connections.filter((c) => c.type === "manager").length
-  const consultantCount = connections.filter((c) => c.type === "consultant").length
+  const allocatorCount = connectionsState.filter((c) => c.type === "allocator").length
+  const managerCount = connectionsState.filter((c) => c.type === "manager").length
+  const consultantCount = connectionsState.filter((c) => c.type === "consultant").length
 
   const renderConnectionCard = (connection: any) => {
     const headerColor =
@@ -508,8 +580,8 @@ export default function ConnectionCenterPage() {
                 <AvatarFallback>{connection.name.split(" ").map((n) => n[0])}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-medium text-base leading-tight">{connection.name}</h3>
-                <p className="text-sm text-gray-600">{connection.contactPerson}</p>
+                <h3 className="font-medium text-base leading-tight">{connection.contactPerson}</h3>
+                <p className="text-sm text-gray-600">{connection.name}</p>
                 <div className="flex items-center mt-2">
                   <Badge className={typeBadgeClass}>{typeLabel}</Badge>
                   <Badge
@@ -746,7 +818,7 @@ export default function ConnectionCenterPage() {
                 <div className="flex-1 relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search connections..."
+                    placeholder="Search contacts or companies..."
                     className="pl-10"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -859,6 +931,34 @@ export default function ConnectionCenterPage() {
                             />
                             <Label htmlFor={`companytype-${type}`} className="text-sm">
                               {type}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Company Filter */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Company</Label>
+                      <div className="space-y-2 max-h-24 overflow-y-auto border rounded p-2 bg-white">
+                        {companyOptions.map((company) => (
+                          <div key={company} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`company-${company}`}
+                              checked={filters.companies.includes(company)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setFilters((prev) => ({ ...prev, companies: [...prev.companies, company] }))
+                                } else {
+                                  setFilters((prev) => ({
+                                    ...prev,
+                                    companies: prev.companies.filter((c) => c !== company),
+                                  }))
+                                }
+                              }}
+                            />
+                            <Label htmlFor={`company-${company}`} className="text-sm">
+                              {company}
                             </Label>
                           </div>
                         ))}
@@ -1063,8 +1163,8 @@ export default function ConnectionCenterPage() {
                                     <AvatarFallback>{connection.name.split(" ").map((n) => n[0])}</AvatarFallback>
                                   </Avatar>
                                   <div>
-                                    <h3 className="font-medium">{connection.name}</h3>
-                                    <p className="text-sm text-gray-600">{connection.contactPerson}</p>
+                                    <h3 className="font-medium">{connection.contactPerson}</h3>
+                                    <p className="text-sm text-gray-600">{connection.name}</p>
                                     <div className="flex items-center mt-1">
                                       <Badge
                                         className={
@@ -1105,11 +1205,16 @@ export default function ConnectionCenterPage() {
                                     variant="outline"
                                     size="sm"
                                     className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+                                    onClick={() => handleDeclineConnection(connection.id)}
                                   >
                                     <X className="h-3 w-3 mr-1" />
                                     Decline
                                   </Button>
-                                  <Button size="sm" className="bg-electric-blue hover:bg-electric-blue/90 text-white">
+                                  <Button 
+                                    size="sm" 
+                                    className="bg-electric-blue hover:bg-electric-blue/90 text-white"
+                                    onClick={() => handleAcceptConnection(connection.id)}
+                                  >
                                     <Check className="h-3 w-3 mr-1" />
                                     Accept
                                   </Button>
@@ -1144,8 +1249,8 @@ export default function ConnectionCenterPage() {
                                     <AvatarFallback>{connection.name.split(" ").map((n) => n[0])}</AvatarFallback>
                                   </Avatar>
                                   <div>
-                                    <h3 className="font-medium">{connection.name}</h3>
-                                    <p className="text-sm text-gray-600">{connection.contactPerson}</p>
+                                    <h3 className="font-medium">{connection.contactPerson}</h3>
+                                    <p className="text-sm text-gray-600">{connection.name}</p>
                                     <div className="flex items-center mt-1">
                                       <Badge
                                         className={
@@ -1184,6 +1289,7 @@ export default function ConnectionCenterPage() {
                                     variant="outline"
                                     size="sm"
                                     className="text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
+                                    onClick={() => handleCancelRequest(connection.id)}
                                   >
                                     <X className="h-3 w-3 mr-1" />
                                     Cancel
@@ -1393,7 +1499,7 @@ export default function ConnectionCenterPage() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="strategy">Strategy/Fund (Optional)</Label>
+                <Label htmlFor="strategy">Purpose of Meeting (Optional)</Label>
                 <Input
                   id="strategy"
                   placeholder="e.g., Global Equity Fund, Fixed Income Strategy"
@@ -1455,7 +1561,7 @@ export default function ConnectionCenterPage() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="meetingStrategy">Strategy/Fund (Optional)</Label>
+                <Label htmlFor="meetingStrategy">Purpose of Meeting (Optional)</Label>
                 <Input
                   id="meetingStrategy"
                   placeholder="e.g., Global Equity Fund, Fixed Income Strategy"
@@ -1488,7 +1594,7 @@ export default function ConnectionCenterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="meetingNotes">Meeting Notes (Optional)</Label>
+                <Label htmlFor="meetingNotes">Additional Information (Optional)</Label>
                 <Textarea
                   id="meetingNotes"
                   placeholder="Add any notes or agenda items for the meeting..."

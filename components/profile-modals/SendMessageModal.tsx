@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,7 @@ interface SendMessageModalProps {
   recipientName: string
   recipientTitle?: string
   organizationName: string
+  contactSelector?: React.ReactNode
 }
 
 export function SendMessageModal({
@@ -23,6 +24,7 @@ export function SendMessageModal({
   recipientName,
   recipientTitle,
   organizationName,
+  contactSelector,
 }: SendMessageModalProps) {
   const [subject, setSubject] = useState("")
   const [message, setMessage] = useState("")
@@ -61,19 +63,23 @@ export function SendMessageModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="text-sm text-gray-600">
-            <div className="flex items-center gap-2 mb-1">
-              <Building2 className="h-4 w-4 text-gray-500" />
-              <span className="font-medium text-deepBrand">{organizationName}</span>
+          {contactSelector ? (
+            contactSelector
+          ) : (
+            <div className="text-sm text-gray-600">
+              <div className="flex items-center gap-2 mb-1">
+                <Building2 className="h-4 w-4 text-gray-500" />
+                <span className="font-medium text-deepBrand">{organizationName}</span>
+              </div>
+              <div className="ml-6">
+                Send a message to{" "}
+                <span className="font-medium">
+                  {recipientName}
+                  {recipientTitle && ` • ${recipientTitle}`}
+                </span>
+              </div>
             </div>
-            <div className="ml-6">
-              Send a message to{" "}
-              <span className="font-medium">
-                {recipientName}
-                {recipientTitle && ` • ${recipientTitle}`}
-              </span>
-            </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">

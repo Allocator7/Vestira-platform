@@ -1,11 +1,17 @@
 "use client"
 
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic'
+
 import { Screen } from "../../../../components/Screen"
 import { Badge } from "../../../../components/ui/badge"
 import { Button } from "../../../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../../../components/ui/card"
 import { Separator } from "../../../../components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../../components/ui/select"
+import { Checkbox } from "../../../../components/ui/checkbox"
+import { Label } from "../../../../components/ui/label"
 import {
   ArrowUpRight,
   Calendar,
@@ -18,6 +24,7 @@ import {
   Share2,
   Star,
   Users,
+  ChevronDown,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -36,7 +43,34 @@ export default function ManagerProfilePage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isStarred, setIsStarred] = useState(false)
   const [connectingUsers, setConnectingUsers] = useState<string[]>([])
+  const [selectedMessageContacts, setSelectedMessageContacts] = useState<string[]>([])
+  const [selectedScheduleContacts, setSelectedScheduleContacts] = useState<string[]>([])
   const { toast } = useToast()
+
+  // Mock contacts data for BlackRock
+  const managerContacts = [
+    {
+      id: "1",
+      name: "Robert Williams",
+      title: "Chief Investment Officer",
+      email: "robert.williams@blackrock.com",
+      role: "Primary Contact"
+    },
+    {
+      id: "2", 
+      name: "James Thompson",
+      title: "Client Relationship Manager",
+      email: "james.thompson@blackrock.com",
+      role: "Client Relations"
+    },
+    {
+      id: "3",
+      name: "Lisa Parker", 
+      title: "Investment Specialist",
+      email: "lisa.parker@blackrock.com",
+      role: "Investment Team"
+    }
+  ]
 
   const managerInfo = {
     name: "BlackRock",
@@ -66,11 +100,52 @@ export default function ManagerProfilePage() {
     }, 1000)
   }
 
-  const handleDownloadDocument = (documentName: string) => {
-    toast({
-      title: "Download Started",
-      description: `Downloading ${documentName}...`,
-    })
+  const handleSendMessage = () => {
+    setSelectedMessageContacts([managerContacts[0].id])
+    setIsMessageModalOpen(true)
+  }
+
+  const handleScheduleMeeting = () => {
+    setSelectedScheduleContacts([managerContacts[0].id])
+    setIsMeetingModalOpen(true)
+  }
+
+  const handleDownloadDocument = async (documentName: string) => {
+    try {
+      // Determine document type based on name
+      let documentType = 'general'
+      if (documentName.includes('Firm Overview')) documentType = 'firm overview'
+      else if (documentName.includes('ESG')) documentType = 'esg policy'
+      else if (documentName.includes('Annual Report')) documentType = 'annual report'
+      else if (documentName.includes('Corporate Responsibility')) documentType = 'annual report'
+
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      await downloadUtils.downloadDocument(documentName, documentType, {
+        onComplete: () => {
+          toast({
+            title: "Download Complete",
+            description: `${documentName} has been downloaded successfully.`,
+          })
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          toast({
+            title: "Download Failed",
+            description: "There was an error downloading the document. Please try again.",
+            variant: "destructive",
+          })
+        }
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the document. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -131,23 +206,23 @@ export default function ManagerProfilePage() {
                 <Separator />
 
                 <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Key Information</h3>
+                  <h3 className="text-sm font-medium">Key Metrics</h3>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="text-xs text-muted-foreground">AUM</p>
-                      <p className="text-sm font-medium">$9.5 Trillion</p>
+                      <p className="text-xs text-muted-foreground"># of Clients</p>
+                      <p className="text-sm font-medium">2,500+</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Active Funds</p>
+                      <p className="text-sm font-medium">150+</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Minimum SMA Size</p>
+                      <p className="text-sm font-medium">$50M</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Founded</p>
                       <p className="text-sm font-medium">1988</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Headquarters</p>
-                      <p className="text-sm font-medium">New York, NY</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Employees</p>
-                      <p className="text-sm font-medium">18,000+</p>
                     </div>
                   </div>
                 </div>
@@ -167,14 +242,14 @@ export default function ManagerProfilePage() {
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                  <Button className="w-full" onClick={() => setIsMessageModalOpen(true)}>
+                  <Button className="w-full" onClick={handleSendMessage}>
                     <MessageSquare className="mr-2 h-4 w-4" />
                     Message
                   </Button>
                   <Button
                     variant="outline"
                     className="w-full bg-transparent"
-                    onClick={() => setIsMeetingModalOpen(true)}
+                    onClick={handleScheduleMeeting}
                   >
                     <Calendar className="mr-2 h-4 w-4" />
                     Schedule Meeting
@@ -191,11 +266,10 @@ export default function ManagerProfilePage() {
           {/* Manager Details */}
           <div className="w-full md:w-2/3 space-y-6">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="team">Team</TabsTrigger>
-                <TabsTrigger value="documents">Documents</TabsTrigger>
-                <TabsTrigger value="activity">Activity</TabsTrigger>
+              <TabsList className="flex w-full" style={{ width: '100%' }}>
+                <TabsTrigger value="overview" className="flex-1" style={{ flex: '1 1 0%' }}>Overview</TabsTrigger>
+                <TabsTrigger value="team" className="flex-1" style={{ flex: '1 1 0%' }}>Team</TabsTrigger>
+                <TabsTrigger value="documents" className="flex-1" style={{ flex: '1 1 0%' }}>Documents</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6 pt-4">
@@ -596,66 +670,6 @@ export default function ManagerProfilePage() {
                   </CardContent>
                 </Card>
               </TabsContent>
-
-              <TabsContent value="activity" className="pt-4">
-                <Card className="vestira-card-minimal">
-                  <CardHeader>
-                    <CardTitle>Recent Activity</CardTitle>
-                    <CardDescription>Latest document and data room activity</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Document Viewed</p>
-                          <p className="text-xs text-muted-foreground">
-                            "Global Equity Fund - Q2 2023 Performance Report"
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                          <FolderOpen className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Data Room Accessed</p>
-                          <p className="text-xs text-muted-foreground">"Global Equity Fund" data room</p>
-                          <p className="text-xs text-muted-foreground mt-1">1 week ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                          <FileText className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Document Downloaded</p>
-                          <p className="text-xs text-muted-foreground">
-                            "ESG Integration: Best Practices for Institutional Investors"
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">2 weeks ago</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-4">
-                        <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                          <FolderOpen className="h-5 w-5 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">Data Room Accessed</p>
-                          <p className="text-xs text-muted-foreground">"Sustainable Fixed Income" data room</p>
-                          <p className="text-xs text-muted-foreground mt-1">1 month ago</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
             </Tabs>
           </div>
         </div>
@@ -665,15 +679,105 @@ export default function ManagerProfilePage() {
       <SendMessageModal
         isOpen={isMessageModalOpen}
         onClose={() => setIsMessageModalOpen(false)}
-        recipientName={managerInfo.primaryContact}
-        recipientEmail={managerInfo.email}
+        recipientName={selectedMessageContacts.length > 0 ? managerContacts.find(c => c.id === selectedMessageContacts[0])?.name || managerInfo.primaryContact : managerInfo.primaryContact}
+        recipientEmail={selectedMessageContacts.length > 0 ? managerContacts.find(c => c.id === selectedMessageContacts[0])?.email || managerInfo.email : managerInfo.email}
+        organizationName={managerInfo.name}
+        contactSelector={
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Contacts</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="select-all-message"
+                  checked={selectedMessageContacts.length === managerContacts.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedMessageContacts(managerContacts.map(c => c.id))
+                    } else {
+                      setSelectedMessageContacts([])
+                    }
+                  }}
+                />
+                <Label htmlFor="select-all-message" className="font-medium">Select All Contacts</Label>
+              </div>
+              <div className="border-t pt-2">
+                {managerContacts.map((contact) => (
+                  <div key={contact.id} className="flex items-start space-x-2 py-2">
+                    <Checkbox
+                      id={`message-contact-${contact.id}`}
+                      checked={selectedMessageContacts.includes(contact.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedMessageContacts(prev => [...prev, contact.id])
+                        } else {
+                          setSelectedMessageContacts(prev => prev.filter(id => id !== contact.id))
+                        }
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor={`message-contact-${contact.id}`} className="text-sm font-medium cursor-pointer">
+                        {contact.name}
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-0.5">{contact.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        }
       />
 
       <ScheduleMeetingModal
         isOpen={isMeetingModalOpen}
         onClose={() => setIsMeetingModalOpen(false)}
-        recipientName={managerInfo.primaryContact}
-        recipientEmail={managerInfo.email}
+        recipientName={selectedScheduleContacts.length > 0 ? managerContacts.find(c => c.id === selectedScheduleContacts[0])?.name || managerInfo.primaryContact : managerInfo.primaryContact}
+        recipientEmail={selectedScheduleContacts.length > 0 ? managerContacts.find(c => c.id === selectedScheduleContacts[0])?.email || managerInfo.email : managerInfo.email}
+        organizationName={managerInfo.name}
+        contactSelector={
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Select Contacts</label>
+            <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="select-all-schedule"
+                  checked={selectedScheduleContacts.length === managerContacts.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      setSelectedScheduleContacts(managerContacts.map(c => c.id))
+                    } else {
+                      setSelectedScheduleContacts([])
+                    }
+                  }}
+                />
+                <Label htmlFor="select-all-schedule" className="font-medium">Select All Contacts</Label>
+              </div>
+              <div className="border-t pt-2">
+                {managerContacts.map((contact) => (
+                  <div key={contact.id} className="flex items-start space-x-2 py-2">
+                    <Checkbox
+                      id={`schedule-contact-${contact.id}`}
+                      checked={selectedScheduleContacts.includes(contact.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedScheduleContacts(prev => [...prev, contact.id])
+                        } else {
+                          setSelectedScheduleContacts(prev => prev.filter(id => id !== contact.id))
+                        }
+                      }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <Label htmlFor={`schedule-contact-${contact.id}`} className="text-sm font-medium cursor-pointer">
+                        {contact.name}
+                      </Label>
+                      <p className="text-xs text-gray-500 mt-0.5">{contact.title}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        }
       />
 
       <ShareProfileModal

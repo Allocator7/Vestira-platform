@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Screen } from "@/components/Screen"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -46,6 +46,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function AllocatorProfilePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const allocatorId = searchParams.get("id")
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
@@ -54,6 +55,9 @@ export default function AllocatorProfilePage() {
   const [showShareModal, setShowShareModal] = useState(false)
   const [showMessageModal, setShowMessageModal] = useState(false)
   const [showScheduleModal, setShowScheduleModal] = useState(false)
+  const [selectedContact, setSelectedContact] = useState<any>(null)
+  const [showContactSelector, setShowContactSelector] = useState(false)
+  const [selectedAction, setSelectedAction] = useState<'message' | 'schedule' | null>(null)
 
   // Share modal states
   const [shareEmail, setShareEmail] = useState("")
@@ -81,65 +85,65 @@ export default function AllocatorProfilePage() {
   const allocatorProfiles = {
     1: {
       // Firm Information (Primary)
-      firmName: "State Teachers Pension",
-      organizationType: "Public Pension",
-      location: "Boston, MA",
-      website: "https://stateteacherspension.gov",
-      aum: "$45B",
-      founded: "1965",
-      yearsInBusiness: 59,
-      focus: ["Private Equity", "Growth Equity", "Real Estate Equity", "ESG"],
+      firmName: "Sovereign Wealth Fund",
+      organizationType: "Sovereign Wealth Fund",
+      location: "Singapore",
+      website: "https://swf.gov.sg",
+      aum: "$320B",
+      founded: "1974",
+      yearsInBusiness: 50,
+      focus: ["Alternative Assets", "Global Markets", "Long-term"],
       about:
-        "State Teachers Pension is a leading public pension fund with over 59 years of experience managing retirement assets for educators. The fund specializes in alternative investments and ESG integration, overseeing a diverse portfolio of private equity and real estate investments with a focus on long-term value creation.",
+        "Leading sovereign wealth fund focused on long-term value creation and sustainable investment strategies across global markets. With over 50 years of experience, we manage diverse portfolios across private equity, real estate, infrastructure, and hedge funds.",
       keyMetrics: {
-        totalAllocations: "$45B",
-        activeManagers: 67,
-        portfolioCompanies: 234,
-        geographicFocus: ["North America", "Europe"],
+        totalAllocations: "$320B",
+        activeManagers: 150,
+        portfolioCompanies: 500,
+        geographicFocus: ["Global", "Asia-Pacific", "North America"],
       },
       allocationTargets: {
-        alternatives: "25%",
-        fixedIncome: "35%",
-        publicEquity: "30%",
+        alternatives: "40%",
+        fixedIncome: "25%",
+        publicEquity: "25%",
         realEstate: "10%",
       },
       // Individual Contacts (Secondary)
       contacts: [
         {
           id: "1",
-          name: "Sarah Johnson",
-          title: "Investment Director",
-          email: "s.johnson@stpension.gov",
-          phone: "+1 (617) 555-0123",
+          name: "Sarah Chen",
+          title: "Chief Investment Officer",
+          email: "sarah@swf.gov.sg",
+          phone: "+65 6123 4567",
           avatar: "/placeholder-user.jpg",
-          experience: "15 years",
+          experience: "20 years",
           isPrimary: true,
         },
         {
           id: "2",
-          name: "Michael Thompson",
-          title: "Senior Portfolio Manager",
-          email: "m.thompson@stpension.gov",
-          phone: "+1 (617) 555-0124",
+          name: "Michael Torres",
+          title: "Managing Director",
+          email: "michael@swf.gov.sg",
+          phone: "+65 6123 4568",
           avatar: "/placeholder-user.jpg",
-          experience: "12 years",
+          experience: "15 years",
           isPrimary: false,
         },
         {
           id: "3",
-          name: "Jennifer Lee",
-          title: "Alternative Investments Analyst",
-          email: "j.lee@stpension.gov",
-          phone: "+1 (617) 555-0125",
+          name: "David Kim",
+          title: "Senior Vice President",
+          email: "david@swf.gov.sg",
+          phone: "+65 6123 4569",
           avatar: "/placeholder-user.jpg",
-          experience: "8 years",
+          experience: "12 years",
           isPrimary: false,
         },
       ],
       recentActivity: [
         {
           date: "2024-01-15",
-          activity: "Committed $100M to Infrastructure Fund V",
+          activity: "Committed $500M to Global Infrastructure Fund",
           type: "Investment",
         },
         {
@@ -150,6 +154,228 @@ export default function AllocatorProfilePage() {
         {
           date: "2024-01-02",
           activity: "Board approved new alternative investment policy",
+          type: "Policy",
+        },
+      ],
+      investments: [
+        {
+          manager: "Global Infrastructure Partners",
+          strategy: "Infrastructure Equity",
+          commitment: "$500M",
+          vintage: "2023",
+          status: "Active",
+        },
+        {
+          manager: "Real Estate Ventures",
+          strategy: "Core Real Estate",
+          commitment: "$300M",
+          vintage: "2023",
+          status: "Active",
+        },
+      ],
+      documents: [
+        {
+          id: "doc1",
+          name: "Investment Policy Statement",
+          type: "Policy",
+          category: "Investment Policy",
+          size: "2.1 MB",
+          lastModified: "2024-01-15",
+          status: "Active",
+        },
+        {
+          id: "doc2",
+          name: "ESG Integration Report",
+          type: "Report",
+          category: "ESG",
+          size: "1.8 MB",
+          lastModified: "2024-01-10",
+          status: "Active",
+        },
+      ],
+    },
+    2: {
+      // Firm Information (Primary)
+      firmName: "Global Pension Alliance",
+      organizationType: "Pension Fund",
+      location: "Toronto, CA",
+      website: "https://gpa.ca",
+      aum: "$180B",
+      founded: "1965",
+      yearsInBusiness: 58,
+      focus: ["Private Markets & Real Assets"],
+      about:
+        "Multi-employer pension plan serving public sector employees with focus on liability-driven investment and risk management. We specialize in private equity, infrastructure, and real estate investments.",
+      keyMetrics: {
+        totalAllocations: "$180B",
+        activeManagers: 85,
+        portfolioCompanies: 300,
+        geographicFocus: ["North America", "Europe"],
+      },
+      allocationTargets: {
+        alternatives: "30%",
+        fixedIncome: "40%",
+        publicEquity: "20%",
+        realEstate: "10%",
+      },
+      // Individual Contacts (Secondary)
+      contacts: [
+        {
+          id: "1",
+          name: "Jennifer Park",
+          title: "Head of Alternatives",
+          email: "jennifer@gpa.ca",
+          phone: "+1 (416) 555-0123",
+          avatar: "/placeholder-user.jpg",
+          experience: "18 years",
+          isPrimary: true,
+        },
+        {
+          id: "2",
+          name: "Lisa Wang",
+          title: "Portfolio Manager",
+          email: "lisa@gpa.ca",
+          phone: "+1 (416) 555-0124",
+          avatar: "/placeholder-user.jpg",
+          experience: "14 years",
+          isPrimary: false,
+        },
+        {
+          id: "3",
+          name: "Robert Chen",
+          title: "Investment Director",
+          email: "robert@gpa.ca",
+          phone: "+1 (416) 555-0125",
+          avatar: "/placeholder-user.jpg",
+          experience: "16 years",
+          isPrimary: false,
+        },
+      ],
+      recentActivity: [
+        {
+          date: "2024-01-15",
+          activity: "Committed $200M to Infrastructure Fund",
+          type: "Investment",
+        },
+        {
+          date: "2024-01-08",
+          activity: "Completed risk assessment review",
+          type: "Review",
+        },
+        {
+          date: "2024-01-02",
+          activity: "Board approved new real estate strategy",
+          type: "Policy",
+        },
+      ],
+      investments: [
+        {
+          manager: "Infrastructure Capital",
+          strategy: "Infrastructure Debt",
+          commitment: "$200M",
+          vintage: "2023",
+          status: "Active",
+        },
+        {
+          manager: "Real Estate Partners",
+          strategy: "Real Estate Equity",
+          commitment: "$150M",
+          vintage: "2023",
+          status: "Active",
+        },
+      ],
+      documents: [
+        {
+          id: "doc1",
+          name: "Pension Fund Policy",
+          type: "Policy",
+          category: "Investment Policy",
+          size: "1.9 MB",
+          lastModified: "2024-01-15",
+          status: "Active",
+        },
+        {
+          id: "doc2",
+          name: "Risk Assessment Report",
+          type: "Report",
+          category: "Risk Management",
+          size: "2.3 MB",
+          lastModified: "2024-01-10",
+          status: "Active",
+        },
+      ],
+    },
+    3: {
+      // Firm Information (Primary)
+      firmName: "University Endowment Foundation",
+      organizationType: "Endowment",
+      location: "Boston, MA",
+      website: "https://uef.edu",
+      aum: "$45B",
+      founded: "1636",
+      yearsInBusiness: 387,
+      focus: ["Alternative Investments"],
+      about:
+        "Prestigious university endowment with innovative investment approach and strong focus on venture capital and emerging managers. We have a long history of pioneering investment strategies.",
+      keyMetrics: {
+        totalAllocations: "$45B",
+        activeManagers: 120,
+        portfolioCompanies: 400,
+        geographicFocus: ["Global", "North America"],
+      },
+      allocationTargets: {
+        alternatives: "50%",
+        fixedIncome: "15%",
+        publicEquity: "25%",
+        realEstate: "10%",
+      },
+      // Individual Contacts (Secondary)
+      contacts: [
+        {
+          id: "1",
+          name: "Alex Kim",
+          title: "Chief Investment Officer",
+          email: "alex@uef.edu",
+          phone: "+1 (617) 555-0123",
+          avatar: "/placeholder-user.jpg",
+          experience: "22 years",
+          isPrimary: true,
+        },
+        {
+          id: "2",
+          name: "Maria Rodriguez",
+          title: "Principal",
+          email: "maria@uef.edu",
+          phone: "+1 (617) 555-0124",
+          avatar: "/placeholder-user.jpg",
+          experience: "18 years",
+          isPrimary: false,
+        },
+        {
+          id: "3",
+          name: "Thomas Mueller",
+          title: "Senior Investment Manager",
+          email: "thomas@uef.edu",
+          phone: "+1 (617) 555-0125",
+          avatar: "/placeholder-user.jpg",
+          experience: "15 years",
+          isPrimary: false,
+        },
+      ],
+      recentActivity: [
+        {
+          date: "2024-01-15",
+          activity: "Committed $50M to Venture Capital Fund",
+          type: "Investment",
+        },
+        {
+          date: "2024-01-08",
+          activity: "Completed emerging manager review",
+          type: "Review",
+        },
+        {
+          date: "2024-01-02",
+          activity: "Board approved new technology strategy",
           type: "Policy",
         },
       ],
@@ -197,411 +423,22 @@ export default function AllocatorProfilePage() {
         },
       ],
     },
-    2: {
-      firmName: "University Endowment Foundation",
-      organizationType: "Endowment",
-      location: "New Haven, CT",
-      website: "https://endowment.university.edu",
-      aum: "$12B",
-      founded: "1890",
-      yearsInBusiness: 134,
-      focus: ["Venture Capital", "Growth Equity", "ESG/Sustainable Equity", "Hedge Funds"],
-      about:
-        "University Endowment Foundation is one of the oldest and most prestigious university endowments in the United States. With over 134 years of investment experience, the fund focuses on long-term value creation through diversified alternative investment strategies and innovative approaches to portfolio management.",
-      keyMetrics: {
-        totalAllocations: "$12B",
-        activeManagers: 45,
-        portfolioCompanies: 156,
-        geographicFocus: ["Global"],
-      },
-      allocationTargets: {
-        alternatives: "40%",
-        fixedIncome: "20%",
-        publicEquity: "25%",
-        realEstate: "15%",
-      },
-      contacts: [
-        {
-          id: "1",
-          name: "Michael Chen",
-          title: "Portfolio Manager",
-          email: "r.chen@university.edu",
-          phone: "+1 (203) 555-0456",
-          avatar: "/placeholder-user.jpg",
-          experience: "20 years",
-          isPrimary: true,
-        },
-        {
-          id: "2",
-          name: "Amanda Foster",
-          title: "Director of Alternative Investments",
-          email: "a.foster@university.edu",
-          phone: "+1 (203) 555-0457",
-          avatar: "/placeholder-user.jpg",
-          experience: "16 years",
-          isPrimary: false,
-        },
-      ],
-      recentActivity: [
-        {
-          date: "2024-01-14",
-          activity: "Allocated $50M to venture capital fund",
-          type: "Investment",
-        },
-        {
-          date: "2024-01-07",
-          activity: "Published annual endowment report",
-          type: "Report",
-        },
-      ],
-      investments: [
-        {
-          manager: "Venture Dynamics",
-          strategy: "Early Stage VC",
-          commitment: "$30M",
-          vintage: "2023",
-          status: "Active",
-        },
-        {
-          manager: "Sustainable Equity Fund",
-          strategy: "ESG Equity",
-          commitment: "$25M",
-          vintage: "2022",
-          status: "Active",
-        },
-      ],
-      documents: [
-        {
-          id: "doc3",
-          name: "Endowment Annual Report 2023",
-          type: "Report",
-          category: "Performance Reports",
-          size: "8.7 MB",
-          lastModified: "2024-01-14",
-          status: "Published",
-        },
-      ],
-    },
-    3: {
-      firmName: "Global Insurance Group",
-      organizationType: "Insurance Company",
-      location: "New York, NY",
-      website: "https://globalinsurance.com",
-      aum: "$85B",
-      founded: "1952",
-      yearsInBusiness: 72,
-      focus: ["Investment Grade Corporate Bonds", "Direct Lending", "Private Fixed Income", "Real Estate Debt"],
-      about:
-        "Global Insurance Group is a leading insurance company with a sophisticated investment management division. With over 72 years of experience, the company specializes in liability-driven investing and fixed income strategies, managing one of the largest insurance investment portfolios globally.",
-      keyMetrics: {
-        totalAllocations: "$85B",
-        activeManagers: 89,
-        portfolioCompanies: 312,
-        geographicFocus: ["North America", "Europe"],
-      },
-      allocationTargets: {
-        alternatives: "20%",
-        fixedIncome: "60%",
-        publicEquity: "15%",
-        realEstate: "5%",
-      },
-      contacts: [
-        {
-          id: "1",
-          name: "Jennifer Rodriguez",
-          title: "Senior Investment Director",
-          email: "j.rodriguez@globalinsurance.com",
-          phone: "+1 (212) 555-0789",
-          avatar: "/placeholder-user.jpg",
-          experience: "18 years",
-          isPrimary: true,
-        },
-        {
-          id: "2",
-          name: "Thomas Wilson",
-          title: "Fixed Income Portfolio Manager",
-          email: "t.wilson@globalinsurance.com",
-          phone: "+1 (212) 555-0790",
-          avatar: "/placeholder-user.jpg",
-          experience: "14 years",
-          isPrimary: false,
-        },
-      ],
-      recentActivity: [
-        {
-          date: "2024-01-12",
-          activity: "Increased allocation to direct lending strategies",
-          type: "Investment",
-        },
-        {
-          date: "2024-01-05",
-          activity: "Completed quarterly portfolio rebalancing",
-          type: "Rebalancing",
-        },
-      ],
-      investments: [
-        {
-          manager: "Fixed Income Strategies",
-          strategy: "Investment Grade Bonds",
-          commitment: "$200M",
-          vintage: "2023",
-          status: "Active",
-        },
-        {
-          manager: "Direct Lending Partners",
-          strategy: "Direct Lending",
-          commitment: "$150M",
-          vintage: "2023",
-          status: "Active",
-        },
-      ],
-      documents: [],
-    },
-    4: {
-      firmName: "Sovereign Wealth Fund",
-      organizationType: "Sovereign Wealth Fund",
-      location: "Singapore",
-      website: "https://swf.gov.sg",
-      aum: "$320B",
-      founded: "1974",
-      yearsInBusiness: 50,
-      focus: ["Real Estate Equity", "Infrastructure Debt", "Private Equity", "Commodities"],
-      about:
-        "Sovereign Wealth Fund is one of the world's largest sovereign wealth funds, established to manage Singapore's foreign reserves. With 50 years of investment experience, the fund focuses on long-term value creation through diversified global investments in real estate, infrastructure, and alternative assets.",
-      keyMetrics: {
-        totalAllocations: "$320B",
-        activeManagers: 156,
-        portfolioCompanies: 445,
-        geographicFocus: ["Global", "Asia-Pacific", "North America", "Europe"],
-      },
-      allocationTargets: {
-        alternatives: "35%",
-        fixedIncome: "25%",
-        publicEquity: "30%",
-        realEstate: "10%",
-      },
-      contacts: [
-        {
-          id: "1",
-          name: "David Park",
-          title: "Managing Director",
-          email: "d.park@swf.gov.sg",
-          phone: "+65 6555-0123",
-          avatar: "/placeholder-user.jpg",
-          experience: "22 years",
-          isPrimary: true,
-        },
-        {
-          id: "2",
-          name: "Li Wei Chen",
-          title: "Head of Real Estate Investments",
-          email: "lw.chen@swf.gov.sg",
-          phone: "+65 6555-0124",
-          avatar: "/placeholder-user.jpg",
-          experience: "19 years",
-          isPrimary: false,
-        },
-        {
-          id: "3",
-          name: "Priya Sharma",
-          title: "Infrastructure Investment Director",
-          email: "p.sharma@swf.gov.sg",
-          phone: "+65 6555-0125",
-          avatar: "/placeholder-user.jpg",
-          experience: "15 years",
-          isPrimary: false,
-        },
-      ],
-      recentActivity: [
-        {
-          date: "2024-01-10",
-          activity: "Committed $500M to Asian infrastructure fund",
-          type: "Investment",
-        },
-        {
-          date: "2024-01-03",
-          activity: "Completed acquisition of European real estate portfolio",
-          type: "Investment",
-        },
-      ],
-      investments: [
-        {
-          manager: "Asia Infrastructure Partners",
-          strategy: "Infrastructure Debt",
-          commitment: "$300M",
-          vintage: "2023",
-          status: "Active",
-        },
-        {
-          manager: "Global Real Estate Ventures",
-          strategy: "Real Estate Equity",
-          commitment: "$250M",
-          vintage: "2023",
-          status: "Active",
-        },
-      ],
-      documents: [],
-    },
-    5: {
-      firmName: "Family Office Partners",
-      organizationType: "Family Office",
-      location: "San Francisco, CA",
-      website: "https://familyofficepartners.com",
-      aum: "$8B",
-      founded: "1995",
-      yearsInBusiness: 29,
-      focus: ["ESG/Sustainable Equity", "Venture Capital", "Growth Equity", "Impact Investing"],
-      about:
-        "Family Office Partners is a leading multi-family office serving ultra-high-net-worth families globally. With nearly 30 years of experience, the firm specializes in sustainable investing, venture capital, and innovative investment strategies that align with family values and long-term wealth preservation goals.",
-      keyMetrics: {
-        totalAllocations: "$8B",
-        activeManagers: 34,
-        portfolioCompanies: 89,
-        geographicFocus: ["North America", "Europe"],
-      },
-      allocationTargets: {
-        alternatives: "35%",
-        fixedIncome: "25%",
-        publicEquity: "30%",
-        realEstate: "10%",
-      },
-      contacts: [
-        {
-          id: "1",
-          name: "Lisa Thompson",
-          title: "Chief Investment Officer",
-          email: "l.thompson@familyofficepartners.com",
-          phone: "+1 (415) 555-0987",
-          avatar: "/placeholder-user.jpg",
-          experience: "17 years",
-          isPrimary: true,
-        },
-        {
-          id: "2",
-          name: "James Mitchell",
-          title: "Director of Sustainable Investing",
-          email: "j.mitchell@familyofficepartners.com",
-          phone: "+1 (415) 555-0988",
-          avatar: "/placeholder-user.jpg",
-          experience: "13 years",
-          isPrimary: false,
-        },
-      ],
-      recentActivity: [
-        {
-          date: "2024-01-08",
-          activity: "Launched new impact investing initiative",
-          type: "Investment",
-        },
-        {
-          date: "2023-12-28",
-          activity: "Committed to cleantech venture fund",
-          type: "Investment",
-        },
-      ],
-      investments: [
-        {
-          manager: "Sustainable Ventures",
-          strategy: "ESG Equity",
-          commitment: "$50M",
-          vintage: "2023",
-          status: "Active",
-        },
-        {
-          manager: "Impact Capital Partners",
-          strategy: "Impact Investing",
-          commitment: "$40M",
-          vintage: "2023",
-          status: "Active",
-        },
-      ],
-      documents: [],
-    },
-    6: {
-      firmName: "Healthcare Foundation",
-      organizationType: "Foundation",
-      location: "Chicago, IL",
-      website: "https://healthcarefoundation.org",
-      aum: "$3.5B",
-      founded: "1978",
-      yearsInBusiness: 46,
-      focus: ["Core Fixed Income", "Large Cap Equity", "Healthcare Sector", "Conservative Strategies"],
-      about:
-        "Healthcare Foundation is a leading philanthropic organization dedicated to improving healthcare outcomes through strategic investments and grants. With over 46 years of experience, the foundation maintains a conservative investment approach focused on capital preservation and steady returns to support its healthcare mission.",
-      keyMetrics: {
-        totalAllocations: "$3.5B",
-        activeManagers: 28,
-        portfolioCompanies: 67,
-        geographicFocus: ["North America"],
-      },
-      allocationTargets: {
-        alternatives: "15%",
-        fixedIncome: "50%",
-        publicEquity: "25%",
-        realEstate: "10%",
-      },
-      contacts: [
-        {
-          id: "1",
-          name: "Robert Williams",
-          title: "Investment Committee Chair",
-          email: "r.williams@healthcarefoundation.org",
-          phone: "+1 (312) 555-0654",
-          avatar: "/placeholder-user.jpg",
-          experience: "20 years",
-          isPrimary: true,
-        },
-        {
-          id: "2",
-          name: "Dr. Sarah Martinez",
-          title: "Chief Financial Officer",
-          email: "s.martinez@healthcarefoundation.org",
-          phone: "+1 (312) 555-0655",
-          avatar: "/placeholder-user.jpg",
-          experience: "16 years",
-          isPrimary: false,
-        },
-      ],
-      recentActivity: [
-        {
-          date: "2023-12-20",
-          activity: "Approved healthcare innovation grant program",
-          type: "Grant",
-        },
-        {
-          date: "2023-12-15",
-          activity: "Rebalanced fixed income portfolio",
-          type: "Rebalancing",
-        },
-      ],
-      investments: [
-        {
-          manager: "Fixed Income Strategies",
-          strategy: "Core Fixed Income",
-          commitment: "$100M",
-          vintage: "2023",
-          status: "Active",
-        },
-        {
-          manager: "Healthcare Equity Fund",
-          strategy: "Healthcare Sector",
-          commitment: "$75M",
-          vintage: "2022",
-          status: "Active",
-        },
-      ],
-      documents: [],
-    },
   }
 
   const [allocator, setAllocator] = useState<any>(null)
 
   useEffect(() => {
     if (allocatorId) {
-      const profile = allocatorProfiles[Number(allocatorId) as keyof typeof allocatorProfiles]
-      if (profile) {
-        setAllocator(profile)
-        setShareMessage(`I wanted to share ${profile.firmName}'s profile with you.`)
+      try {
+        const profile = allocatorProfiles[Number(allocatorId) as keyof typeof allocatorProfiles]
+        if (profile) {
+          setAllocator(profile)
+          setShareMessage(`I wanted to share ${profile.firmName}'s profile with you.`)
+        } else {
+          console.error('Profile not found for ID:', allocatorId)
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error)
       }
     }
   }, [allocatorId])
@@ -700,6 +537,27 @@ export default function AllocatorProfilePage() {
     }, 1500)
   }
 
+  const handleSendMessageWithContact = (allocator: any) => {
+    setSelectedAction('message')
+    setShowContactSelector(true)
+  }
+
+  const handleScheduleMeetingWithContact = (allocator: any) => {
+    setSelectedAction('schedule')
+    setShowContactSelector(true)
+  }
+
+  const handleContactSelect = (contact: any) => {
+    setSelectedContact(contact)
+    setShowContactSelector(false)
+    
+    if (selectedAction === 'message') {
+      setShowMessageModal(true)
+    } else if (selectedAction === 'schedule') {
+      setShowScheduleModal(true)
+    }
+  }
+
   if (!allocator) {
     return (
       <Screen>
@@ -744,7 +602,7 @@ export default function AllocatorProfilePage() {
                     </Button>
                     <Button
                       className="bg-electric-blue hover:bg-electric-blue/90 text-white"
-                      onClick={() => setShowMessageModal(true)}
+                      onClick={() => handleSendMessageWithContact(allocator)}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Message
@@ -752,7 +610,7 @@ export default function AllocatorProfilePage() {
                     <Button
                       variant="outline"
                       className="border-electric-blue text-electric-blue hover:bg-electric-blue hover:text-white bg-transparent"
-                      onClick={() => setShowScheduleModal(true)}
+                      onClick={() => handleScheduleMeetingWithContact(allocator)}
                     >
                       <CalendarDays className="h-4 w-4 mr-2" />
                       Schedule
@@ -773,19 +631,19 @@ export default function AllocatorProfilePage() {
                   </div>
                 </div>
 
-                {/* Key Metrics */}
+                {/* Top Boxes */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                   <div className="text-center p-4 bg-canvas-bg rounded-lg">
                     <p className="text-2xl font-bold text-deep-brand">{allocator.aum}</p>
-                    <p className="text-sm text-base-gray">Assets Under Management</p>
+                    <p className="text-sm text-base-gray">Total Assets</p>
+                  </div>
+                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
+                    <p className="text-2xl font-bold text-deep-brand">{allocator.keyMetrics.totalAllocations}</p>
+                    <p className="text-sm text-base-gray">Investment Portfolio</p>
                   </div>
                   <div className="text-center p-4 bg-canvas-bg rounded-lg">
                     <p className="text-2xl font-bold text-deep-brand">{allocator.keyMetrics.activeManagers}</p>
-                    <p className="text-sm text-base-gray">Active Managers</p>
-                  </div>
-                  <div className="text-center p-4 bg-canvas-bg rounded-lg">
-                    <p className="text-2xl font-bold text-deep-brand">{allocator.allocationTargets.alternatives}</p>
-                    <p className="text-sm text-base-gray">Alternative Allocation</p>
+                    <p className="text-sm text-base-gray">External Managers</p>
                   </div>
                 </div>
               </div>
@@ -840,6 +698,32 @@ export default function AllocatorProfilePage() {
                           <span>{contact.phone}</span>
                         </div>
                       </div>
+                      <div className="flex gap-1 mt-3">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            setSelectedContact(contact)
+                            setShowMessageModal(true)
+                          }}
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Message
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            setSelectedContact(contact)
+                            setShowScheduleModal(true)
+                          }}
+                        >
+                          <CalendarDays className="h-3 w-3 mr-1" />
+                          Schedule
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -852,7 +736,7 @@ export default function AllocatorProfilePage() {
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="allocations">Allocations</TabsTrigger>
+            <TabsTrigger value="allocations">Current Investments</TabsTrigger>
             <TabsTrigger value="activity">Recent Activity</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
@@ -889,59 +773,40 @@ export default function AllocatorProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Key Metrics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Total AUM:</span>
-                      <span className="font-medium">{allocator.keyMetrics.totalAllocations}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Active Managers:</span>
-                      <span className="font-medium">{allocator.keyMetrics.activeManagers}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Portfolio Companies:</span>
-                      <span className="font-medium">{allocator.keyMetrics.portfolioCompanies}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-base-gray">Founded:</span>
-                      <span className="font-medium">{allocator.founded}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
 
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <DollarSign className="h-5 w-5" />
-                    Allocation Targets
+                    Allocation Target Categories
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Alternatives:</span>
-                      <span className="font-medium">{allocator.allocationTargets.alternatives}</span>
+                      <span className="text-base-gray">Public Fixed Income:</span>
+                      <span className="font-medium">{allocator.allocationTargets.fixedIncome}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Fixed Income:</span>
-                      <span className="font-medium">{allocator.allocationTargets.fixedIncome}</span>
+                      <span className="text-base-gray">Private Fixed Income:</span>
+                      <span className="font-medium">{allocator.allocationTargets.alternatives}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-base-gray">Public Equity:</span>
                       <span className="font-medium">{allocator.allocationTargets.publicEquity}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-base-gray">Real Estate:</span>
+                      <span className="text-base-gray">Real Estate Debt:</span>
                       <span className="font-medium">{allocator.allocationTargets.realEstate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-base-gray">Real Estate Equity:</span>
+                      <span className="font-medium">{allocator.allocationTargets.realEstate}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-base-gray">Alternatives:</span>
+                      <span className="font-medium">{allocator.allocationTargets.alternatives}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -952,7 +817,7 @@ export default function AllocatorProfilePage() {
           <TabsContent value="allocations" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Current Allocations</CardTitle>
+                <CardTitle>Current Investments</CardTitle>
                 <CardDescription>Active manager relationships and commitments</CardDescription>
               </CardHeader>
               <CardContent>
@@ -1150,7 +1015,7 @@ export default function AllocatorProfilePage() {
                 Send Message
               </DialogTitle>
               <DialogDescription>
-                Send a message to {primaryContact.name} at {allocator.firmName}
+                Send a message to {selectedContact?.name || primaryContact.name} at {allocator.firmName}
               </DialogDescription>
             </DialogHeader>
 
@@ -1161,7 +1026,7 @@ export default function AllocatorProfilePage() {
                 </div>
                 <p className="text-lg font-medium text-center">Message sent successfully!</p>
                 <p className="text-sm text-center mt-1 text-base-gray">
-                  Your message has been sent to {primaryContact.name}.
+                  Your message has been sent to {selectedContact?.name || primaryContact.name}.
                 </p>
               </div>
             ) : (
@@ -1169,7 +1034,7 @@ export default function AllocatorProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="to">To</Label>
-                    <Input id="to" value={`${primaryContact.name} <${primaryContact.email}>`} disabled />
+                    <Input id="to" value={`${selectedContact?.name || primaryContact.name} <${selectedContact?.email || primaryContact.email}>`} disabled />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="priority">Priority</Label>
@@ -1232,7 +1097,7 @@ export default function AllocatorProfilePage() {
                 <Calendar className="h-5 w-5" />
                 Schedule Meeting
               </DialogTitle>
-              <DialogDescription>Schedule a meeting with {primaryContact.name}</DialogDescription>
+              <DialogDescription>Schedule a meeting with {selectedContact?.name || primaryContact.name}</DialogDescription>
             </DialogHeader>
 
             {scheduleSuccess ? (
@@ -1242,7 +1107,7 @@ export default function AllocatorProfilePage() {
                 </div>
                 <p className="text-lg font-medium text-center">Meeting scheduled!</p>
                 <p className="text-sm text-center mt-1 text-base-gray">
-                  Your meeting with {primaryContact.name} has been scheduled for {meetingDate} at {meetingTime}.
+                  Your meeting with {selectedContact?.name || primaryContact.name} has been scheduled for {meetingDate} at {meetingTime}.
                 </p>
               </div>
             ) : (
@@ -1350,6 +1215,40 @@ export default function AllocatorProfilePage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Contact Selector Modal */}
+        {showContactSelector && (
+          <Dialog open={showContactSelector} onOpenChange={setShowContactSelector}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Select Contact</DialogTitle>
+                <DialogDescription>
+                  Choose a contact at {allocator.firmName} to {selectedAction === 'message' ? 'message' : 'schedule a meeting with'}.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-3">
+                {allocator.contacts.map((contact: any) => (
+                  <div
+                    key={contact.id}
+                    className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => handleContactSelect(contact)}
+                  >
+                    <div>
+                      <p className="font-medium">{contact.name}</p>
+                      <p className="text-sm text-gray-600">{contact.title}</p>
+                      {contact.isPrimary && (
+                        <Badge variant="outline" className="text-xs mt-1">Primary</Badge>
+                      )}
+                    </div>
+                    <Button size="sm" variant="outline">
+                      {selectedAction === 'message' ? 'Message' : 'Schedule'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </Screen>
   )

@@ -3,7 +3,7 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { TrendingUp, Users, BookOpen } from "lucide-react"
+import { TrendingUp, Users, BookOpen, Share2 } from "lucide-react"
 
 interface StandardInsightCardProps {
   insight: {
@@ -23,9 +23,10 @@ interface StandardInsightCardProps {
     tags?: string[]
   }
   onReadMore: () => void
+  onShare?: () => void
 }
 
-export default function StandardInsightCard({ insight, onReadMore }: StandardInsightCardProps) {
+export default function StandardInsightCard({ insight, onReadMore, onShare }: StandardInsightCardProps) {
   return (
     <Card className="overflow-hidden hover:shadow-vestira-lg transition-all duration-200 h-full flex flex-col">
       {/* Image Section */}
@@ -57,14 +58,6 @@ export default function StandardInsightCard({ insight, onReadMore }: StandardIns
             <TrendingUp className="h-3 w-3" />
             <span className="font-medium">{insight.likes}</span>
           </span>
-          <span className="flex items-center gap-1 text-xs text-base-gray">
-            <Users className="h-3 w-3" />
-            <span className="font-medium">{insight.shares}</span>
-          </span>
-          <span className="flex items-center gap-1 text-xs text-base-gray">
-            <BookOpen className="h-3 w-3" />
-            <span className="font-medium">{insight.bookmarks}</span>
-          </span>
         </div>
 
         {/* Tags */}
@@ -78,7 +71,7 @@ export default function StandardInsightCard({ insight, onReadMore }: StandardIns
           </div>
         )}
 
-        {/* Footer with Author and Button */}
+        {/* Footer with Author and Buttons */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-deep-brand rounded-full flex items-center justify-center flex-shrink-0">
@@ -95,14 +88,27 @@ export default function StandardInsightCard({ insight, onReadMore }: StandardIns
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onReadMore}
-            className="text-xs px-3 py-1.5 h-auto font-medium flex-shrink-0 ml-3 bg-transparent"
-          >
-            Read More
-          </Button>
+          <div className="flex items-center gap-2">
+            {onShare && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onShare}
+                className="text-xs px-3 py-1.5 h-auto font-medium flex-shrink-0 bg-transparent"
+              >
+                <Share2 className="h-3 w-3 mr-1" />
+                Share
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onReadMore}
+              className="text-xs px-3 py-1.5 h-auto font-medium flex-shrink-0 bg-transparent"
+            >
+              Read More
+            </Button>
+          </div>
         </div>
       </div>
     </Card>

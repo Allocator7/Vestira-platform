@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,6 +23,7 @@ interface ScheduleMeetingModalProps {
   recipientName: string
   recipientEmail: string
   organizationName?: string
+  contactSelector?: React.ReactNode
 }
 
 export function ScheduleMeetingModal({
@@ -31,6 +32,7 @@ export function ScheduleMeetingModal({
   recipientName,
   recipientEmail,
   organizationName,
+  contactSelector,
 }: ScheduleMeetingModalProps) {
   const { toast } = useToast()
   const [meetingTitle, setMeetingTitle] = useState("")
@@ -92,8 +94,16 @@ export function ScheduleMeetingModal({
             <Calendar className="h-5 w-5" />
             Schedule Meeting
           </DialogTitle>
-          <DialogDescription>Schedule a meeting with {recipientName}</DialogDescription>
+          <DialogDescription>
+            {contactSelector ? "Schedule a meeting with selected contact" : `Schedule a meeting with ${recipientName}`}
+          </DialogDescription>
         </DialogHeader>
+
+        {contactSelector && (
+          <div className="mb-4">
+            {contactSelector}
+          </div>
+        )}
 
         {scheduleSuccess ? (
           <div className="flex flex-col items-center justify-center py-8">

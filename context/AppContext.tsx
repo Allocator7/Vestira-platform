@@ -78,6 +78,7 @@ interface UnreadCounts {
 interface AppContextType {
   userRole: UserRole
   setUserRole: (role: UserRole) => void
+  refreshRoleFromStorage: () => void
   currentPersonProfile: PersonProfile | null
   setCurrentPersonProfile: (profile: PersonProfile | null) => void
   currentFirmProfile: FirmProfile | null
@@ -167,8 +168,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         // Prioritize currentUserRole (set by demo login) over userRole
         const roleToUse = currentUserRole || storedRole
 
+        console.log("AppContext: Initializing from localStorage")
+        console.log("AppContext: currentUserRole from localStorage:", currentUserRole)
+        console.log("AppContext: userRole from localStorage:", storedRole)
+        console.log("AppContext: roleToUse:", roleToUse)
+
         if (roleToUse && ["allocator", "manager", "consultant", "industry-group"].includes(roleToUse)) {
+          console.log("AppContext: Setting userRole to:", roleToUse)
           setUserRoleState(roleToUse as UserRole)
+        } else {
+          console.log("AppContext: No valid role found, keeping as null")
         }
         // Remove the else clause that was defaulting to "allocator"
       } catch (e) {
@@ -193,6 +202,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }
+
+  // Function to refresh role from localStorage
+  const refreshRoleFromStorage = useCallback(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const storedRole = localStorage.getItem("userRole")
+        const currentUserRole = localStorage.getItem("currentUserRole")
+        const roleToUse = currentUserRole || storedRole
+
+        console.log("AppContext: Refreshing role from localStorage")
+        console.log("AppContext: currentUserRole from localStorage:", currentUserRole)
+        console.log("AppContext: userRole from localStorage:", storedRole)
+        console.log("AppContext: roleToUse:", roleToUse)
+
+        if (roleToUse && ["allocator", "manager", "consultant", "industry-group"].includes(roleToUse)) {
+          console.log("AppContext: Setting userRole to:", roleToUse)
+          setUserRoleState(roleToUse as UserRole)
+        }
+      } catch (e) {
+        console.error("Failed to read from localStorage:", e)
+      }
+    }
+  }, [])
 
   // Update unread message count for a specific role
   const updateUnreadMessageCount = useCallback((role: UserRole, count: number) => {
@@ -320,6 +352,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         userRole,
         setUserRole,
+        refreshRoleFromStorage,
         currentPersonProfile,
         setCurrentPersonProfile,
         currentFirmProfile,
@@ -353,7 +386,36 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 export function useApp() {
   const context = useContext(AppContext)
   if (context === undefined) {
-    throw new Error("useApp must be used within an AppProvider")
+    // Return a fallback context instead of throwing
+    console.warn("useApp called outside of AppProvider, returning fallback")
+    return {
+      userRole: null,
+      setUserRole: () => console.warn("setUserRole called outside of AppProvider"),
+      refreshRoleFromStorage: () => console.warn("refreshRoleFromStorage called outside of AppProvider"),
+      currentPersonProfile: null,
+      setCurrentPersonProfile: () => console.warn("setCurrentPersonProfile called outside of AppProvider"),
+      currentFirmProfile: null,
+      setCurrentFirmProfile: () => console.warn("setCurrentFirmProfile called outside of AppProvider"),
+      notifications: [],
+      addNotification: () => console.warn("addNotification called outside of AppProvider"),
+      markNotificationAsRead: () => console.warn("markNotificationAsRead called outside of AppProvider"),
+      markAllNotificationsAsRead: () => console.warn("markAllNotificationsAsRead called outside of AppProvider"),
+      clearNotifications: () => console.warn("clearNotifications called outside of AppProvider"),
+      unreadCount: 0,
+      unreadMessageCounts: { allocator: 0, manager: 0, consultant: 0, "industry-group": 0 },
+      updateUnreadMessageCount: () => console.warn("updateUnreadMessageCount called outside of AppProvider"),
+      isNavOpen: false,
+      setIsNavOpen: () => console.warn("setIsNavOpen called outside of AppProvider"),
+      currentDataRoom: null,
+      setCurrentDataRoom: () => console.warn("setCurrentDataRoom called outside of AppProvider"),
+      recentlyViewed: [],
+      addToRecentlyViewed: () => console.warn("addToRecentlyViewed called outside of AppProvider"),
+      isLoading: false,
+      setIsLoading: () => console.warn("setIsLoading called outside of AppProvider"),
+      error: null,
+      setError: () => console.warn("setError called outside of AppProvider"),
+      clearError: () => console.warn("clearError called outside of AppProvider"),
+    }
   }
   return context
 }

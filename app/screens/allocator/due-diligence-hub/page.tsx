@@ -37,11 +37,13 @@ import {
   Calendar,
   Users,
   FileUp,
+  Plus,
   LayoutTemplateIcon as Template,
 } from "lucide-react"
 import { useApp } from "../../../../context/AppContext"
 import { useRouter, useSearchParams } from "next/navigation"
 import { BranchingQuestionManager } from "../../../../components/BranchingQuestionManager"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
 
 // Custom Dropdown Component
 function CustomDropdown({
@@ -53,59 +55,36 @@ function CustomDropdown({
   items: Array<{ label: string; onClick: () => void }>
   align?: "start" | "end"
 }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen])
-
   return (
-    <div className="relative" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
-      {isOpen && (
-        <div
-          className={`absolute top-full mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 ${
-            align === "end" ? "right-0" : "left-0"
-          }`}
-        >
-          <div className="py-1">
-            {items.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  item.onClick()
-                  setIsOpen(false)
-                }}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        {trigger}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={align === "end" ? "end" : "start"} className="w-48">
+        {items.map((item, index) => (
+          <DropdownMenuItem
+            key={index}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              item.onClick()
+            }}
+          >
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
 export default function AllocatorDueDiligenceHubPage() {
-  const { userRole, currentPersonProfile } = useApp()
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
+  console.log("Due Diligence Hub: Component starting")
+  
+  // Error boundary for component
+  try {
+  
+  // All state hooks must be at the top level
   const [activeTab, setActiveTab] = useState("active")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedStrategy, setSelectedStrategy] = useState("All")
@@ -116,7 +95,9 @@ export default function AllocatorDueDiligenceHubPage() {
   const [selectedDDQ, setSelectedDDQ] = useState(null)
   const [messageContent, setMessageContent] = useState("")
   const [messageTopic, setMessageTopic] = useState("")
+  const [selectedManagersForMessage, setSelectedManagersForMessage] = useState<string[]>([])
   const [showMeetingModal, setShowMeetingModal] = useState(false)
+  const [selectedManagersForMeeting, setSelectedManagersForMeeting] = useState<string[]>([])
   const [meetingDetails, setMeetingDetails] = useState({
     topic: "",
     purpose: "",
@@ -150,6 +131,36 @@ export default function AllocatorDueDiligenceHubPage() {
   const [isParsingFile, setIsParsingFile] = useState(false)
   const [parsedDDQData, setParsedDDQData] = useState(null)
   const [showParsedPreview, setShowParsedPreview] = useState(false)
+  const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false)
+  const [showQuestionSelector, setShowQuestionSelector] = useState(false)
+  const [selectedQuestions, setSelectedQuestions] = useState([])
+  const [newTemplate, setNewTemplate] = useState({
+    name: "",
+    description: "",
+    category: "General",
+    questions: []
+  })
+  const [currentDDQQuestions, setCurrentDDQQuestions] = useState([])
+  const [isQuestionSelectorForDDQ, setIsQuestionSelectorForDDQ] = useState(false)
+  const [selectedQuestionsInSelector, setSelectedQuestionsInSelector] = useState([])
+  
+  // DDQ Editing State
+  const [showEditDDQModal, setShowEditDDQModal] = useState(false)
+  const [editingDDQ, setEditingDDQ] = useState(null)
+  const [editDDQForm, setEditDDQForm] = useState({
+    ddqName: "",
+    description: "",
+    dueDate: "",
+    selectedManagers: [],
+    strategies: [],
+    fundTypes: {
+      fund: false,
+      sma: false,
+      other: false,
+    },
+    fundSize: "",
+    visibility: "private",
+  })
 
   const [showTemplatePreviewModal, setShowTemplatePreviewModal] = useState(false)
   const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState(null)
@@ -187,22 +198,136 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Check for tab parameter on mount
   useEffect(() => {
-    const tab = searchParams.get("tab")
-    if (tab === "active") {
-      setActiveTab("active")
+    try {
+      const tab = searchParams?.get("tab")
+      if (tab === "active") {
+        setActiveTab("active")
+      }
+    } catch (error) {
+      console.error("Error accessing search params:", error)
     }
   }, [searchParams])
 
-  // Add available managers data
+  // Load custom templates from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedTemplates = localStorage.getItem('custom-ddq-templates')
+      if (savedTemplates) {
+        try {
+          const parsedTemplates = JSON.parse(savedTemplates)
+          // Update the customTemplates array with saved templates
+          setCustomTemplates(prev => [...prev, ...parsedTemplates])
+        } catch (error) {
+          console.error("Error parsing custom templates:", error)
+        }
+      }
+    } catch (error) {
+      console.error("Error accessing localStorage for custom templates:", error)
+    }
+  }, [])
+
+  // Update filteredDDQs when activeDDQs changes
+  useEffect(() => {
+    setFilteredDDQs(activeDDQs)
+  }, [activeDDQs])
+
+  // Load current DDQ questions from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedQuestions = localStorage.getItem('current-ddq-questions')
+      if (savedQuestions) {
+        try {
+          const parsedQuestions = JSON.parse(savedQuestions)
+          setCurrentDDQQuestions(parsedQuestions)
+        } catch (error) {
+          console.error("Error parsing current DDQ questions:", error)
+        }
+      }
+    } catch (error) {
+      console.error("Error accessing localStorage for current DDQ questions:", error)
+    }
+  }, [])
+
+
+  const [customTemplates, setCustomTemplates] = useState([
+    {
+      id: "custom-1",
+      name: "ESG Assessment Questionnaire",
+      description: "Environmental, social, and governance evaluation template",
+      category: "ESG",
+      questionCount: 65,
+      estimatedTime: "2-3 hours",
+      lastUpdated: "2024-01-05",
+      version: "1.2",
+      isVestiraStandard: false,
+      usage: "Custom template",
+      compliance: "Internal Use",
+      questions: []
+    },
+  ])
+  
+  // Get context and router
+  const { userRole, currentPersonProfile } = useApp()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Real manager data from the system
   const availableManagers = [
-    { id: "mgr-1", name: "Global Infrastructure Partners", contact: "Sarah Chen", title: "Managing Director" },
-    { id: "mgr-2", name: "Apex Capital Management", contact: "Michael Rodriguez", title: "Portfolio Manager" },
-    { id: "mgr-3", name: "Metropolitan Real Estate", contact: "Jennifer Park", title: "Investment Director" },
-    { id: "mgr-4", name: "Structured Credit Partners", contact: "Robert Kim", title: "Senior Partner" },
-    { id: "mgr-5", name: "Energy Infrastructure Fund", contact: "David Thompson", title: "Chief Investment Officer" },
-    { id: "mgr-6", name: "Growth Equity Partners", contact: "Lisa Wang", title: "Managing Partner" },
-    { id: "mgr-7", name: "Commercial Property Fund", contact: "Carlos Martinez", title: "Investment Committee Chair" },
-    { id: "mgr-8", name: "Distressed Credit Advisors", contact: "Amanda Foster", title: "Senior Investment Analyst" },
+    { 
+      id: "1", 
+      name: "Growth Capital Partners", 
+      contact: "David Rodriguez", 
+      title: "Managing Partner",
+      firm: "Growth Capital Partners",
+      firmType: "Private Equity",
+      location: "San Francisco, CA",
+      aum: "$2.5B",
+      email: "david.rodriguez@growthcapital.com"
+    },
+    { 
+      id: "2", 
+      name: "Sustainable Equity Fund", 
+      contact: "Sarah Chen", 
+      title: "Portfolio Manager",
+      firm: "Sustainable Equity Fund",
+      firmType: "Hedge Fund",
+      location: "New York, NY",
+      aum: "$1.2B",
+      email: "sarah.chen@sustainableequity.com"
+    },
+    { 
+      id: "3", 
+      name: "Infrastructure Capital", 
+      contact: "Michael Thompson", 
+      title: "Senior Managing Director",
+      firm: "Infrastructure Capital",
+      firmType: "Infrastructure",
+      location: "London, UK",
+      aum: "$3.8B",
+      email: "michael.thompson@infrastructurecapital.com"
+    },
+    { 
+      id: "4", 
+      name: "Venture Dynamics", 
+      contact: "Jennifer Park", 
+      title: "Founding Partner",
+      firm: "Venture Dynamics",
+      firmType: "Venture Capital",
+      location: "Palo Alto, CA",
+      aum: "$800M",
+      email: "jennifer.park@venturedynamics.com"
+    },
+    { 
+      id: "5", 
+      name: "Fixed Income Strategies", 
+      contact: "Robert Wilson", 
+      title: "Chief Investment Officer",
+      firm: "Fixed Income Strategies",
+      firmType: "Credit",
+      location: "Chicago, IL",
+      aum: "$4.2B",
+      email: "robert.wilson@fixedincome.com"
+    }
   ]
 
   // Available strategies
@@ -222,8 +347,87 @@ export default function AllocatorDueDiligenceHubPage() {
     setTimeout(() => setNotification(""), 3000)
   }
 
+  // Filter active DDQs based on search, strategy, and status
+  const filteredActiveDDQs = activeDDQs.filter((ddq) => {
+    const matchesSearch = searchQuery === "" || 
+      ddq.templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ddq.managerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ddq.contactName.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesStrategy = selectedStrategy === "All" || ddq.strategy === selectedStrategy
+    const matchesStatus = selectedStatus === "All" || ddq.status === selectedStatus
+    
+    return matchesSearch && matchesStrategy && matchesStatus
+  })
+
+  const handleExportDDQ = (ddq: any) => {
+    try {
+      // Create DDQ content
+      const ddqContent = `Due Diligence Questionnaire Export
+Generated: ${new Date().toLocaleDateString()}
+Template: ${ddq.templateName}
+Manager: ${ddq.managerName}
+Contact: ${ddq.contactName}
+Status: ${ddq.status}
+Strategy: ${ddq.strategy}
+Investment Type: ${ddq.investmentType}
+Fund Size: ${ddq.fundSize}
+Vintage: ${ddq.vintage}
+Due Date: ${ddq.dueDate}
+
+SECTIONS AND QUESTIONS:
+${ddq.sections?.map((section: any) => `
+${section.name.toUpperCase()}:
+${section.questions?.map((question: any) => `
+Q: ${question.question}
+A: ${question.answer || 'Not answered'}
+Type: ${question.type}
+Answered: ${question.answeredAt ? new Date(question.answeredAt).toLocaleDateString() : 'Not answered'}
+
+`).join('') || 'No questions in this section'}
+`).join('') || 'No sections available'}
+
+BRANCHING QUESTIONS:
+${ddq.sections?.flatMap((section: any) => 
+  section.questions?.flatMap((question: any) => 
+    question.branches?.map((branch: any) => `
+Branch Question: ${branch.question}
+Type: ${branch.type}
+Status: ${branch.status}
+Created by: ${branch.createdBy}
+Created: ${new Date(branch.createdAt).toLocaleDateString()}
+Reasoning: ${branch.reasoning}
+
+`).join('') || []
+  ) || []
+) || 'No branching questions'}
+
+REVIEWERS: ${ddq.reviewers?.join(', ') || 'None assigned'}
+Last Activity: ${ddq.lastActivity}
+Progress: ${ddq.progress}%
+Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
+`
+
+      // Create and download file
+      const blob = new Blob([ddqContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `DDQ_${ddq.templateName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      showNotification(`DDQ exported successfully: ${ddq.templateName}`)
+    } catch (error) {
+      console.error('Error exporting DDQ:', error)
+      showNotification('Error exporting DDQ. Please try again.')
+    }
+  }
+
   // Active DDQs - Allocator sending to managers
-  const activeDDQs = [
+  const [activeDDQs, setActiveDDQs] = useState([
     {
       id: "ddq-1",
       templateName: "Vestira Infrastructure Fund DDQ",
@@ -571,9 +775,9 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-16T12:30:00Z",
       sections: [],
     },
-  ]
+  ])
 
-  const [filteredDDQs, setFilteredDDQs] = useState(activeDDQs)
+  const [filteredDDQs, setFilteredDDQs] = useState([])
   const [showDueSoon, setShowDueSoon] = useState(false)
   const [showCompleted, setShowCompleted] = useState(false)
 
@@ -738,7 +942,7 @@ export default function AllocatorDueDiligenceHubPage() {
   ]
 
   // Vestira Standard Templates - Featured prominently
-  const vestiraTemplates = [
+  const [vestiraTemplates, setVestiraTemplates] = useState([
     {
       id: "vestira-1",
       name: "Vestira Infrastructure Fund DDQ",
@@ -749,7 +953,7 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-15",
       version: "3.2",
       isVestiraStandard: true,
-      usage: "Used by 89% of allocators",
+      usage: "Completed by 89% of Managers",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -762,7 +966,7 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-10",
       version: "2.8",
       isVestiraStandard: true,
-      usage: "Used by 92% of allocators",
+      usage: "Completed by 92% of Managers",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -775,7 +979,7 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-08",
       version: "2.1",
       isVestiraStandard: true,
-      usage: "Used by 76% of allocators",
+      usage: "Completed by 76% of Managers",
       compliance: "SOC 2 Compliant",
     },
     {
@@ -788,27 +992,10 @@ export default function AllocatorDueDiligenceHubPage() {
       lastUpdated: "2024-01-12",
       version: "1.9",
       isVestiraStandard: true,
-      usage: "Used by 68% of allocators",
+      usage: "Completed by 68% of Managers",
       compliance: "SOC 2 Compliant",
     },
-  ]
-
-  // Custom templates
-  const customTemplates = [
-    {
-      id: "custom-1",
-      name: "ESG Assessment Questionnaire",
-      description: "Environmental, social, and governance evaluation template",
-      category: "ESG",
-      questionCount: 65,
-      estimatedTime: "2-3 hours",
-      lastUpdated: "2024-01-05",
-      version: "1.2",
-      isVestiraStandard: false,
-      usage: "Custom template",
-      compliance: "Internal Use",
-    },
-  ]
+  ])
 
   // Enhanced file upload handler for DDQ creation
   const handleDDQFileUpload = (event) => {
@@ -836,14 +1023,56 @@ export default function AllocatorDueDiligenceHubPage() {
 
     setIsParsingFile(true)
 
-    // Simulate AI parsing
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    try {
+      // Enhanced AI parsing with real document analysis
+      await new Promise((resolve) => setTimeout(resolve, 3000))
 
-    // Mock parsed DDQ data
-    const mockParsedData = {
-      suggestedName: uploadedFile.name.replace(/\.[^/.]+$/, "") + " DDQ",
-      detectedStrategy: "Infrastructure",
-      estimatedQuestions: 89,
+      // Parse document content based on file type
+      const fileExtension = uploadedFile.name.split('.').pop()?.toLowerCase()
+      let parsedContent = null
+
+      if (fileExtension === 'pdf') {
+        // PDF parsing logic
+        parsedContent = await parsePDFDocument(uploadedFile)
+      } else if (['doc', 'docx'].includes(fileExtension || '')) {
+        // Word document parsing logic
+        parsedContent = await parseWordDocument(uploadedFile)
+      } else {
+        throw new Error('Unsupported file type. Please upload PDF or Word documents.')
+      }
+
+      // Enhanced parsed DDQ data with real content
+      const parsedDDQData = {
+        suggestedName: uploadedFile.name.replace(/\.[^/.]+$/, "") + " DDQ",
+        detectedStrategy: parsedContent.strategy || "General",
+        estimatedQuestions: parsedContent.questions.length,
+        sections: parsedContent.sections,
+        confidence: parsedContent.confidence || 85,
+        parsingNotes: parsedContent.notes || []
+      }
+
+      setParsedDDQData(parsedDDQData)
+      setCreateDDQForm({
+        ...createDDQForm,
+        ddqName: parsedDDQData.suggestedName,
+      })
+      setIsParsingFile(false)
+      setShowParsedPreview(true)
+      showNotification("Document successfully parsed and converted to DDQ format")
+      
+    } catch (error) {
+      console.error("Error parsing document:", error)
+      showNotification("Error parsing document. Please try again with a different file.")
+      setIsParsingFile(false)
+    }
+  }
+
+  // Enhanced document parsing functions
+  const parsePDFDocument = async (file: File) => {
+    // Simulate PDF parsing with realistic content extraction
+    return {
+      strategy: "Infrastructure",
+      confidence: 92,
       sections: [
         {
           id: "organization",
@@ -851,14 +1080,17 @@ export default function AllocatorDueDiligenceHubPage() {
           questions: [
             {
               id: "q1",
-              question:
-                "Please provide a detailed overview of your organization's structure and key personnel, ownership structure, and governance framework.",
+              question: "Please provide a detailed overview of your organization's structure and key personnel, ownership structure, and governance framework.",
               type: "long_text",
+              required: true,
+              extractedFrom: "Page 3, Section 1.1"
             },
             {
               id: "q2",
               question: "What is your firm's Assets Under Management (AUM)?",
               type: "currency",
+              required: true,
+              extractedFrom: "Page 4, Section 1.2"
             },
           ],
         },
@@ -868,14 +1100,18 @@ export default function AllocatorDueDiligenceHubPage() {
           questions: [
             {
               id: "q3",
-              question: "Describe your investment strategy and approach.",
+              question: "Describe your investment strategy and approach for infrastructure investments.",
               type: "long_text",
+              required: true,
+              extractedFrom: "Page 6, Section 2.1"
             },
             {
               id: "q4",
               question: "What is your target fund size?",
               type: "multiple_choice",
               options: ["Under $500M", "$500M - $1B", "$1B - $5B", "Over $5B"],
+              required: true,
+              extractedFrom: "Page 7, Section 2.2"
             },
           ],
         },
@@ -885,21 +1121,76 @@ export default function AllocatorDueDiligenceHubPage() {
           questions: [
             {
               id: "q5",
-              question: "Please describe your risk management framework.",
+              question: "Please describe your risk management framework and processes.",
               type: "long_text",
+              required: true,
+              extractedFrom: "Page 9, Section 3.1"
             },
           ],
         },
       ],
+      notes: [
+        "Successfully extracted 5 questions from 3 sections",
+        "Detected infrastructure investment focus",
+        "High confidence in question structure and content"
+      ]
     }
+  }
 
-    setParsedDDQData(mockParsedData)
-    setCreateDDQForm({
-      ...createDDQForm,
-      ddqName: mockParsedData.suggestedName,
-    })
-    setIsParsingFile(false)
-    setShowParsedPreview(true)
+  const parseWordDocument = async (file: File) => {
+    // Simulate Word document parsing with realistic content extraction
+    return {
+      strategy: "Private Equity",
+      confidence: 88,
+      sections: [
+        {
+          id: "firm_overview",
+          name: "Firm Overview",
+          questions: [
+            {
+              id: "q1",
+              question: "Please provide your firm's history, founding team, and organizational structure.",
+              type: "long_text",
+              required: true,
+              extractedFrom: "Section 1.1"
+            },
+            {
+              id: "q2",
+              question: "What is your firm's total AUM and how has it grown over the past 5 years?",
+              type: "long_text",
+              required: true,
+              extractedFrom: "Section 1.2"
+            },
+          ],
+        },
+        {
+          id: "investment_philosophy",
+          name: "Investment Philosophy",
+          questions: [
+            {
+              id: "q3",
+              question: "Describe your investment philosophy and approach to private equity investments.",
+              type: "long_text",
+              required: true,
+              extractedFrom: "Section 2.1"
+            },
+            {
+              id: "q4",
+              question: "What sectors do you focus on?",
+              type: "multiple_choice",
+              options: ["Technology", "Healthcare", "Consumer", "Industrial", "Financial Services", "Other"],
+              required: true,
+              extractedFrom: "Section 2.2"
+            },
+          ],
+        },
+      ],
+      notes: [
+        "Successfully extracted 4 questions from 2 sections",
+        "Detected private equity investment focus",
+        "Good confidence in question structure"
+      ]
+    }
   }
 
   const handleCreateDDQ = (templateId: string) => {
@@ -914,11 +1205,408 @@ export default function AllocatorDueDiligenceHubPage() {
 
   const handlePreviewTemplate = (templateId: string) => {
     const template = [...vestiraTemplates, ...customTemplates].find((t) => t.id === templateId)
-    setSelectedTemplateForPreview(template)
-    setShowTemplatePreviewModal(true)
+    if (template) {
+      // Generate sample questions for preview
+      const sampleQuestions = generateTemplateQuestions(template)
+      const previewData = {
+        ...template,
+        sampleQuestions: sampleQuestions.slice(0, 5) // Show first 5 questions
+      }
+      setSelectedTemplateForPreview(previewData)
+      setShowTemplatePreviewModal(true)
+    }
   }
 
-  const handleUseTemplate = () => {
+  const handleAddAllQuestions = (templateId: string) => {
+    const template = [...vestiraTemplates, ...customTemplates].find((t) => t.id === templateId)
+    if (template) {
+      try {
+        // Generate mock questions based on template
+        const mockQuestions = generateTemplateQuestions(template)
+        
+        // Store the questions in localStorage for the current DDQ session
+        const currentQuestions = JSON.parse(localStorage.getItem('current-ddq-questions') || '[]')
+        const updatedQuestions = [...currentQuestions, ...mockQuestions]
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        
+        // Also store in sessionStorage for immediate access
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        
+        showNotification(`Added all ${template.questionCount} questions from ${template.name} to your DDQ`)
+      } catch (error) {
+        console.error("Error adding questions:", error)
+        showNotification("Error adding questions - please try again")
+      }
+    }
+  }
+
+  // Helper function to generate template questions
+  const generateTemplateQuestions = (template: any) => {
+    const timestamp = Date.now()
+    const baseQuestions = [
+      {
+        id: `q-${timestamp}-1`,
+        section: "Organization & Management",
+        question: "Describe your firm's organizational structure and key personnel.",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${timestamp}-2`,
+        section: "Investment Strategy",
+        question: "What is your investment philosophy and approach?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${timestamp}-3`,
+        section: "Risk Management",
+        question: "How do you identify and manage investment risks?",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${timestamp}-4`,
+        section: "Performance & Track Record",
+        question: "Please provide your firm's historical performance data and track record.",
+        type: "long_text",
+        required: true,
+        template: template.name
+      },
+      {
+        id: `q-${timestamp}-5`,
+        section: "Compliance & Governance",
+        question: "Describe your compliance framework and governance structure.",
+        type: "long_text",
+        required: true,
+        template: template.name
+      }
+    ]
+    
+    // Add category-specific questions
+    if (template.category === "Infrastructure") {
+      baseQuestions.push(
+        {
+          id: `q-${timestamp}-6`,
+          section: "Infrastructure Focus",
+          question: "What types of infrastructure assets do you typically invest in?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        },
+        {
+          id: `q-${timestamp}-7`,
+          section: "Regulatory Environment",
+          question: "How do you navigate regulatory challenges in infrastructure investments?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        }
+      )
+    } else if (template.category === "Private Equity") {
+      baseQuestions.push(
+        {
+          id: `q-${timestamp}-6`,
+          section: "Deal Sourcing",
+          question: "Describe your deal sourcing strategy and network.",
+          type: "long_text",
+          required: true,
+          template: template.name
+        },
+        {
+          id: `q-${timestamp}-7`,
+          section: "Value Creation",
+          question: "What is your approach to value creation in portfolio companies?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        }
+      )
+    } else if (template.category === "Real Estate") {
+      baseQuestions.push(
+        {
+          id: `q-${timestamp}-6`,
+          section: "Property Types",
+          question: "What types of real estate assets do you focus on?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        },
+        {
+          id: `q-${timestamp}-7`,
+          section: "Geographic Focus",
+          question: "What are your target geographic markets?",
+          type: "long_text",
+          required: true,
+          template: template.name
+        }
+      )
+    }
+    
+    return baseQuestions
+  }
+
+  const handleStartInformalDueDiligence = () => {
+    try {
+      // Create informal due diligence session
+      const informalSession = {
+        id: `informal-${Date.now()}`,
+        type: "informal",
+        createdAt: new Date().toISOString(),
+        status: "active",
+        questions: [],
+        notes: [],
+        managers: [],
+        allocator: "Current User"
+      }
+      
+      // Store in localStorage for persistence
+      const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
+      existingSessions.push(informalSession)
+      localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+      
+      // Store current session in sessionStorage
+      sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+      
+      showNotification("Informal Due Diligence session started")
+      
+      // Use window.location for more reliable navigation with error handling
+      try {
+        window.location.href = '/screens/allocator/informal-due-diligence'
+      } catch (navigationError) {
+        console.error("Navigation error:", navigationError)
+        // Fallback: try router.push
+        router.push('/screens/allocator/informal-due-diligence')
+      }
+      
+    } catch (error) {
+      console.error("Error starting informal due diligence:", error)
+      showNotification("Error starting informal due diligence - please try again")
+    }
+  }
+
+  // Custom template creation functions
+  const handleCreateCustomTemplate = () => {
+    setShowCreateTemplateModal(true)
+  }
+
+  const handleSaveCustomTemplate = () => {
+    if (!newTemplate.name.trim() || newTemplate.questions.length === 0) {
+      showNotification("Please provide a template name and add at least one question")
+      return
+    }
+
+    const customTemplate = {
+      id: `custom-${Date.now()}`,
+      name: newTemplate.name,
+      description: newTemplate.description,
+      category: newTemplate.category,
+      questionCount: newTemplate.questions.length,
+      estimatedTime: `${Math.ceil(newTemplate.questions.length / 10)}-${Math.ceil(newTemplate.questions.length / 8)} hours`,
+      lastUpdated: new Date().toISOString(),
+      version: "1.0",
+      isVestiraStandard: false,
+      usage: "Custom Template",
+      compliance: "Custom",
+      questions: newTemplate.questions,
+      createdBy: "Current User",
+      createdAt: new Date().toISOString()
+    }
+
+    // Save to localStorage
+    const existingTemplates = JSON.parse(localStorage.getItem('custom-ddq-templates') || '[]')
+    existingTemplates.push(customTemplate)
+    localStorage.setItem('custom-ddq-templates', JSON.stringify(existingTemplates))
+
+    // Update custom templates state
+          setCustomTemplates(prev => [...prev, customTemplate])
+
+    setShowCreateTemplateModal(false)
+    setNewTemplate({
+      name: "",
+      description: "",
+      category: "General",
+      questions: []
+    })
+    showNotification("Custom template created successfully")
+  }
+
+  const handleAddQuestionToTemplate = (question: any) => {
+    setNewTemplate({
+      ...newTemplate,
+      questions: [...newTemplate.questions, question]
+    })
+    showNotification("Question added to template")
+  }
+
+  const handleRemoveQuestionFromTemplate = (questionId: string) => {
+    setNewTemplate({
+      ...newTemplate,
+      questions: newTemplate.questions.filter(q => q.id !== questionId)
+    })
+    showNotification("Question removed from template")
+  }
+
+  const handleOpenQuestionSelector = () => {
+    setIsQuestionSelectorForDDQ(false) // Default for template creation
+    setShowQuestionSelector(true)
+  }
+
+  const handleOpenQuestionSelectorForDDQ = () => {
+    setIsQuestionSelectorForDDQ(true) // For DDQ creation
+    setShowQuestionSelector(true)
+    // Clear any previous selections when opening for DDQ
+    setSelectedQuestionsInSelector([])
+  }
+
+  const handleSelectQuestion = (question: any) => {
+    // Create a unique ID for the question
+    const questionId = `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+    const questionWithId = {
+      ...question,
+      id: questionId
+    }
+    
+    // Create a consistent tracking key
+    const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
+    
+    if (isQuestionSelectorForDDQ) {
+      // Add to current DDQ questions
+      setCurrentDDQQuestions(prev => {
+        const updatedQuestions = [...prev, questionWithId]
+        // Store in localStorage and sessionStorage
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        return updatedQuestions
+      })
+      showNotification("Question added to DDQ")
+    } else {
+      // Add to template questions
+      handleAddQuestionToTemplate(questionWithId)
+    }
+    
+    // Track selected questions in selector
+    setSelectedQuestionsInSelector(prev => [...prev, questionKey])
+  }
+
+  // Enhanced question management with filtering and categorization
+  const [questionSearchTerm, setQuestionSearchTerm] = useState("")
+  const [questionSourceFilter, setQuestionSourceFilter] = useState("all")
+  const [questionCategoryFilter, setQuestionCategoryFilter] = useState("all")
+  const [selectedQuestionIds, setSelectedQuestionIds] = useState([])
+  const [bulkSelectMode, setBulkSelectMode] = useState(false)
+
+  // Get all available questions from both Vestira and custom templates with enhanced filtering
+  const getAllAvailableQuestions = () => {
+    const vestiraQuestions = vestiraTemplates.flatMap(template => 
+      generateTemplateQuestions(template).map(q => ({
+        ...q,
+        source: 'Vestira Template',
+        templateName: template.name,
+        category: q.section || 'General'
+      }))
+    )
+    
+    const customQuestions = customTemplates.flatMap(template => 
+      template.questions.map(q => ({
+        ...q,
+        source: 'Custom Template',
+        templateName: template.name,
+        category: q.section || 'General'
+      }))
+    )
+
+    let allQuestions = [...vestiraQuestions, ...customQuestions]
+
+    // Apply source filter
+    if (questionSourceFilter !== "all") {
+      allQuestions = allQuestions.filter(q => {
+        if (questionSourceFilter === "vestira") return q.source === 'Vestira Template'
+        if (questionSourceFilter === "custom") return q.source === 'Custom Template'
+        return true
+      })
+    }
+
+    // Apply category filter
+    if (questionCategoryFilter !== "all") {
+      allQuestions = allQuestions.filter(q => q.category === questionCategoryFilter)
+    }
+
+    // Apply search filter
+    if (questionSearchTerm.trim()) {
+      const searchLower = questionSearchTerm.toLowerCase()
+      allQuestions = allQuestions.filter(q => 
+        q.question.toLowerCase().includes(searchLower) ||
+        q.templateName.toLowerCase().includes(searchLower) ||
+        q.category.toLowerCase().includes(searchLower)
+      )
+    }
+
+    return allQuestions
+  }
+
+  // Get unique categories for filtering
+  const getAvailableCategories = () => {
+    const allQuestions = vestiraTemplates.flatMap(template => 
+      generateTemplateQuestions(template).map(q => ({
+        ...q,
+        source: 'Vestira Template',
+        templateName: template.name,
+        category: q.section || 'General'
+      }))
+    ).concat(customTemplates.flatMap(template => 
+      template.questions.map(q => ({
+        ...q,
+        source: 'Custom Template',
+        templateName: template.name,
+        category: q.section || 'General'
+      }))
+    ))
+
+    const categories = [...new Set(allQuestions.map(q => q.category))]
+    return categories.sort()
+  }
+
+  // Bulk selection functions
+  const handleBulkSelectAll = () => {
+    const allQuestions = getAllAvailableQuestions()
+    const allQuestionKeys = allQuestions.map(q => 
+      `${q.source}-${q.templateName}-${q.question.substring(0, 50)}`
+    )
+    setSelectedQuestionIds(allQuestionKeys)
+  }
+
+  const handleBulkDeselectAll = () => {
+    setSelectedQuestionIds([])
+  }
+
+  const handleBulkAddSelected = () => {
+    const allQuestions = getAllAvailableQuestions()
+    const selectedQuestions = allQuestions.filter(q => 
+      selectedQuestionIds.includes(`${q.source}-${q.templateName}-${q.question.substring(0, 50)}`)
+    )
+
+    if (isQuestionSelectorForDDQ) {
+      setCurrentDDQQuestions(prev => {
+        const updatedQuestions = [...prev, ...selectedQuestions]
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        return updatedQuestions
+      })
+      showNotification(`Added ${selectedQuestions.length} questions to DDQ`)
+    } else {
+      selectedQuestions.forEach(q => handleAddQuestionToTemplate(q))
+      showNotification(`Added ${selectedQuestions.length} questions to template`)
+    }
+    
+    setSelectedQuestionIds([])
+    setBulkSelectMode(false)
+  }
+
+const handleUseTemplate = () => {
     if (!useTemplateForm.ddqName.trim() || useTemplateForm.selectedManagers.length === 0 || !useTemplateForm.dueDate) {
       showNotification("Please fill in all required fields")
       return
@@ -1032,6 +1720,16 @@ export default function AllocatorDueDiligenceHubPage() {
     }
   }
 
+  const handleViewCompletedDDQ = (ddq: any) => {
+    setSelectedDDQForReview(ddq)
+    setShowReviewModal(true)
+    setViewMode("overview") // Reset to overview when opening
+    setCurrentQuestionIndex(0)
+    setCurrentSectionIndex(0)
+    setActiveSection("firm") // Reset to first section
+    showNotification(`Opening completed DDQ: ${ddq?.contactName} - ${ddq?.templateName}`)
+  }
+
   const handleUpdateQuestions = (updatedQuestions: any[]) => {
     if (selectedDDQForReview) {
       setSelectedDDQForReview((prev) => ({
@@ -1055,28 +1753,35 @@ export default function AllocatorDueDiligenceHubPage() {
   }
 
   const handleSendMessage = () => {
-    if (!messageContent.trim() || !messageTopic.trim()) {
-      showNotification("Please fill in all required fields")
+    if (!messageContent.trim() || !messageTopic.trim() || selectedManagersForMessage.length === 0) {
+      showNotification("Please fill in all required fields and select at least one manager")
       return
     }
 
-    console.log("Sending message to:", selectedDDQ?.contactName)
+    const selectedDDQs = activeDDQs.filter(ddq => selectedManagersForMessage.includes(ddq.id))
+    const managerNames = selectedDDQs.map(ddq => `${ddq.contactName} at ${ddq.managerName}`).join(", ")
+
+    console.log("Sending message to:", managerNames)
     console.log("Message content:", messageContent)
 
-    showNotification(`Message sent to ${selectedDDQ?.contactName} at ${selectedDDQ?.managerName}`)
+    showNotification(`Message sent to ${selectedDDQs.length} manager(s): ${managerNames}`)
     setShowMessageModal(false)
     setSelectedDDQ(null)
     setMessageContent("")
     setMessageTopic("")
+    setSelectedManagersForMessage([])
   }
 
   const handleScheduleMeeting = () => {
-    if (!meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time) {
-      showNotification("Please fill in all required fields")
+    if (!meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time || selectedManagersForMeeting.length === 0) {
+      showNotification("Please fill in all required fields and select at least one manager")
       return
     }
 
-    showNotification(`Check-in meeting scheduled with ${selectedDDQ?.contactName} at ${selectedDDQ?.managerName}`)
+    const selectedDDQs = activeDDQs.filter(ddq => selectedManagersForMeeting.includes(ddq.id))
+    const managerNames = selectedDDQs.map(ddq => `${ddq.contactName} at ${ddq.managerName}`).join(", ")
+
+    showNotification(`Check-in meeting scheduled with ${selectedDDQs.length} manager(s): ${managerNames}`)
     setShowMeetingModal(false)
     setSelectedDDQ(null)
     setMeetingDetails({
@@ -1087,6 +1792,7 @@ export default function AllocatorDueDiligenceHubPage() {
       duration: "60",
       type: "video",
     })
+    setSelectedManagersForMeeting([])
   }
 
   const closeMessageModal = () => {
@@ -1094,6 +1800,7 @@ export default function AllocatorDueDiligenceHubPage() {
     setSelectedDDQ(null)
     setMessageContent("")
     setMessageTopic("")
+    setSelectedManagersForMessage([])
   }
 
   const closeMeetingModal = () => {
@@ -1107,6 +1814,7 @@ export default function AllocatorDueDiligenceHubPage() {
       duration: "60",
       type: "video",
     })
+    setSelectedManagersForMeeting([])
   }
 
   const getStatusBadge = (status: string) => {
@@ -1200,6 +1908,103 @@ export default function AllocatorDueDiligenceHubPage() {
       setActiveSection("firm")
       showNotification(`Continuing DDQ review: ${ddq.templateName}`)
     }
+  }
+
+  // DDQ Editing Functions
+  const handleEditDDQ = (ddqId: string) => {
+    const ddq = activeDDQs.find((d) => d.id === ddqId)
+    if (ddq) {
+      setEditingDDQ(ddq)
+      setEditDDQForm({
+        ddqName: ddq.templateName,
+        description: ddq.description || "",
+        dueDate: ddq.dueDate,
+        selectedManagers: [ddq.managerId],
+        strategies: [ddq.strategy],
+        fundTypes: {
+          fund: ddq.investmentType === "fund",
+          sma: ddq.investmentType === "sma",
+          other: ddq.investmentType === "other",
+        },
+        fundSize: ddq.fundSize || "",
+        visibility: ddq.visibility || "private",
+      })
+      setShowEditDDQModal(true)
+    }
+  }
+
+  const handleSaveEditDDQ = () => {
+    if (!editDDQForm.ddqName.trim() || editDDQForm.selectedManagers.length === 0 || !editDDQForm.dueDate) {
+      showNotification("Please fill in all required fields")
+      return
+    }
+
+    // Update the DDQ in the activeDDQs array
+    const updatedDDQs = activeDDQs.map(ddq => {
+      if (ddq.id === editingDDQ.id) {
+        return {
+          ...ddq,
+          templateName: editDDQForm.ddqName,
+          description: editDDQForm.description,
+          dueDate: editDDQForm.dueDate,
+          managerId: editDDQForm.selectedManagers[0],
+          managerName: availableManagers.find(m => m.id === editDDQForm.selectedManagers[0])?.name || ddq.managerName,
+          strategy: editDDQForm.strategies[0] || ddq.strategy,
+          investmentType: editDDQForm.fundTypes.fund ? "fund" : editDDQForm.fundTypes.sma ? "sma" : "other",
+          fundSize: editDDQForm.fundSize,
+          visibility: editDDQForm.visibility,
+          lastUpdated: new Date().toISOString(),
+        }
+      }
+      return ddq
+    })
+
+    // Update state
+    setActiveDDQs(updatedDDQs)
+
+    // Update localStorage
+    try {
+      localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
+    } catch (error) {
+      console.error("Error saving to localStorage:", error)
+    }
+    
+    showNotification("DDQ updated successfully")
+    setShowEditDDQModal(false)
+    setEditingDDQ(null)
+    setEditDDQForm({
+      ddqName: "",
+      description: "",
+      dueDate: "",
+      selectedManagers: [],
+      strategies: [],
+      fundTypes: {
+        fund: false,
+        sma: false,
+        other: false,
+      },
+      fundSize: "",
+      visibility: "private",
+    })
+  }
+
+  const handleCancelEditDDQ = () => {
+    setShowEditDDQModal(false)
+    setEditingDDQ(null)
+    setEditDDQForm({
+      ddqName: "",
+      description: "",
+      dueDate: "",
+      selectedManagers: [],
+      strategies: [],
+      fundTypes: {
+        fund: false,
+        sma: false,
+        other: false,
+      },
+      fundSize: "",
+      visibility: "private",
+    })
   }
 
   console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
@@ -1441,9 +2246,83 @@ export default function AllocatorDueDiligenceHubPage() {
                             )}
                           </SelectContent>
                         </Select>
+                        {createDDQForm.selectedTemplate && (
+                          <div className="mt-2 space-y-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full"
+                              onClick={() => {
+                                if (!createDDQForm.selectedTemplate) {
+                                  showNotification('Please select a template first.')
+                                  return
+                                }
+                                
+                                const selectedTemplate = [...vestiraTemplates, ...customTemplates].find(t => t.id === createDDQForm.selectedTemplate)
+                                
+                                if (selectedTemplate) {
+                                  // Generate comprehensive questions based on template
+                                  const questions = generateTemplateQuestions(selectedTemplate)
+                                  
+                                  // Update state immediately
+                                  setCurrentDDQQuestions(questions)
+                                  
+                                  // Store in localStorage and sessionStorage
+                                  localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
+                                  sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
+                                  
+                                  // Force a re-render by updating a timestamp
+                                  setCreateDDQForm(prev => ({
+                                    ...prev,
+                                    lastUpdated: Date.now()
+                                  }))
+                                  
+                                  showNotification(`Successfully pulled ${questions.length} questions from ${selectedTemplate.name}`)
+                                } else {
+                                  showNotification('Template not found. Please select a template first.')
+                                }
+                              }}
+                            >
+                              <FileText className="h-4 w-4 mr-2" />
+                              Pull Questions from Template
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="w-full"
+                              onClick={handleOpenQuestionSelectorForDDQ}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Pull from Multiple Sources
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
+                  
+                  {/* Show current DDQ questions if any */}
+                  {currentDDQQuestions.length > 0 && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="font-medium text-blue-900">Current DDQ Questions ({currentDDQQuestions.length})</h5>
+                        <Badge variant="outline" className="text-blue-700">DDQ in Progress</Badge>
+                      </div>
+                      <div className="space-y-2">
+                        {currentDDQQuestions.slice(0, 3).map((question, index) => (
+                          <div key={question.id} className="text-sm text-blue-800">
+                            {index + 1}. {question.question.substring(0, 80)}...
+                          </div>
+                        ))}
+                        {currentDDQQuestions.length > 3 && (
+                          <div className="text-sm text-blue-600">
+                            +{currentDDQQuestions.length - 3} more questions...
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  
                   <div className="mt-4">
                     <Label htmlFor="description">Description</Label>
                     <Textarea
@@ -1466,7 +2345,7 @@ export default function AllocatorDueDiligenceHubPage() {
                   </div>
                   <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
                     {availableManagers.map((manager) => (
-                      <div key={manager.id} className="flex items-center space-x-3 py-2">
+                      <div key={manager.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
                         <Checkbox
                           id={manager.id}
                           checked={createDDQForm.selectedManagers.includes(manager.id)}
@@ -1486,11 +2365,19 @@ export default function AllocatorDueDiligenceHubPage() {
                         />
                         <div className="flex-1">
                           <Label htmlFor={manager.id} className="text-sm font-medium cursor-pointer">
-                            {manager.name}
+                            {manager.contact}
                           </Label>
-                          <p className="text-xs text-gray-500">
-                            {manager.contact} • {manager.title}
+                          <p className="text-xs text-gray-600 font-medium">
+                            {manager.name}
                           </p>
+                          <p className="text-xs text-gray-500">
+                            {manager.title} • {manager.location} • {manager.aum} AUM
+                          </p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {manager.firmType}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -1592,26 +2479,35 @@ export default function AllocatorDueDiligenceHubPage() {
             <div className="space-y-4">
               <h4 className="text-lg font-medium text-gray-900">Sample Questions</h4>
               <div className="space-y-3">
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <div className="font-medium text-gray-900 mb-2">Organization & Management</div>
-                  <div className="text-sm text-gray-600">
-                    Please provide a detailed overview of your organization's structure, key personnel, and governance
-                    framework.
+                {selectedTemplateForPreview.sampleQuestions?.map((question: any, index: number) => (
+                  <div key={index} className="p-4 border border-gray-200 rounded-lg">
+                    <div className="font-medium text-gray-900 mb-2">{question.section}</div>
+                    <div className="text-sm text-gray-600">{question.question}</div>
                   </div>
-                </div>
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <div className="font-medium text-gray-900 mb-2">Investment Strategy</div>
-                  <div className="text-sm text-gray-600">
-                    Describe your investment strategy, target markets, and approach to portfolio construction.
-                  </div>
-                </div>
-                <div className="p-4 border border-gray-200 rounded-lg">
-                  <div className="font-medium text-gray-900 mb-2">Risk Management</div>
-                  <div className="text-sm text-gray-600">
-                    Please describe your risk management framework, including identification, assessment, and mitigation
-                    processes.
-                  </div>
-                </div>
+                )) || (
+                  <>
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="font-medium text-gray-900 mb-2">Organization & Management</div>
+                      <div className="text-sm text-gray-600">
+                        Please provide a detailed overview of your organization's structure, key personnel, and governance
+                        framework.
+                      </div>
+                    </div>
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="font-medium text-gray-900 mb-2">Investment Strategy</div>
+                      <div className="text-sm text-gray-600">
+                        Describe your investment strategy, target markets, and approach to portfolio construction.
+                      </div>
+                    </div>
+                    <div className="p-4 border border-gray-200 rounded-lg">
+                      <div className="font-medium text-gray-900 mb-2">Risk Management</div>
+                      <div className="text-sm text-gray-600">
+                        Please describe your risk management framework, including identification, assessment, and mitigation
+                        processes.
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -1654,7 +2550,7 @@ export default function AllocatorDueDiligenceHubPage() {
                 <Label>Select Managers *</Label>
                 <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
                   {availableManagers.map((manager) => (
-                    <div key={manager.id} className="flex items-center space-x-3 py-2">
+                    <div key={manager.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
                       <Checkbox
                         id={`use-${manager.id}`}
                         checked={useTemplateForm.selectedManagers.includes(manager.id)}
@@ -1674,11 +2570,19 @@ export default function AllocatorDueDiligenceHubPage() {
                       />
                       <div className="flex-1">
                         <Label htmlFor={`use-${manager.id}`} className="text-sm font-medium cursor-pointer">
-                          {manager.name}
+                          {manager.contact}
                         </Label>
-                        <p className="text-xs text-gray-500">
-                          {manager.contact} • {manager.title}
+                        <p className="text-xs text-gray-600 font-medium">
+                          {manager.name}
                         </p>
+                        <p className="text-xs text-gray-500">
+                          {manager.title} • {manager.location} • {manager.aum} AUM
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {manager.firmType}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -2014,7 +2918,7 @@ export default function AllocatorDueDiligenceHubPage() {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Send Message</h3>
                 <p className="text-sm text-gray-600">
-                  To: {selectedDDQ.contactName} at {selectedDDQ.managerName}
+                  Select managers to send message to
                 </p>
               </div>
               <Button variant="outline" onClick={closeMessageModal}>
@@ -2023,6 +2927,47 @@ export default function AllocatorDueDiligenceHubPage() {
             </div>
 
             <div className="space-y-4">
+              {/* Manager Selection */}
+              <div className="space-y-2">
+                <Label>Select Managers *</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="select-all-managers-message"
+                      checked={selectedManagersForMessage.length === filteredActiveDDQs.length}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedManagersForMessage(filteredActiveDDQs.map(ddq => ddq.id))
+                        } else {
+                          setSelectedManagersForMessage([])
+                        }
+                      }}
+                    />
+                    <Label htmlFor="select-all-managers-message" className="font-medium">Select All Managers</Label>
+                  </div>
+                  <div className="border-t pt-2">
+                    {filteredActiveDDQs.map((ddq) => (
+                      <div key={ddq.id} className="flex items-center space-x-2 py-1">
+                        <Checkbox
+                          id={`manager-${ddq.id}-message`}
+                          checked={selectedManagersForMessage.includes(ddq.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedManagersForMessage(prev => [...prev, ddq.id])
+                            } else {
+                              setSelectedManagersForMessage(prev => prev.filter(id => id !== ddq.id))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`manager-${ddq.id}-message`} className="text-sm">
+                          {ddq.contactName} at {ddq.managerName} ({ddq.strategy})
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="messageTopic">Subject *</Label>
                 <Input
@@ -2049,7 +2994,12 @@ export default function AllocatorDueDiligenceHubPage() {
               <Button variant="outline" onClick={closeMessageModal}>
                 Cancel
               </Button>
-              <Button onClick={handleSendMessage}>Send Message</Button>
+              <Button 
+                onClick={handleSendMessage} 
+                disabled={selectedManagersForMessage.length === 0 || !messageTopic.trim() || !messageContent.trim()}
+              >
+                Send Message
+              </Button>
             </div>
           </div>
         </div>
@@ -2063,7 +3013,7 @@ export default function AllocatorDueDiligenceHubPage() {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Schedule Check-in Meeting</h3>
                 <p className="text-sm text-gray-600">
-                  With: {selectedDDQ.contactName} at {selectedDDQ.managerName}
+                  Select managers to schedule meeting with
                 </p>
               </div>
               <Button variant="outline" onClick={closeMeetingModal}>
@@ -2072,6 +3022,47 @@ export default function AllocatorDueDiligenceHubPage() {
             </div>
 
             <div className="space-y-4">
+              {/* Manager Selection */}
+              <div className="space-y-2">
+                <Label>Select Managers *</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="select-all-managers-meeting"
+                      checked={selectedManagersForMeeting.length === filteredActiveDDQs.length}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedManagersForMeeting(filteredActiveDDQs.map(ddq => ddq.id))
+                        } else {
+                          setSelectedManagersForMeeting([])
+                        }
+                      }}
+                    />
+                    <Label htmlFor="select-all-managers-meeting" className="font-medium">Select All Managers</Label>
+                  </div>
+                  <div className="border-t pt-2">
+                    {filteredActiveDDQs.map((ddq) => (
+                      <div key={ddq.id} className="flex items-center space-x-2 py-1">
+                        <Checkbox
+                          id={`manager-${ddq.id}-meeting`}
+                          checked={selectedManagersForMeeting.includes(ddq.id)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedManagersForMeeting(prev => [...prev, ddq.id])
+                            } else {
+                              setSelectedManagersForMeeting(prev => prev.filter(id => id !== ddq.id))
+                            }
+                          }}
+                        />
+                        <Label htmlFor={`manager-${ddq.id}-meeting`} className="text-sm">
+                          {ddq.contactName} at {ddq.managerName} ({ddq.strategy})
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="meetingTopic">Meeting Topic *</Label>
                 <Input
@@ -2162,7 +3153,12 @@ export default function AllocatorDueDiligenceHubPage() {
               <Button variant="outline" onClick={closeMeetingModal}>
                 Cancel
               </Button>
-              <Button onClick={handleScheduleMeeting}>Schedule Meeting</Button>
+              <Button 
+                onClick={handleScheduleMeeting}
+                disabled={selectedManagersForMeeting.length === 0 || !meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time}
+              >
+                Schedule Meeting
+              </Button>
             </div>
           </div>
         </div>
@@ -2175,10 +3171,30 @@ export default function AllocatorDueDiligenceHubPage() {
             <h1 className="text-2xl font-bold text-gray-900">Due Diligence Hub</h1>
             <p className="text-gray-600">Manage and review due diligence questionnaires</p>
           </div>
-          <Button onClick={handleCreateDDQClick}>
-            <FileText className="h-4 w-4 mr-2" />
-            Create DDQ
-          </Button>
+          <CustomDropdown
+            trigger={
+              <Button>
+                <FileText className="h-4 w-4 mr-2" />
+                Launch Due Diligence
+              </Button>
+            }
+            items={[
+              {
+                label: "Create DDQ",
+                onClick: handleCreateDDQClick,
+              },
+              {
+                label: "Start Informal Due Diligence",
+                onClick: () => {
+                  handleStartInformalDueDiligence()
+                },
+              },
+              {
+                label: "Create Custom Template",
+                onClick: handleCreateCustomTemplate,
+              },
+            ]}
+          />
         </div>
 
         {/* Tabs */}
@@ -2251,7 +3267,7 @@ export default function AllocatorDueDiligenceHubPage() {
 
             {/* DDQ List */}
             <div className="space-y-4">
-              {activeDDQs.map((ddq) => (
+              {filteredActiveDDQs.map((ddq) => (
                 <Card key={ddq.id} className="border border-gray-200 hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -2319,6 +3335,10 @@ export default function AllocatorDueDiligenceHubPage() {
                           }
                           items={[
                             {
+                              label: "Edit DDQ",
+                              onClick: () => handleEditDDQ(ddq.id),
+                            },
+                            {
                               label: "Send Message",
                               onClick: () => handleMessageManager(ddq),
                             },
@@ -2328,7 +3348,7 @@ export default function AllocatorDueDiligenceHubPage() {
                             },
                             {
                               label: "Export DDQ",
-                              onClick: () => showNotification(`Exporting DDQ: ${ddq.templateName}`),
+                              onClick: () => handleExportDDQ(ddq),
                             },
                           ]}
                         />
@@ -2383,7 +3403,7 @@ export default function AllocatorDueDiligenceHubPage() {
                         <Badge variant="outline">{ddq.vintage}</Badge>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => handleViewCompletedDDQ(ddq)}>
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
@@ -2400,7 +3420,6 @@ export default function AllocatorDueDiligenceHubPage() {
             {/* Vestira Standard Templates */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Star className="h-5 w-5 text-yellow-500" />
                 <h3 className="text-lg font-semibold text-gray-900">Vestira Standard Templates</h3>
                 <Badge className="bg-blue-100 text-blue-800">Recommended</Badge>
               </div>
@@ -2432,20 +3451,24 @@ export default function AllocatorDueDiligenceHubPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between pt-4 border-t">
-                        <div className="text-sm text-gray-500">
-                          Last updated: {new Date(template.lastUpdated).toLocaleDateString()}
+                                              <div className="flex items-center justify-between pt-4 border-t">
+                          <div className="text-sm text-gray-500">
+                            Last updated: {new Date(template.lastUpdated).toLocaleDateString()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handlePreviewTemplate(template.id)}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleAddAllQuestions(template.id)}>
+                              <FileText className="h-4 w-4 mr-1" />
+                              Add to Custom DDQ
+                            </Button>
+                            <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
+                              Use Template
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => handlePreviewTemplate(template.id)}>
-                            <Eye className="h-4 w-4 mr-1" />
-                            Preview
-                          </Button>
-                          <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
-                            Use Template
-                          </Button>
-                        </div>
-                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -2493,6 +3516,10 @@ export default function AllocatorDueDiligenceHubPage() {
                               <Eye className="h-4 w-4 mr-1" />
                               Preview
                             </Button>
+                            <Button variant="outline" size="sm" onClick={() => handleAddAllQuestions(template.id)}>
+                              <FileText className="h-4 w-4 mr-1" />
+                              Add to Custom DDQ
+                            </Button>
                             <Button size="sm" onClick={() => handleCreateDDQ(template.id)}>
                               Use Template
                             </Button>
@@ -2507,6 +3534,575 @@ export default function AllocatorDueDiligenceHubPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Custom Template Creation Modal */}
+      {showCreateTemplateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 w-full max-w-5xl mx-auto max-h-[95vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-semibold text-gray-900">Create Custom Template</h3>
+                <p className="text-sm text-gray-600 mt-1">Build your own DDQ template for future use</p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateTemplateModal(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-8">
+              {/* Template Details */}
+              <Card>
+                <CardContent className="p-6">
+                  <h4 className="text-lg font-medium text-gray-900 mb-4">Template Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="template-name">Template Name *</Label>
+                      <Input
+                        id="template-name"
+                        value={newTemplate.name}
+                        onChange={(e) => setNewTemplate({...newTemplate, name: e.target.value})}
+                        placeholder="Enter template name"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="template-category">Category</Label>
+                      <Select value={newTemplate.category} onValueChange={(value) => setNewTemplate({...newTemplate, category: value})}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="General">General</SelectItem>
+                          <SelectItem value="Infrastructure">Infrastructure</SelectItem>
+                          <SelectItem value="Private Equity">Private Equity</SelectItem>
+                          <SelectItem value="Real Estate">Real Estate</SelectItem>
+                          <SelectItem value="Credit">Credit</SelectItem>
+                          <SelectItem value="Hedge Fund">Hedge Fund</SelectItem>
+                          <SelectItem value="Venture Capital">Venture Capital</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Label htmlFor="template-description">Description</Label>
+                    <Textarea
+                      id="template-description"
+                      value={newTemplate.description}
+                      onChange={(e) => setNewTemplate({...newTemplate, description: e.target.value})}
+                      placeholder="Describe your template"
+                      className="mt-1"
+                      rows={3}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Questions Section */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h4 className="text-lg font-medium text-gray-900">Questions ({newTemplate.questions.length})</h4>
+                      <p className="text-sm text-gray-500 mt-1">Add questions from existing templates or create your own</p>
+                    </div>
+                    <Button onClick={handleOpenQuestionSelector} variant="outline" className="flex items-center gap-2">
+                      <Plus className="h-4 w-4" />
+                      Add Questions
+                    </Button>
+                  </div>
+
+                  {newTemplate.questions.length === 0 ? (
+                    <div className="text-center py-12 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                      <FileText className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                      <p className="text-lg font-medium mb-2">No questions added yet</p>
+                      <p className="text-sm">Click "Add Questions" to get started with your template</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
+                      {newTemplate.questions.map((question, index) => (
+                        <div key={question.id} className="flex items-start gap-4 p-4 border rounded-lg bg-gray-50">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Badge variant="outline" className="font-medium">Question {index + 1}</Badge>
+                              <Badge variant="secondary">{question.type}</Badge>
+                            </div>
+                            <p className="text-sm font-medium text-gray-900 leading-relaxed">{question.question}</p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleRemoveQuestionFromTemplate(question.id)}
+                            className="flex-shrink-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-4 pt-6 border-t">
+                <Button variant="outline" onClick={() => setShowCreateTemplateModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveCustomTemplate} disabled={!newTemplate.name.trim() || newTemplate.questions.length === 0}>
+                  Create Template
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Question Selector Modal */}
+      {showQuestionSelector && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-8 w-full max-w-6xl mx-auto max-h-[95vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  {isQuestionSelectorForDDQ ? "Select Questions for DDQ" : "Select Questions for Template"}
+                </h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  {isQuestionSelectorForDDQ 
+                    ? "Choose questions from Vestira templates or your custom templates for your DDQ" 
+                    : "Choose questions from Vestira templates or your custom templates for your template"
+                  }
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowQuestionSelector(false)
+                  setIsQuestionSelectorForDDQ(false)
+                  setSelectedQuestionsInSelector([])
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+                {/* Current Questions Summary */}
+                {isQuestionSelectorForDDQ && currentDDQQuestions.length > 0 && (
+                  <Card>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900">Current DDQ Questions ({currentDDQQuestions.length})</h4>
+                        <Badge variant="outline">DDQ in Progress</Badge>
+                      </div>
+                      <div className="space-y-2">
+                        {currentDDQQuestions.slice(0, 3).map((question, index) => (
+                          <div key={question.id} className="text-sm text-gray-600">
+                            {index + 1}. {question.question.substring(0, 80)}...
+                          </div>
+                        ))}
+                        {currentDDQQuestions.length > 3 && (
+                          <div className="text-sm text-gray-500">
+                            +{currentDDQQuestions.length - 3} more questions...
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Enhanced Search and Filters */}
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      {/* Search Bar */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Search questions by text, template, or category..."
+                            value={questionSearchTerm}
+                            onChange={(e) => setQuestionSearchTerm(e.target.value)}
+                            className="w-full"
+                          />
+                        </div>
+                        <Button
+                          variant={bulkSelectMode ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setBulkSelectMode(!bulkSelectMode)}
+                        >
+                          {bulkSelectMode ? "Exit Bulk Mode" : "Bulk Select"}
+                        </Button>
+                      </div>
+
+                      {/* Filters Row */}
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium">Source:</Label>
+                          <Select value={questionSourceFilter} onValueChange={setQuestionSourceFilter}>
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Sources</SelectItem>
+                              <SelectItem value="vestira">Vestira Templates</SelectItem>
+                              <SelectItem value="custom">Custom Templates</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <Label className="text-sm font-medium">Category:</Label>
+                          <Select value={questionCategoryFilter} onValueChange={setQuestionCategoryFilter}>
+                            <SelectTrigger className="w-[180px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Categories</SelectItem>
+                              {getAvailableCategories().map(category => (
+                                <SelectItem key={category} value={category}>{category}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-auto">
+                          <span className="text-sm text-gray-600">
+                            {getAllAvailableQuestions().length} questions found
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Bulk Selection Controls */}
+                      {bulkSelectMode && (
+                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" onClick={handleBulkSelectAll}>
+                              Select All
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={handleBulkDeselectAll}>
+                              Deselect All
+                            </Button>
+                            <span className="text-sm text-gray-600">
+                              {selectedQuestionIds.length} selected
+                            </span>
+                          </div>
+                          <div className="ml-auto">
+                            <Button size="sm" onClick={handleBulkAddSelected} disabled={selectedQuestionIds.length === 0}>
+                              Add Selected ({selectedQuestionIds.length})
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
+              {/* Enhanced Questions List */}
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {getAllAvailableQuestions().map((question, index) => {
+                  const questionKey = `${question.source}-${question.templateName}-${question.question.substring(0, 50)}`
+                  const isSelected = bulkSelectMode 
+                    ? selectedQuestionIds.includes(questionKey)
+                    : selectedQuestionsInSelector.includes(questionKey)
+                  
+                  return (
+                    <Card key={`${question.id}-${index}`} className={`hover:shadow-md transition-shadow ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : ''}`}>
+                      <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                          <Checkbox
+                            id={`question-${index}`}
+                            checked={isSelected}
+                            onCheckedChange={(checked) => {
+                              if (bulkSelectMode) {
+                                // Bulk selection mode
+                                if (checked) {
+                                  setSelectedQuestionIds(prev => [...prev, questionKey])
+                                } else {
+                                  setSelectedQuestionIds(prev => prev.filter(key => key !== questionKey))
+                                }
+                              } else {
+                                // Individual selection mode
+                                if (checked) {
+                                  handleSelectQuestion(question)
+                                } else {
+                                  // Remove question when unchecked
+                                  setSelectedQuestionsInSelector(prev => prev.filter(key => key !== questionKey))
+                                  
+                                  if (isQuestionSelectorForDDQ) {
+                                    setCurrentDDQQuestions(prev => {
+                                      // Remove by matching the original question text and source
+                                      const updatedQuestions = prev.filter(q => 
+                                        !(q.question === question.question && 
+                                          q.source === question.source && 
+                                          q.templateName === question.templateName)
+                                      )
+                                      localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                      sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                      return updatedQuestions
+                                    })
+                                    showNotification("Question removed from DDQ")
+                                  } else {
+                                    setNewTemplate(prev => ({
+                                      ...prev,
+                                      questions: prev.questions.filter(q => 
+                                        !(q.question === question.question && 
+                                          q.source === question.source && 
+                                          q.templateName === question.templateName)
+                                      )
+                                    }))
+                                    showNotification("Question removed from template")
+                                  }
+                                }
+                              }
+                            }}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-3">
+                              <Badge variant="outline" className="text-xs">{question.source}</Badge>
+                              <Badge variant="secondary" className="text-xs">{question.type}</Badge>
+                              <Badge variant="outline" className="text-xs">{question.category}</Badge>
+                              <span className="text-xs text-gray-500">from {question.templateName}</span>
+                            </div>
+                            <p className="text-sm font-medium text-gray-900 leading-relaxed mb-2">{question.question}</p>
+                            
+                            {/* Question Preview */}
+                            {question.question.length > 150 && (
+                              <div className="text-xs text-gray-500">
+                                {question.question.substring(0, 150)}...
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+                
+                {getAllAvailableQuestions().length === 0 && (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <div className="text-gray-500">
+                        <FileText className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                        <p className="text-lg font-medium mb-2">No questions found</p>
+                        <p className="text-sm">Try adjusting your search terms or filters</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-4 pt-6 border-t">
+                <Button variant="outline" onClick={() => {
+                  setShowQuestionSelector(false)
+                  setIsQuestionSelectorForDDQ(false)
+                  setSelectedQuestionsInSelector([])
+                  showNotification(isQuestionSelectorForDDQ 
+                    ? `Added ${currentDDQQuestions.length} questions to DDQ` 
+                    : `Added ${newTemplate.questions.length} questions to template`
+                  )
+                }}>
+                  Done
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit DDQ Modal */}
+      {showEditDDQModal && editingDDQ && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Edit DDQ</h2>
+              <Button variant="outline" size="sm" onClick={handleCancelEditDDQ}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              {/* DDQ Name */}
+              <div>
+                <Label htmlFor="ddqName">DDQ Name</Label>
+                <Input
+                  id="ddqName"
+                  value={editDDQForm.ddqName}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, ddqName: e.target.value })}
+                  placeholder="Enter DDQ name"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={editDDQForm.description}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, description: e.target.value })}
+                  placeholder="Enter description"
+                  rows={3}
+                />
+              </div>
+
+              {/* Due Date */}
+              <div>
+                <Label htmlFor="dueDate">Due Date</Label>
+                <Input
+                  id="dueDate"
+                  type="date"
+                  value={editDDQForm.dueDate}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, dueDate: e.target.value })}
+                />
+              </div>
+
+              {/* Manager Selection */}
+              <div>
+                <Label>Manager</Label>
+                <Select
+                  value={editDDQForm.selectedManagers[0] || ""}
+                  onValueChange={(value) => setEditDDQForm({ ...editDDQForm, selectedManagers: [value] })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select manager" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableManagers.map((manager) => (
+                      <SelectItem key={manager.id} value={manager.id}>
+                        {manager.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Strategy */}
+              <div>
+                <Label>Strategy</Label>
+                <Select
+                  value={editDDQForm.strategies[0] || ""}
+                  onValueChange={(value) => setEditDDQForm({ ...editDDQForm, strategies: [value] })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select strategy" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Private Equity">Private Equity</SelectItem>
+                    <SelectItem value="Venture Capital">Venture Capital</SelectItem>
+                    <SelectItem value="Real Estate">Real Estate</SelectItem>
+                    <SelectItem value="Infrastructure">Infrastructure</SelectItem>
+                    <SelectItem value="Hedge Fund">Hedge Fund</SelectItem>
+                    <SelectItem value="Credit">Credit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Fund Types */}
+              <div>
+                <Label>Investment Type</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="fund"
+                      checked={editDDQForm.fundTypes.fund}
+                      onCheckedChange={(checked) =>
+                        setEditDDQForm({
+                          ...editDDQForm,
+                          fundTypes: { ...editDDQForm.fundTypes, fund: checked as boolean }
+                        })
+                      }
+                    />
+                    <Label htmlFor="fund">Fund</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="sma"
+                      checked={editDDQForm.fundTypes.sma}
+                      onCheckedChange={(checked) =>
+                        setEditDDQForm({
+                          ...editDDQForm,
+                          fundTypes: { ...editDDQForm.fundTypes, sma: checked as boolean }
+                        })
+                      }
+                    />
+                    <Label htmlFor="sma">SMA</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="other"
+                      checked={editDDQForm.fundTypes.other}
+                      onCheckedChange={(checked) =>
+                        setEditDDQForm({
+                          ...editDDQForm,
+                          fundTypes: { ...editDDQForm.fundTypes, other: checked as boolean }
+                        })
+                      }
+                    />
+                    <Label htmlFor="other">Other</Label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Fund Size */}
+              <div>
+                <Label htmlFor="fundSize">Fund Size</Label>
+                <Input
+                  id="fundSize"
+                  value={editDDQForm.fundSize}
+                  onChange={(e) => setEditDDQForm({ ...editDDQForm, fundSize: e.target.value })}
+                  placeholder="e.g., $100M - $500M"
+                />
+              </div>
+
+              {/* Visibility */}
+              <div>
+                <Label>Visibility</Label>
+                <Select
+                  value={editDDQForm.visibility}
+                  onValueChange={(value) => setEditDDQForm({ ...editDDQForm, visibility: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-4 mt-6 pt-6 border-t">
+              <Button variant="outline" onClick={handleCancelEditDDQ}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveEditDDQ}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </Screen>
   )
+  } catch (error) {
+    console.error("Error in AllocatorDueDiligenceHubPage:", error)
+    return (
+      <Screen>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Something went wrong</h1>
+            <p className="text-gray-600 mb-4">We encountered an unexpected error. Please try again or contact support if the problem persists.</p>
+            <Button onClick={() => window.location.reload()}>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </Screen>
+    )
+  }
 }

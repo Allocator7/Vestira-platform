@@ -1,0 +1,187 @@
+service: my-v0-project
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: ${opt:region, 'us-east-1'}
+  stage: ${opt:stage, 'dev'}
+  environment:
+    NODE_ENV: production
+    NEXTAUTH_URL: https://${self:custom.domainName}
+    NEXTAUTH_SECRET: ${ssm:/my-v0-project/${self:provider.stage}/nextauth-secret}
+    GOOGLE_CLIENT_ID: ${ssm:/my-v0-project/${self:provider.stage}/google-client-id}
+    GOOGLE_CLIENT_SECRET: ${ssm:/my-v0-project/${self:provider.stage}/google-client-secret}
+    MICROSOFT_CLIENT_ID: ${ssm:/my-v0-project/${self:provider.stage}/microsoft-client-id}
+    MICROSOFT_CLIENT_SECRET: ${ssm:/my-v0-project/${self:provider.stage}/microsoft-client-secret}
+
+custom:
+  domainName: ${self:service}-${self:provider.stage}.example.com
+  s3BucketName: ${self:service}-${self:provider.stage}-static-assets
+  cloudfrontOriginAccessIdentity: ${self:service}-${self:provider.stage}-oai
+
+plugins:
+  - serverless-s3-sync
+
+package:
+  individually: true
+  excludeDevDependencies: true
+  exclude:
+    - .git/**
+    - .gitignore
+    - README.md
+    - node_modules/**
+    - .next/**
+    - coverage/**
+    - .nyc_output/**
+    - .vscode/**
+
+functions:
+  nextjs:
+    handler: index.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: ANY
+          cors: true
+      - http:
+          path: /
+          method: ANY
+          cors: true
+    timeout: 30
+    memorySize: 1024
+
+resources:
+  Resources:
+    # S3 Bucket for static assets
+    StaticAssetsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3BucketName}
+        PublicReadBlockConfiguration:
+          BlockPublicAcls: true
+          BlockPublicPolicy: true
+          IgnorePublicAcls: true
+          RestrictPublicBuckets: true
+        BucketEncryption:
+          ServerSideEncryptionConfiguration:
+            - ServerSideEncryptionByDefault:
+                SSEAlgorithm: AES256
+    
+    # CloudFront Origin Access Identity
+    OriginAccessIdentity:
+      Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+      Properties:
+        CloudFrontOriginAccessIdentityConfig:
+          Comment: ${self:custom.cloudfrontOriginAccessIdentity}
+    
+    # S3 Bucket Policy
+    StaticAssetsBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref StaticAssetsBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal:
+                AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${OriginAccessIdentity}'
+              Action: 's3:GetObject'
+              Resource: !Sub '${StaticAssetsBucket}/*'
+    
+    # CloudFront Distribution
+    CloudFrontDistribution:
+      Type: AWS::CloudFront::Distribution
+      Properties:
+        DistributionConfig:
+          Origins:
+            - DomainName: !GetAtt StaticAssetsBucket.RegionalDomainName
+              Id: S3Origin
+              S3OriginConfig:
+                OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${OriginAccessIdentity}'
+            - DomainName: !Sub '${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com'
+              Id: ApiGatewayOrigin
+              OriginPath: /${self:provider.stage}
+              CustomOriginConfig:
+                HTTPPort: 443
+                HTTPSPort: 443
+                OriginProtocolPolicy: https-only
+          DefaultCacheBehavior:
+            TargetOriginId: ApiGatewayOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            ForwardedValues:
+              QueryString: true
+              Headers:
+                - Authorization
+                - CloudFront-Forwarded-Proto
+                - Host
+              Cookies:
+                Forward: all
+            Compress: true
+            DefaultTTL: 0
+            MaxTTL: 31536000
+            MinTTL: 0
+          CacheBehaviors:
+            - PathPattern: '/_next/static/*'
+              TargetOriginId: S3Origin
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods:
+                - GET
+                - HEAD
+              CachedMethods:
+                - GET
+                - HEAD
+              ForwardedValues:
+                QueryString: false
+                Headers: []
+              Compress: true
+              DefaultTTL: 86400
+              MaxTTL: 31536000
+              MinTTL: 0
+            - PathPattern: '/static/*'
+              TargetOriginId: S3Origin
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods:
+                - GET
+                - HEAD
+              CachedMethods:
+                - GET
+                - HEAD
+              ForwardedValues:
+                QueryString: false
+                Headers: []
+              Compress: true
+              DefaultTTL: 86400
+              MaxTTL: 31536000
+              MinTTL: 0
+          Comment: ${self:service} ${self:provider.stage} distribution
+          DefaultRootObject: ''
+          Enabled: true
+          HttpVersion: http2
+          PriceClass: PriceClass_100
+
+  Outputs:
+    CloudFrontDistributionId:
+      Value: !Ref CloudFrontDistribution
+      Export:
+        Name: ${self:service}-${self:provider.stage}-CloudFrontDistributionId
+    
+    CloudFrontDistributionDomainName:
+      Value: !GetAtt CloudFrontDistribution.DomainName
+      Export:
+        Name: ${self:service}-${self:provider.stage}-CloudFrontDistributionDomainName
+    
+    S3BucketName:
+      Value: !Ref StaticAssetsBucket
+      Export:
+        Name: ${self:service}-${self:provider.stage}-S3BucketName

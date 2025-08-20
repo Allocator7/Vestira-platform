@@ -335,38 +335,53 @@ export default function DocumentManagementPageClient() {
     })
 
     try {
-      // Simulate file preparation and download process
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create document content based on classification
+      let documentContent = ""
+      const timestamp = new Date().toISOString()
+      
+      switch (document.classification) {
+        case "Restricted Documents":
+          documentContent = `RESTRICTED DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis is a restricted document with confidential information. Please handle with appropriate care.\n\nGenerated: ${timestamp}`
+          break
+        case "Client-Specific Documents":
+          documentContent = `CLIENT-SPECIFIC DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis document contains client-specific information and should be handled according to client confidentiality requirements.\n\nGenerated: ${timestamp}`
+          break
+        case "Internal Documents":
+          documentContent = `INTERNAL DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis is an internal document for organizational use only.\n\nGenerated: ${timestamp}`
+          break
+        default:
+          documentContent = `DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nGenerated: ${timestamp}`
+      }
 
-      // Create a blob URL for the download (simulated)
-      const blob = new Blob([`Document: ${document.title}\nContent: ${document.description}`], {
-        type: "text/plain",
-      })
-      const url = window.URL.createObjectURL(blob)
-
-      // Create temporary download link
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(url)
-
-      notify({
-        title: "Download Complete",
-        description: `${document.title} has been downloaded successfully.`,
+      await downloadUtils.downloadText(documentContent, `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`, {
+        onComplete: () => {
+          setIsDownloading(false)
+          notify({
+            title: "Download Complete",
+            description: `${document.title} has been downloaded successfully. Check your downloads folder.`,
+          })
+        },
+        onError: (error) => {
+          console.error("Download error:", error)
+          setIsDownloading(false)
+          notify({
+            title: "Download Failed",
+            description: "There was an error downloading the document. Please try again.",
+            variant: "destructive",
+          })
+        }
       })
     } catch (error) {
+      console.error("Download error:", error)
+      setIsDownloading(false)
       notify({
         title: "Download Failed",
         description: "There was an error downloading the document. Please try again.",
         variant: "destructive",
       })
-    } finally {
-      setIsDownloading(false)
     }
   }
 

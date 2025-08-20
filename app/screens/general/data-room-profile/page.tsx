@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Progress } from "@/components/ui/progress"
+
 import {
   Search,
   Download,
@@ -26,6 +26,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
+  Settings,
 } from "lucide-react"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { useToast } from "@/hooks/use-toast"
@@ -184,32 +185,61 @@ export default function DataRoomProfilePage() {
   const [showDocumentViewer, setShowDocumentViewer] = useState(false)
 
   const handleDownloadAll = async () => {
-    setIsDownloading(true)
+    try {
+      setIsDownloading(true)
 
-    // Simulate downloading all documents
-    for (let i = 0; i < filteredDocuments.length; i++) {
-      const doc = filteredDocuments[i]
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create a combined document with all documents
+      const combinedContent = `DATA ROOM DOCUMENTS - ${dataRoomName}
 
-      // Create a blob with document content
-      const content = `Document: ${doc.name}\nType: ${doc.type}\nSize: ${doc.size}\nCategory: ${doc.category}\nStatus: ${doc.status}`
-      const blob = new Blob([content], { type: "text/plain" })
-      const url = URL.createObjectURL(blob)
+Total Documents: ${filteredDocuments.length}
+Generated: ${new Date().toISOString()}
 
-      // Create download link
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `${doc.name.replace(/\s+/g, "_")}.txt`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+${filteredDocuments.map((doc, index) => `
+DOCUMENT ${index + 1}:
+Name: ${doc.name}
+Type: ${doc.type}
+Size: ${doc.size}
+Category: ${doc.category}
+Status: ${doc.status}
+Last Modified: ${doc.lastModified}
+Description: ${doc.description || 'No description available'}
 
-      // Add delay between downloads
-      await new Promise((resolve) => setTimeout(resolve, 500))
+Content:
+This is the content for ${doc.name}. In a real implementation, this would contain the actual document content.
+
+${'='.repeat(50)}
+`).join('\n')}`
+
+      await downloadUtils.downloadText(combinedContent, `${dataRoomName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_all_documents.txt`, {
+        onComplete: () => {
+          setIsDownloading(false)
+          toast({
+            title: "Download Complete",
+            description: `Successfully downloaded ${filteredDocuments.length} documents`,
+          })
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          setIsDownloading(false)
+          toast({
+            title: "Download Failed",
+            description: "There was an error downloading the documents. Please try again.",
+            variant: "destructive",
+          })
+        }
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      setIsDownloading(false)
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the documents. Please try again.",
+        variant: "destructive",
+      })
     }
-
-    setIsDownloading(false)
-    alert(`Successfully downloaded ${filteredDocuments.length} documents`)
   }
 
   const handleViewDocument = (document: any) => {
@@ -223,21 +253,50 @@ export default function DataRoomProfilePage() {
   }
 
   const handleDownloadDocument = async (doc: any) => {
-    // Simulate downloading individual document
-    const content = `Document: ${doc.name}\nType: ${doc.type}\nSize: ${doc.size}\nCategory: ${doc.category}\nStatus: ${doc.status}\nLast Modified: ${doc.lastModified}`
-    const blob = new Blob([content], { type: "text/plain" })
-    const url = URL.createObjectURL(blob)
+    try {
+      // Import and use the download utility
+      const { downloadUtils } = await import('../../../../utils/downloadUtils')
+      
+      // Create document content
+      const content = `DOCUMENT DETAILS
 
-    // Create download link
-    const link = window.document.createElement("a")
-    link.href = url
-    link.download = `${doc.name.replace(/\s+/g, "_")}.txt`
-    window.document.body.appendChild(link)
-    link.click()
-    window.document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+Name: ${doc.name}
+Type: ${doc.type}
+Size: ${doc.size}
+Category: ${doc.category}
+Status: ${doc.status}
+Last Modified: ${doc.lastModified}
+Description: ${doc.description || 'No description available'}
 
-    alert(`Downloaded ${doc.name}`)
+CONTENT:
+This is the content for ${doc.name}. In a real implementation, this would contain the actual document content.
+
+Generated: ${new Date().toISOString()}`
+
+      await downloadUtils.downloadText(content, `${doc.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`, {
+        onComplete: () => {
+          toast({
+            title: "Download Complete",
+            description: `Successfully downloaded ${doc.name}`,
+          })
+        },
+        onError: (error) => {
+          console.error('Download error:', error)
+          toast({
+            title: "Download Failed",
+            description: "There was an error downloading the document. Please try again.",
+            variant: "destructive",
+          })
+        }
+      })
+    } catch (error) {
+      console.error('Download error:', error)
+      toast({
+        title: "Download Failed",
+        description: "There was an error downloading the document. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleSendMessage = (participant: any) => {
@@ -247,6 +306,24 @@ export default function DataRoomProfilePage() {
 
   const handleMessageSent = async (messageData: any) => {
     try {
+      // Store message in localStorage for persistence
+      const message = {
+        id: `msg-${Date.now()}`,
+        from: "Current User",
+        to: selectedParticipant?.name || "Unknown",
+        subject: messageData.subject || "Data Room Inquiry",
+        content: messageData.content,
+        timestamp: new Date().toISOString(),
+        dataRoomId: dataRoomId,
+        dataRoomName: dataRoomName,
+        status: "sent"
+      }
+      
+      // Get existing messages
+      const existingMessages = JSON.parse(localStorage.getItem('data-room-messages') || '[]')
+      existingMessages.push(message)
+      localStorage.setItem('data-room-messages', JSON.stringify(existingMessages))
+      
       // Simulate sending message
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -258,6 +335,7 @@ export default function DataRoomProfilePage() {
       setShowMessageModal(false)
       setSelectedParticipant(null)
     } catch (error) {
+      console.error("Error sending message:", error)
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -323,21 +401,8 @@ export default function DataRoomProfilePage() {
               </div>
             </div>
 
-            {/* Progress and Key Metrics - Horizontal Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              {/* Overall Progress */}
-              <Card className="p-4 bg-gradient-to-r from-blue-50 to-purple-50">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-medium text-deepBrand">Document Review Progress</span>
-                  <span className="text-2xl font-bold text-deepBrand">{dataRoomData.completionRate}%</span>
-                </div>
-                <Progress value={dataRoomData.completionRate} className="h-3 mb-2" />
-                <div className="text-xs text-gray-600">
-                  {Math.round((dataRoomData.completionRate / 100) * dataRoomData.totalDocuments)} of{" "}
-                  {dataRoomData.totalDocuments} documents reviewed
-                </div>
-              </Card>
-
+            {/* Owner & Contact and Security - Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Owner & Contact */}
               <Card className="p-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -405,14 +470,7 @@ export default function DataRoomProfilePage() {
                 <p className="text-xl font-bold text-deepBrand">{dataRoomData.totalDocuments}</p>
                 <p className="text-xs text-gray-500">Total available</p>
               </div>
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="flex items-center justify-center gap-1 text-green-600 mb-1">
-                  <Users className="h-4 w-4" />
-                  <span className="text-sm font-medium">Contacts</span>
-                </div>
-                <p className="text-xl font-bold text-deepBrand">{dataRoomData.participants}</p>
-                <p className="text-xs text-gray-500">Active users</p>
-              </div>
+
               <div className="text-center p-3 bg-purple-50 rounded-lg">
                 <div className="flex items-center justify-center gap-1 text-purple-600 mb-1">
                   <Clock className="h-4 w-4" />
@@ -445,9 +503,7 @@ export default function DataRoomProfilePage() {
             <TabsTrigger value="activity" className="data-[state=active]:bg-white data-[state=active]:text-deepBrand">
               Activity
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="data-[state=active]:bg-white data-[state=active]:text-deepBrand">
-              Analytics
-            </TabsTrigger>
+
             <TabsTrigger
               value="participants"
               className="data-[state=active]:bg-white data-[state=active]:text-deepBrand"
@@ -551,49 +607,7 @@ export default function DataRoomProfilePage() {
                 </CardContent>
               </Card>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Progress Breakdown */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Progress Breakdown
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Document Review</span>
-                          <span className="font-medium">85%</span>
-                        </div>
-                        <Progress value={85} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Due Diligence</span>
-                          <span className="font-medium">72%</span>
-                        </div>
-                        <Progress value={72} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Legal Review</span>
-                          <span className="font-medium">60%</span>
-                        </div>
-                        <Progress value={60} className="h-2" />
-                      </div>
-                      <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Final Approval</span>
-                          <span className="font-medium">45%</span>
-                        </div>
-                        <Progress value={45} className="h-2" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
+              <div className="grid grid-cols-1 gap-6">
                 {/* Recent Activity Summary */}
                 <Card>
                   <CardHeader>
@@ -627,6 +641,10 @@ export default function DataRoomProfilePage() {
                 <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                   <CardTitle>Documents ({filteredDocuments.length})</CardTitle>
                   <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Settings className="h-4 w-4 mr-1" />
+                      Manage Files
+                    </Button>
                     <Button variant="outline" size="sm" onClick={handleDownloadAll} disabled={isDownloading}>
                       <Download className="h-4 w-4 mr-1" />
                       {isDownloading ? "Downloading..." : "Download All"}
@@ -700,7 +718,6 @@ export default function DataRoomProfilePage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-baseGray">{doc.views} views</span>
                         <Button variant="outline" size="sm" onClick={() => handleViewDocument(doc)}>
                           <Eye className="h-4 w-4 mr-1" />
                           View
@@ -747,62 +764,83 @@ export default function DataRoomProfilePage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+          <TabsContent value="participants">
+            <div className="space-y-6">
+              {/* Connected Allocators */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Document Engagement
-                  </CardTitle>
+                  <CardTitle>Connected Allocators (5)</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {documentsData.slice(0, 5).map((doc) => (
-                      <div key={doc.id} className="flex justify-between items-center p-2 rounded hover:bg-gray-50">
-                        <span className="text-sm truncate">{doc.name}</span>
-                        <div className="flex items-center gap-3 text-xs text-gray-600">
-                          <span>{doc.views} views</span>
-                          <span>{doc.downloadCount} downloads</span>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <img src="/placeholder.svg?height=40&width=40" alt="State Teachers Pension" />
+                          <AvatarFallback>ST</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">State Teachers Pension</p>
+                          <p className="text-sm text-baseGray">Pension Fund • $45B AUM</p>
                         </div>
                       </div>
-                    ))}
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-green-100 text-green-800">Active</Badge>
+                        <Button size="sm" variant="outline">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <img src="/placeholder.svg?height=40&width=40" alt="University Endowment" />
+                          <AvatarFallback>UE</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">University Endowment Foundation</p>
+                          <p className="text-sm text-baseGray">Endowment • $12B AUM</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-blue-100 text-blue-800">Reviewing</Badge>
+                        <Button size="sm" variant="outline">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <img src="/placeholder.svg?height=40&width=40" alt="Healthcare Foundation" />
+                          <AvatarFallback>HF</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">Healthcare Foundation</p>
+                          <p className="text-sm text-baseGray">Foundation • $3.5B AUM</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
+                        <Button size="sm" variant="outline">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Message
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
+              {/* Firm Contacts */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
-                    Engagement Trends
-                  </CardTitle>
+                  <CardTitle>Firm Contacts (3)</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {documentsData.reduce((sum, doc) => sum + doc.views, 0)}
-                      </div>
-                      <div className="text-sm text-gray-600">Total Views</div>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <div className="text-2xl font-bold text-green-600">
-                        {documentsData.reduce((sum, doc) => sum + doc.downloadCount, 0)}
-                      </div>
-                      <div className="text-sm text-gray-600">Total Downloads</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="participants">
-            <Card>
-              <CardHeader>
-                <CardTitle>Contacts ({dataRoomData.participants})</CardTitle>
-              </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -838,25 +876,55 @@ export default function DataRoomProfilePage() {
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10">
-                        <img src="/placeholder.svg?height=40&width=40" alt="Michael Chen" />
-                        <AvatarFallback>MC</AvatarFallback>
+                        <img src="/placeholder.svg?height=40&width=40" alt="David Rodriguez" />
+                        <AvatarFallback>DR</AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">Michael Chen</p>
-                        <p className="text-sm text-baseGray">Investment Analyst • CalPERS</p>
+                        <p className="font-medium">David Rodriguez</p>
+                        <p className="text-sm text-baseGray">Senior Director • BlackRock</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline">Viewer</Badge>
+                      <Badge variant="outline">Manager</Badge>
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() =>
                           handleSendMessage({
-                            name: "Michael Chen",
-                            title: "Investment Analyst",
-                            company: "CalPERS",
-                            email: "michael.chen@calpers.ca.gov",
+                            name: "David Rodriguez",
+                            title: "Senior Director",
+                            company: "BlackRock",
+                            email: "david.rodriguez@blackrock.com",
+                          })
+                        }
+                      >
+                        <MessageSquare className="h-4 w-4 mr-1" />
+                        Message
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <img src="/placeholder.svg?height=40&width=40" alt="Lisa Thompson" />
+                        <AvatarFallback>LT</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">Lisa Thompson</p>
+                        <p className="text-sm text-baseGray">Investment Manager • BlackRock</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline">Manager</Badge>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() =>
+                          handleSendMessage({
+                            name: "Lisa Thompson",
+                            title: "Investment Manager",
+                            company: "BlackRock",
+                            email: "lisa.thompson@blackrock.com",
                           })
                         }
                       >
@@ -868,6 +936,7 @@ export default function DataRoomProfilePage() {
                 </div>
               </CardContent>
             </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

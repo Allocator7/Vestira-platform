@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Search, Filter, MapPin, Clock, Users, Star } from "lucide-react"
+import { Calendar, Search, Filter, MapPin, Clock, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,10 +36,9 @@ export default function AllocatorEventsCenter() {
       attendees: 380,
       maxAttendees: 450,
       price: "$1,500",
-      rating: 4.9,
       description: "Comprehensive summit covering advanced due diligence methodologies and risk assessment strategies.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=DD+Summit",
+      image: "/events/dd-summit.jpg",
     },
     {
       id: 2,
@@ -53,10 +52,9 @@ export default function AllocatorEventsCenter() {
       attendees: 250,
       maxAttendees: 300,
       price: "$950",
-      rating: 4.7,
       description: "Strategic insights into alternative investment allocation for institutional portfolios.",
       isRegistered: true,
-      image: "/placeholder.svg?height=200&width=400&text=Allocation+Strategies",
+      image: "/events/allocation-strategies.jpg",
     },
     {
       id: 3,
@@ -70,10 +68,9 @@ export default function AllocatorEventsCenter() {
       attendees: 95,
       maxAttendees: 120,
       price: "$650",
-      rating: 4.8,
       description: "Hands-on workshop on performance measurement and benchmarking in private markets.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Analytics+Workshop",
+      image: "/events/analytics-workshop.jpg",
     },
     {
       id: 4,
@@ -87,10 +84,9 @@ export default function AllocatorEventsCenter() {
       attendees: 180,
       maxAttendees: 200,
       price: "$750",
-      rating: 4.6,
       description: "Networking and knowledge sharing for endowment and foundation investment professionals.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Investment+Forum",
+      image: "/events/investment-forum.jpg",
     },
   ]
 
@@ -117,7 +113,6 @@ export default function AllocatorEventsCenter() {
       type: "Webinar",
       status: "attended",
       registrationDate: "2025-05-05",
-      rating: 4.4,
     },
   ]
 
@@ -202,10 +197,6 @@ export default function AllocatorEventsCenter() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <Badge variant={event.isRegistered ? "default" : "secondary"}>{event.type}</Badge>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{event.rating}</span>
-                    </div>
                   </div>
                   <CardTitle className="text-lg leading-tight">{event.title}</CardTitle>
                   <p className="text-sm text-gray-600">{event.organizer}</p>

@@ -820,65 +820,13 @@ function ConsultantMarketInsightsPage() {
             </TabsContent>
           </Tabs>
 
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Upcoming Industry Events</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <EventCard
-                  title="Consultant Forum 2025"
-                  date="June 15, 2025"
-                  time="9:00 AM - 5:00 PM EST"
-                  host="Investment Consultant Association"
-                />
-                <EventCard
-                  title="Client Advisory Workshop"
-                  date="June 22, 2025"
-                  time="2:00 PM - 4:00 PM EST"
-                  host="Institutional Advisory Network"
-                />
-                <EventCard
-                  title="Alternative Investments Summit"
-                  date="July 8-9, 2025"
-                  time="9:00 AM - 5:00 PM EST"
-                  host="Private Markets Institute"
-                />
-              </div>
-            </CardContent>
-          </Card>
+          {/* Removed Upcoming Industry Events section - now using dedicated Events Center */}
         </div>
 
         {/* Click outside to close dropdown */}
         {showFilterDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowFilterDropdown(false)} />}
 
-        {/* Export Dialog */}
-        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Export Insights</DialogTitle>
-              <DialogDescription>Choose a format to export the current insights</DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <Button onClick={() => handleExport("PDF")} className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Export as PDF
-              </Button>
-              <Button onClick={() => handleExport("Excel")} className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Export as Excel
-              </Button>
-              <Button onClick={() => handleExport("CSV")} className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Export as CSV
-              </Button>
-              <Button onClick={() => handleExport("Image")} className="flex items-center gap-2">
-                <Download className="h-4 w-4" />
-                Export as Images
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        {/* Export Dialog removed as per feedback - users should download individual pieces instead */}
 
         {/* Share Dialog */}
         <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

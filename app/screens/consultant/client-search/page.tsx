@@ -513,7 +513,7 @@ export default function ConsultantAllocatorManagerSearchPage() {
                           { value: "aua", label: "Highest AUA" },
                           { value: "tenure", label: "Longest Tenure" },
                           { value: "name", label: "Name (A–Z)" },
-                          { value: "aum", label: "Largest AUM" },
+                          { value: "aum", label: "Largest Total Assets" },
                           { value: "experience", label: "Most Experience" },
                           { value: "bookmarked", label: "Bookmarked First" },
                         ]}
@@ -578,7 +578,7 @@ export default function ConsultantAllocatorManagerSearchPage() {
                             <div className="flex items-center gap-2 mb-1">
                               <Building2 className="h-4 w-4" style={{ color: "#6D6A75" }} />
                               <span className="text-sm" style={{ color: "#6D6A75" }}>
-                                {contact.type} • {contact.aum} AUM
+                                {contact.type} • {contact.aum} Total Assets
                                 {contact.aua !== "$0M" && ` • ${contact.aua} AUA`}
                               </span>
                             </div>

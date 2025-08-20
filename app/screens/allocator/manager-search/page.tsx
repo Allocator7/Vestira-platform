@@ -266,18 +266,49 @@ export default function AllocatorManagerSearchPage() {
       })
 
       // Apply sorting
-      if (sortBy === "aum") {
-        filtered.sort((a, b) => {
-          const aumA = Number.parseInt(a.aum.replace(/[^0-9]/g, ""))
-          const aumB = Number.parseInt(b.aum.replace(/[^0-9]/g, ""))
-          return aumB - aumA
-        })
-      } else if (sortBy === "experience") {
-        filtered.sort((a, b) => Number.parseInt(b.experience) - Number.parseInt(a.experience))
-      } else if (sortBy === "name") {
-        filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
-      } else if (sortBy === "bookmarked") {
-        filtered.sort((a, b) => (b.isBookmarked ? 1 : 0) - (a.isBookmarked ? 1 : 0))
+      switch (sortBy) {
+        case "aum":
+          filtered.sort((a, b) => {
+            const aumA = parseFloat(a.aum.replace(/[^0-9.]/g, ""))
+            const aumB = parseFloat(b.aum.replace(/[^0-9.]/g, ""))
+            return aumB - aumA
+          })
+          break
+        case "aum-desc":
+          filtered.sort((a, b) => {
+            const aumA = parseFloat(a.aum.replace(/[^0-9.]/g, ""))
+            const aumB = parseFloat(b.aum.replace(/[^0-9.]/g, ""))
+            return aumA - aumB
+          })
+          break
+        case "experience":
+          filtered.sort((a, b) => {
+            const expA = parseInt(a.experience.replace(/[^0-9]/g, ""))
+            const expB = parseInt(b.experience.replace(/[^0-9]/g, ""))
+            return expB - expA
+          })
+          break
+        case "experience-desc":
+          filtered.sort((a, b) => {
+            const expA = parseInt(a.experience.replace(/[^0-9]/g, ""))
+            const expB = parseInt(b.experience.replace(/[^0-9]/g, ""))
+            return expA - expB
+          })
+          break
+        case "name":
+          filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
+          break
+        case "name-desc":
+          filtered.sort((a, b) => b.firmName.localeCompare(a.firmName))
+          break
+        case "bookmarked":
+          filtered.sort((a, b) => (b.isBookmarked ? 1 : 0) - (a.isBookmarked ? 1 : 0))
+          break
+        case "bookmarked-desc":
+          filtered.sort((a, b) => (a.isBookmarked ? 1 : 0) - (b.isBookmarked ? 1 : 0))
+          break
+        default:
+          filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
       }
 
       setFilteredManagers(filtered)
@@ -345,9 +376,13 @@ export default function AllocatorManagerSearchPage() {
                     onChange={handleSortChange}
                     options={[
                       { value: "aum", label: "Largest AUM" },
+                      { value: "aum-desc", label: "Smallest AUM" },
                       { value: "experience", label: "Most Experience" },
+                      { value: "experience-desc", label: "Least Experience" },
                       { value: "name", label: "Firm Name A-Z" },
+                      { value: "name-desc", label: "Firm Name Z-A" },
                       { value: "bookmarked", label: "Bookmarked First" },
+                      { value: "bookmarked-desc", label: "Bookmarked Last" },
                     ]}
                   />
                   <ExportButton

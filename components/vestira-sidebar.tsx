@@ -46,8 +46,15 @@ export function VestiraSidebar({
   userTitle,
   className,
 }: VestiraSidebarProps) {
-  const { userRole: contextUserRole, setUserRole, isNavOpen, unreadMessageCounts } = useApp()
-  const userRole = propUserRole || contextUserRole || "allocator"
+  const { userRole: contextUserRole, setUserRole, refreshRoleFromStorage, isNavOpen, unreadMessageCounts } = useApp()
+  const userRole = propUserRole || contextUserRole || null
+
+  // Refresh role from storage when component mounts
+  useEffect(() => {
+    if (!userRole && typeof window !== 'undefined') {
+      refreshRoleFromStorage()
+    }
+  }, [userRole, refreshRoleFromStorage])
 
   const title =
     userTitle ||
@@ -192,6 +199,7 @@ export function VestiraSidebar({
       icon: Network,
       route: "/screens/industry-group/connection-center",
     },
+    { id: "market-insights", label: "Market Insights", icon: BookOpen, route: "/screens/industry-group/market-insights" },
     {
       id: "inbox",
       label: "Inbox",
@@ -221,8 +229,10 @@ export function VestiraSidebar({
       case "industry-group":
         return industryGroupNavItems
       case "allocator":
-      default:
         return allocatorNavItems
+      default:
+        // If no role is set, return empty array to prevent rendering
+        return []
     }
   }
 

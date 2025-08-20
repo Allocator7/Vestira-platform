@@ -21,7 +21,9 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
+import { Toaster } from "@/components/ui/toaster"
+import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 
 // Sample team members data for allocator
 const teamMembersData = [
@@ -117,6 +119,12 @@ export default function AllocatorTeamManagementPage() {
     role: "Viewer",
     department: "Research",
   })
+  // Mock current user - in real app this would come from auth context
+  const currentUser = { role: "Admin" }
+
+  // Message modal state
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
+  const [selectedMember, setSelectedMember] = useState<(typeof teamMembersData)[0] | null>(null)
 
   const { toast } = useToast()
 
@@ -203,6 +211,11 @@ export default function AllocatorTeamManagementPage() {
   const openEditDialog = (member: (typeof teamMembersData)[0]) => {
     setCurrentMember(member)
     setIsEditMemberOpen(true)
+  }
+
+  const handleSendEmail = (member: (typeof teamMembersData)[0]) => {
+    setSelectedMember(member)
+    setIsMessageModalOpen(true)
   }
 
   return (
@@ -533,36 +546,41 @@ export default function AllocatorTeamManagementPage() {
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleSendEmail(member)}>
                                     <Mail className="mr-2 h-4 w-4" />
                                     Send Email
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
-                                    <Shield className="mr-2 h-4 w-4" />
-                                    Permissions
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleToggleStatus(member.id)}>
-                                    <span className="flex items-center">
-                                      {member.status === "active" ? (
-                                        <>
-                                          <X className="mr-2 h-4 w-4" />
-                                          Deactivate
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Check className="mr-2 h-4 w-4" />
-                                          Activate
-                                        </>
-                                      )}
-                                    </span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    className="text-red-600"
-                                    onClick={() => handleDeleteMember(member.id)}
-                                  >
-                                    <Trash className="mr-2 h-4 w-4" />
-                                    Delete
-                                  </DropdownMenuItem>
+                                  {/* Admin-only actions */}
+                                  {currentUser.role === "Admin" && (
+                                    <>
+                                      <DropdownMenuItem>
+                                        <Shield className="mr-2 h-4 w-4" />
+                                        Permissions
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => handleToggleStatus(member.id)}>
+                                        <span className="flex items-center">
+                                          {member.status === "active" ? (
+                                            <>
+                                              <X className="mr-2 h-4 w-4" />
+                                              Deactivate
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Check className="mr-2 h-4 w-4" />
+                                              Activate
+                                            </>
+                                          )}
+                                        </span>
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem
+                                        className="text-red-600"
+                                        onClick={() => handleDeleteMember(member.id)}
+                                      >
+                                        <Trash className="mr-2 h-4 w-4" />
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </td>
@@ -577,6 +595,22 @@ export default function AllocatorTeamManagementPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {/* Send Message Modal */}
+      {selectedMember && (
+        <SendMessageModal
+          isOpen={isMessageModalOpen}
+          onClose={() => {
+            setIsMessageModalOpen(false)
+            setSelectedMember(null)
+          }}
+          recipientName={selectedMember.name}
+          recipientTitle={selectedMember.role}
+          organizationName="Vestira Platform"
+        />
+      )}
+      
+      <Toaster />
     </div>
   )
 }

@@ -18,7 +18,7 @@ export function ProfileManagementWidget({ userType, compact = false }: ProfileMa
     lastName: "Johnson",
     title: "Investment Director",
     organization: "State Teachers Pension",
-    avatar: "/placeholder-user.jpg",
+    avatar: "/profiles/default-user.jpg",
     profileCompleteness: 85,
   }
 
@@ -55,7 +55,7 @@ export function ProfileManagementWidget({ userType, compact = false }: ProfileMa
           <div className="flex items-center gap-3">
             <Avatar className="h-12 w-12">
               <AvatarImage
-                src={currentUser.avatar || "/placeholder.svg"}
+                src={currentUser.avatar || "/profiles/default-user.jpg"}
                 alt={`${currentUser.firstName} ${currentUser.lastName}`}
               />
               <AvatarFallback>
@@ -95,7 +95,7 @@ export function ProfileManagementWidget({ userType, compact = false }: ProfileMa
         <div className="flex items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage
-              src={currentUser.avatar || "/placeholder.svg"}
+              src={currentUser.avatar || "/profiles/default-user.jpg"}
               alt={`${currentUser.firstName} ${currentUser.lastName}`}
             />
             <AvatarFallback className="text-lg">

@@ -145,11 +145,17 @@ export default function IndustryGroupEventsPage() {
     })
     .sort((a, b) => {
       switch (sortBy) {
-        case "date":
+        case "date-asc":
           return new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
-        case "title":
+        case "date-desc":
+          return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        case "title-asc":
           return a.title.localeCompare(b.title)
-        case "registrations":
+        case "title-desc":
+          return b.title.localeCompare(a.title)
+        case "registrations-asc":
+          return a.registrations - b.registrations
+        case "registrations-desc":
           return b.registrations - a.registrations
         default:
           return 0
@@ -220,6 +226,15 @@ export default function IndustryGroupEventsPage() {
     })
   }
 
+  const handleEditEvent = (event: any) => {
+    setSelectedEvent(event)
+    setEventDetailsOpen(true)
+    toast({
+      title: "Edit Event",
+      description: `Opening editor for ${event.title}`,
+    })
+  }
+
   const handleDuplicateEvent = (event: any) => {
     const duplicatedEvent = {
       ...event,
@@ -239,20 +254,114 @@ export default function IndustryGroupEventsPage() {
   }
 
   const handleExportData = () => {
-    // Mock export functionality
-    toast({
-      title: "Export Started",
-      description: "Your event data is being prepared for download.",
-    })
+    try {
+      // Show initial toast
+      toast({
+        title: "Export Started",
+        description: "Your event data is being prepared for download.",
+      })
+      
+      // Prepare export data
+      const exportData = events.map(event => ({
+        title: event.title,
+        type: event.type,
+        status: event.status,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        location: event.location,
+        registrations: event.registrations,
+        maxAttendees: event.maxAttendees,
+        confirmed: event.confirmed,
+        attended: event.attended
+      }))
+      
+      // Create CSV content
+      const headers = ["Title", "Type", "Status", "Start Date", "End Date", "Location", "Registrations", "Max Attendees", "Confirmed", "Attended"]
+      const csvContent = [
+        headers.join(","),
+        ...exportData.map(row => [
+          `"${row.title}"`,
+          `"${row.type}"`,
+          `"${row.status}"`,
+          `"${row.startDate}"`,
+          `"${row.endDate}"`,
+          `"${row.location}"`,
+          row.registrations,
+          row.maxAttendees,
+          row.confirmed,
+          row.attended
+        ].join(","))
+      ].join("\n")
+      
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+      const link = document.createElement("a")
+      const url = URL.createObjectURL(blob)
+      link.setAttribute("href", url)
+      link.setAttribute("download", `event-data-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = "hidden"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Show success toast
+      setTimeout(() => {
+        toast({
+          title: "Export Complete",
+          description: `Event data has been exported successfully. (${exportData.length} events)`,
+        })
+      }, 1000)
+    } catch (error) {
+      console.error("Export error:", error)
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting the data. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleShareEvent = (event: any) => {
-    // Mock share functionality
-    navigator.clipboard.writeText(`Check out this event: ${event.title}`)
-    toast({
-      title: "Link Copied",
-      description: "Event link has been copied to clipboard.",
-    })
+    try {
+      // Create a shareable link for the event
+      const shareText = `Check out this event: ${event.title}\n\nDate: ${event.startDate}${event.startDate !== event.endDate ? ` - ${event.endDate}` : ''}\nTime: ${event.startTime} - ${event.endTime}\nLocation: ${event.location}\n\nRegister now!`
+      
+      // Try to use native sharing if available
+      if (navigator.share) {
+        navigator.share({
+          title: event.title,
+          text: shareText,
+          url: window.location.href
+        }).then(() => {
+          toast({
+            title: "Event Shared",
+            description: `${event.title} has been shared successfully.`,
+          })
+        }).catch((error) => {
+          console.error('Error sharing:', error)
+          // Fallback to clipboard
+          navigator.clipboard.writeText(shareText)
+          toast({
+            title: "Link Copied",
+            description: "Event details have been copied to clipboard.",
+          })
+        })
+      } else {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(shareText)
+        toast({
+          title: "Link Copied",
+          description: "Event details have been copied to clipboard.",
+        })
+      }
+    } catch (error) {
+      console.error("Share error:", error)
+      toast({
+        title: "Share Failed",
+        description: "There was an error sharing the event. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleViewEvent = (event: any) => {
@@ -329,10 +438,16 @@ export default function IndustryGroupEventsPage() {
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filter by type" />
+                <SelectValue placeholder="Filter by Event Type">
+                  {filterType === "all" ? "All Event Types" : 
+                   filterType === "conference" ? "Conference" :
+                   filterType === "webinar" ? "Webinar" :
+                   filterType === "workshop" ? "Workshop" :
+                   filterType === "networking" ? "Networking" : "Filter by Event Type"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="all">All Event Types</SelectItem>
                 <SelectItem value="conference">Conference</SelectItem>
                 <SelectItem value="webinar">Webinar</SelectItem>
                 <SelectItem value="workshop">Workshop</SelectItem>
@@ -341,12 +456,22 @@ export default function IndustryGroupEventsPage() {
             </Select>
             <Select value={sortBy} onValueChange={setSortBy}>
               <SelectTrigger className="w-48">
-                <SelectValue placeholder="Sort by" />
+                <SelectValue placeholder="Sort by Criteria">
+                  {sortBy === "date-asc" ? "Date (Nearest to Furthest)" :
+                   sortBy === "date-desc" ? "Date (Furthest to Nearest)" :
+                   sortBy === "title-asc" ? "Title (A-Z)" :
+                   sortBy === "title-desc" ? "Title (Z-A)" :
+                   sortBy === "registrations-asc" ? "Registrations (Low to High)" :
+                   sortBy === "registrations-desc" ? "Registrations (High to Low)" : "Sort by Criteria"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="date">Date</SelectItem>
-                <SelectItem value="title">Title</SelectItem>
-                <SelectItem value="registrations">Registrations</SelectItem>
+                <SelectItem value="date-asc">Date (Nearest to Furthest)</SelectItem>
+                <SelectItem value="date-desc">Date (Furthest to Nearest)</SelectItem>
+                <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+                <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+                <SelectItem value="registrations-asc">Registrations (Low to High)</SelectItem>
+                <SelectItem value="registrations-desc">Registrations (High to Low)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -467,7 +592,7 @@ export default function IndustryGroupEventsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="gap-2">
+                            <DropdownMenuItem className="gap-2" onClick={() => handleEditEvent(event)}>
                               <Edit className="h-4 w-4" />
                               Edit Event
                             </DropdownMenuItem>

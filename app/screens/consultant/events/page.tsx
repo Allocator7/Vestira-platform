@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar, Search, Filter, MapPin, Clock, Users, Star } from "lucide-react"
+import { Calendar, Search, Filter, MapPin, Clock, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +13,7 @@ import { EventRegistrationModal } from "@/components/events/EventRegistrationMod
 import { EventDetailsModal } from "@/components/events/EventDetailsModal"
 import { EventCertificateModal } from "@/components/events/EventCertificateModal"
 import { EventCalendar } from "@/components/events/EventCalendar"
+import { CreateEventButton } from "@/components/events/CreateEventButton"
 
 export default function ConsultantEventsCenter() {
   const { toast } = useToast()
@@ -37,10 +38,10 @@ export default function ConsultantEventsCenter() {
       attendees: 320,
       maxAttendees: 400,
       price: "$1,100",
-      rating: 4.8,
+
       description: "Comprehensive summit covering latest trends and best practices in financial advisory services.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=Advisory+Summit",
+      image: "/events/advisory-summit.jpg",
     },
     {
       id: 2,
@@ -54,10 +55,10 @@ export default function ConsultantEventsCenter() {
       attendees: 180,
       maxAttendees: 250,
       price: "$850",
-      rating: 4.7,
+
       description: "Stay updated on the latest regulatory requirements and compliance strategies.",
       isRegistered: true,
-      image: "/placeholder.svg?height=200&width=400&text=Compliance+Conference",
+      image: "/events/compliance-conference.jpg",
     },
     {
       id: 3,
@@ -71,10 +72,10 @@ export default function ConsultantEventsCenter() {
       attendees: 75,
       maxAttendees: 100,
       price: "$550",
-      rating: 4.9,
+
       description: "Enhance your client relationship management skills and grow your practice.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=CRM+Workshop",
+      image: "/events/crm-workshop.jpg",
     },
     {
       id: 4,
@@ -88,10 +89,10 @@ export default function ConsultantEventsCenter() {
       attendees: 200,
       maxAttendees: 300,
       price: "$750",
-      rating: 4.6,
+
       description: "Explore how technology is transforming financial services and advisory practices.",
       isRegistered: false,
-      image: "/placeholder.svg?height=200&width=400&text=FinTech+Forum",
+      image: "/events/fintech-forum.jpg",
     },
   ]
 
@@ -118,7 +119,7 @@ export default function ConsultantEventsCenter() {
       type: "Seminar",
       status: "attended",
       registrationDate: "2025-05-10",
-      rating: 4.3,
+
     },
   ]
 
@@ -156,6 +157,7 @@ export default function ConsultantEventsCenter() {
           <h1 className="text-3xl font-bold text-gray-900">Events Center</h1>
           <p className="text-gray-600 mt-1">Professional development and industry networking events</p>
         </div>
+        <CreateEventButton />
       </div>
 
       <Tabs defaultValue="browse" className="space-y-6">
@@ -207,10 +209,7 @@ export default function ConsultantEventsCenter() {
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <Badge variant={event.isRegistered ? "default" : "secondary"}>{event.type}</Badge>
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{event.rating}</span>
-                    </div>
+                    
                   </div>
                   <CardTitle className="text-lg leading-tight">{event.title}</CardTitle>
                   <p className="text-sm text-gray-600">{event.organizer}</p>

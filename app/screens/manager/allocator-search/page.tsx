@@ -14,6 +14,7 @@ import { ExportButton } from "@/components/ExportButton"
 import { MapPin, TrendingUp, Users, MessageCircle, Calendar, Eye, Bookmark, Building2 } from "lucide-react"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { ScheduleMeetingModal } from "@/components/profile-modals/ScheduleMeetingModal"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const allocators = [
   {
@@ -219,31 +220,36 @@ export default function ManagerAllocatorSearchPage() {
   const [selectedContact, setSelectedContact] = useState<any>(null)
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false)
+  const [showContactSelector, setShowContactSelector] = useState(false)
+  const [selectedAction, setSelectedAction] = useState<'message' | 'schedule' | null>(null)
 
   const router = useRouter()
 
   const handleViewProfile = (allocator: any) => {
-    router.push(`/screens/general/allocator-profile?id=${allocator.id}`)
+    router.push(`/screens/general/allocator-profile?id=${allocator.id}&firm=${encodeURIComponent(allocator.firmName)}`)
   }
 
-  const handleSendMessage = (allocator: any, strategy?: string) => {
+  const handleSendMessage = (allocator: any) => {
     setSelectedAllocator(allocator)
-    // Find the most relevant contact based on strategy or use the first contact
-    const contact = strategy
-      ? allocator.contacts.find((c: any) => c.strategy === strategy) || allocator.contacts[0]
-      : allocator.contacts[0]
-    setSelectedContact(contact)
-    setIsMessageModalOpen(true)
+    setSelectedAction('message')
+    setShowContactSelector(true)
   }
 
-  const handleScheduleMeeting = (allocator: any, strategy?: string) => {
+  const handleScheduleMeeting = (allocator: any) => {
     setSelectedAllocator(allocator)
-    // Find the most relevant contact based on strategy or use the first contact
-    const contact = strategy
-      ? allocator.contacts.find((c: any) => c.strategy === strategy) || allocator.contacts[0]
-      : allocator.contacts[0]
+    setSelectedAction('schedule')
+    setShowContactSelector(true)
+  }
+
+  const handleContactSelect = (contact: any) => {
     setSelectedContact(contact)
-    setIsMeetingModalOpen(true)
+    setShowContactSelector(false)
+    
+    if (selectedAction === 'message') {
+      setIsMessageModalOpen(true)
+    } else if (selectedAction === 'schedule') {
+      setIsMeetingModalOpen(true)
+    }
   }
 
   const handleFiltersChange = useCallback(
@@ -359,7 +365,7 @@ export default function ManagerAllocatorSearchPage() {
                     value={sortBy}
                     onChange={handleSortChange}
                     options={[
-                      { value: "aum", label: "Largest AUM" },
+                      { value: "aum", label: "Largest Total Assets" },
                       { value: "experience", label: "Most Experience" },
                       { value: "name", label: "Firm Name A-Z" },
                       { value: "bookmarked", label: "Bookmarked First" },
@@ -411,7 +417,7 @@ export default function ManagerAllocatorSearchPage() {
                           </h3>
                         </div>
                         <p className="text-sm mb-2" style={{ color: "#6D6A75" }}>
-                          {allocator.aum} AUM • Founded {allocator.founded}
+                          {allocator.aum} Total Assets • Founded {allocator.founded}
                         </p>
                         <p className="text-sm leading-relaxed max-w-2xl mb-3" style={{ color: "#6D6A75" }}>
                           {allocator.description}
@@ -541,6 +547,38 @@ export default function ManagerAllocatorSearchPage() {
             organizationName={selectedAllocator.firmName}
           />
         </>
+      )}
+
+      {/* Contact Selector Modal */}
+      {showContactSelector && selectedAllocator && (
+        <Dialog open={showContactSelector} onOpenChange={setShowContactSelector}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Select Contact</DialogTitle>
+              <DialogDescription>
+                Choose a contact at {selectedAllocator.firmName} to {selectedAction === 'message' ? 'message' : 'schedule a meeting with'}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              {selectedAllocator.contacts.map((contact: any, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleContactSelect(contact)}
+                >
+                  <div>
+                    <p className="font-medium">{contact.name}</p>
+                    <p className="text-sm text-gray-600">{contact.title}</p>
+                    <p className="text-xs text-gray-500">{contact.strategy}</p>
+                  </div>
+                  <Button size="sm" variant="outline">
+                    {selectedAction === 'message' ? 'Message' : 'Schedule'}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </Screen>
   )

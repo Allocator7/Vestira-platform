@@ -175,7 +175,15 @@ export function EventRegistrationModal({ event, isOpen, onClose, onSuccess }: Ev
                   onCheckedChange={(checked) => handleInputChange("agreeToTerms", checked as boolean)}
                 />
                 <Label htmlFor="agreeToTerms" className="text-sm leading-relaxed">
-                  I agree to the event terms and conditions and understand the cancellation policy *
+                  I agree to the{" "}
+                  <button
+                    type="button"
+                    className="text-electric-blue hover:underline font-medium"
+                    onClick={() => window.open('/terms/event-terms', '_blank')}
+                  >
+                    event terms and conditions
+                  </button>{" "}
+                  and understand the cancellation policy *
                 </Label>
               </div>
               <div className="flex items-start space-x-2">

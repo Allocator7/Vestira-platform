@@ -26,6 +26,8 @@ import {
   List,
   Save,
   Send,
+  Upload,
+  Paperclip,
 } from "lucide-react"
 import { useApp } from "../../../../context/AppContext"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -109,6 +111,7 @@ export default function ManagerDueDiligenceHubPage() {
   // New state for comprehensive DDQ response interface
   const [showDDQResponseModal, setShowDDQResponseModal] = useState(false)
   const [selectedDDQForResponse, setSelectedDDQForResponse] = useState(null)
+  const [questionAttachments, setQuestionAttachments] = useState<{[key: string]: File[]}>({})
   const [viewMode, setViewMode] = useState<"overview" | "question-by-question">("overview")
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [activeSection, setActiveSection] = useState("firm")
@@ -1593,6 +1596,62 @@ export default function ManagerDueDiligenceHubPage() {
                                       className="w-full"
                                     />
                                   )}
+
+                                  {/* Document Attachment Section */}
+                                  <div className="mt-4">
+                                    <Label className="text-sm font-medium text-gray-700 mb-2 block">Attach Documents</Label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                      <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                      <p className="text-sm text-gray-600 mb-2">Drop files here or click to upload</p>
+                                      <input
+                                        type="file"
+                                        multiple
+                                        className="hidden"
+                                        id={`file-upload-${question.id}`}
+                                        onChange={(e) => {
+                                          const files = Array.from(e.target.files || [])
+                                          setQuestionAttachments(prev => ({
+                                            ...prev,
+                                            [question.id]: [...(prev[question.id] || []), ...files]
+                                          }))
+                                        }}
+                                      />
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => document.getElementById(`file-upload-${question.id}`)?.click()}
+                                      >
+                                        Choose Files
+                                      </Button>
+                                    </div>
+                                    
+                                    {/* Show attached files */}
+                                    {questionAttachments[question.id] && questionAttachments[question.id].length > 0 && (
+                                      <div className="mt-3 space-y-2">
+                                        <p className="text-sm font-medium text-gray-700">Attached Files:</p>
+                                        {questionAttachments[question.id].map((file, index) => (
+                                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                            <div className="flex items-center gap-2">
+                                              <Paperclip className="h-4 w-4 text-gray-500" />
+                                              <span className="text-sm text-gray-700">{file.name}</span>
+                                            </div>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => {
+                                                setQuestionAttachments(prev => ({
+                                                  ...prev,
+                                                  [question.id]: prev[question.id].filter((_, i) => i !== index)
+                                                }))
+                                              }}
+                                            >
+                                              <X className="h-4 w-4" />
+                                            </Button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
                               )}
 
@@ -1739,6 +1798,62 @@ export default function ManagerDueDiligenceHubPage() {
                                 className="w-full"
                               />
                             )}
+
+                            {/* Document Attachment Section for Question-by-Question View */}
+                            <div className="mt-6">
+                              <Label className="text-sm font-medium text-gray-700 mb-3 block">Attach Documents</Label>
+                              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                                <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600 mb-2">Drop files here or click to upload</p>
+                                <input
+                                  type="file"
+                                  multiple
+                                  className="hidden"
+                                  id={`file-upload-question-${getCurrentQuestion().id}`}
+                                  onChange={(e) => {
+                                    const files = Array.from(e.target.files || [])
+                                    setQuestionAttachments(prev => ({
+                                      ...prev,
+                                      [getCurrentQuestion().id]: [...(prev[getCurrentQuestion().id] || []), ...files]
+                                    }))
+                                  }}
+                                />
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => document.getElementById(`file-upload-question-${getCurrentQuestion().id}`)?.click()}
+                                >
+                                  Choose Files
+                                </Button>
+                              </div>
+                              
+                              {/* Show attached files for Question-by-Question View */}
+                              {questionAttachments[getCurrentQuestion().id] && questionAttachments[getCurrentQuestion().id].length > 0 && (
+                                <div className="mt-4 space-y-2">
+                                  <p className="text-sm font-medium text-gray-700">Attached Files:</p>
+                                  {questionAttachments[getCurrentQuestion().id].map((file, index) => (
+                                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                      <div className="flex items-center gap-2">
+                                        <Paperclip className="h-4 w-4 text-gray-500" />
+                                        <span className="text-sm text-gray-700">{file.name}</span>
+                                      </div>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                          setQuestionAttachments(prev => ({
+                                            ...prev,
+                                            [getCurrentQuestion().id]: prev[getCurrentQuestion().id].filter((_, i) => i !== index)
+                                          }))
+                                        }}
+                                      >
+                                        <X className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         )}
 

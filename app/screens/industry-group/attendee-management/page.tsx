@@ -8,9 +8,12 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/components/ui/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { SendInvitationModal } from "@/components/industry-group/SendInvitationModal"
-import { IssueCertificateModal } from "@/components/industry-group/IssueCertificateModal"
+import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
+import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
+
 import {
   Search,
   Filter,
@@ -91,13 +94,25 @@ const mockEvents = [
 ]
 
 export default function AttendeeManagementPage() {
-  const { toast } = useToast()
+  const toast = useToast()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [memberTypeFilter, setMemberTypeFilter] = useState("all")
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
   const [showInvitationModal, setShowInvitationModal] = useState(false)
-  const [showCertificateModal, setShowCertificateModal] = useState(false)
+  const [showMessageModal, setShowMessageModal] = useState(false)
+  const [selectedAttendeeForMessage, setSelectedAttendeeForMessage] = useState<any>(null)
+  const [showViewProfileModal, setShowViewProfileModal] = useState(false)
+  const [selectedAttendeeForView, setSelectedAttendeeForView] = useState<any>(null)
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    assetClasses: [],
+    strategies: [],
+    sectors: [],
+    organizationTypes: [],
+    experience: []
+  })
+
   const [attendees, setAttendees] = useState(mockAttendees)
 
   const getStatusBadge = (status: string) => {
@@ -138,44 +153,106 @@ export default function AttendeeManagementPage() {
   })
 
   const handleExportData = () => {
-    toast({
-      title: "Export Started",
-      description: "Your attendee data is being prepared for download.",
-    })
-    // Simulate export
-    setTimeout(() => {
-      toast({
-        title: "Export Complete",
-        description: "Attendee data has been exported successfully.",
-      })
-    }, 2000)
+    const dataToExport = attendees.map((attendee) => ({
+      name: attendee.name,
+      email: attendee.email,
+      organization: attendee.organization,
+      title: attendee.title,
+      phone: attendee.phone,
+      location: attendee.location,
+      status: attendee.status,
+      memberType: attendee.memberType,
+      eventsAttended: attendee.eventsAttended,
+      lastEventDate: attendee.lastEventDate,
+      registrationDate: attendee.registrationDate,
+      certificatesEarned: attendee.certificatesEarned || 0,
+    }))
+
+    // Create CSV content
+    const headers = Object.keys(dataToExport[0] || {})
+    const csvContent = [
+      headers.join(","),
+      ...dataToExport.map((row) =>
+        headers
+          .map((header) => {
+            const value = row[header as keyof typeof row]
+            return typeof value === "string" && value.includes(",") ? `"${value}"` : value
+          })
+          .join(","),
+      ),
+    ].join("\n")
+
+    // Download CSV
+    const blob = new Blob([csvContent], { type: "text/csv" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `attendee-data-${new Date().toISOString().split("T")[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    toast.success("Attendee data exported successfully!")
   }
 
   const handleBulkAction = (action: string) => {
     if (selectedAttendees.length === 0) {
-      toast({
-        title: "No Selection",
-        description: "Please select attendees to perform bulk actions.",
-        variant: "destructive",
-      })
+      toast.error("Please select attendees to perform bulk actions.", "No Selection")
       return
     }
 
     switch (action) {
       case "email":
-        toast({
-          title: "Bulk Email Sent",
-          description: `Email sent to ${selectedAttendees.length} attendees.`,
-        })
+        toast.success(`Email sent to ${selectedAttendees.length} attendees.`, "Bulk Email Sent")
         break
-      case "certificate":
-        setShowCertificateModal(true)
-        break
+
       case "export":
-        toast({
-          title: "Export Started",
-          description: `Exporting data for ${selectedAttendees.length} selected attendees.`,
-        })
+        // Export only selected attendees
+        const selectedAttendeeData = attendees.filter(a => selectedAttendees.includes(a.id))
+        const csvHeaders = [
+          "Name",
+          "Email", 
+          "Organization",
+          "Title",
+          "Phone",
+          "Location",
+          "Status",
+          "Member Type",
+          "Events Attended",
+          "Last Event Date",
+          "Registration Date"
+        ]
+        
+        const csvData = selectedAttendeeData.map(attendee => [
+          attendee.name,
+          attendee.email,
+          attendee.organization,
+          attendee.title,
+          attendee.phone,
+          attendee.location,
+          attendee.status,
+          attendee.memberType,
+          attendee.eventsAttended,
+          attendee.lastEventDate,
+          attendee.registrationDate
+        ])
+        
+        const csvContent = [csvHeaders, ...csvData]
+          .map(row => row.map(field => `"${field}"`).join(','))
+          .join('\n')
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const link = document.createElement("a")
+        const url = URL.createObjectURL(blob)
+        link.setAttribute("href", url)
+        link.setAttribute("download", `selected-attendees-${new Date().toISOString().split('T')[0]}.csv`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        toast.success(`Exported data for ${selectedAttendees.length} selected attendees.`, "Export Complete")
         break
     }
   }
@@ -185,35 +262,46 @@ export default function AttendeeManagementPage() {
 
     switch (action) {
       case "email":
-        toast({
-          title: "Email Sent",
-          description: `Email sent to ${attendee?.name}.`,
-        })
+        // Open default email client
+        const emailSubject = encodeURIComponent("Industry Group Event Update")
+        const emailBody = encodeURIComponent(`Dear ${attendee?.name},\n\nThank you for your participation in our events.\n\nBest regards,\nIndustry Group Team`)
+        window.open(`mailto:${attendee?.email}?subject=${emailSubject}&body=${emailBody}`)
+        toast.success(`Email client opened for ${attendee?.name}.`, "Email Initiated")
         break
+        
       case "call":
-        toast({
-          title: "Call Initiated",
-          description: `Calling ${attendee?.name} at ${attendee?.phone}.`,
-        })
+        // Open phone dialer
+        const phoneNumber = attendee?.phone?.replace(/\D/g, '') || ''
+        if (phoneNumber) {
+          window.open(`tel:${phoneNumber}`)
+          toast.success(`Phone dialer opened for ${attendee?.name}.`, "Call Initiated")
+        } else {
+          toast.error("Phone number not available.", "Call Failed")
+        }
         break
+        
       case "message":
-        toast({
-          title: "Message Sent",
-          description: `Message sent to ${attendee?.name}.`,
-        })
+        // Open SendMessageModal
+        setSelectedAttendeeForMessage(attendee)
+        setShowMessageModal(true)
         break
-      case "edit":
-        toast({
-          title: "Edit Mode",
-          description: `Opening edit form for ${attendee?.name}.`,
-        })
+        
+      case "view":
+        // Open View Profile modal
+        try {
+          setSelectedAttendeeForView(attendee)
+          setShowViewProfileModal(true)
+        } catch (error) {
+          console.error("Error opening view profile:", error)
+          toast.error("Failed to open attendee profile. Please try again.", "Error")
+        }
         break
+        
       case "delete":
-        setAttendees(attendees.filter((a) => a.id !== attendeeId))
-        toast({
-          title: "Attendee Removed",
-          description: `${attendee?.name} has been removed from the system.`,
-        })
+        if (confirm(`Are you sure you want to remove ${attendee?.name} from the system?`)) {
+          setAttendees(attendees.filter((a) => a.id !== attendeeId))
+          toast.success(`${attendee?.name} has been removed from the system.`, "Attendee Removed")
+        }
         break
     }
   }
@@ -221,7 +309,7 @@ export default function AttendeeManagementPage() {
   const stats = {
     total: attendees.length,
     active: attendees.filter((a) => a.status === "confirmed" || a.status === "attended").length,
-    certificates: attendees.reduce((sum, a) => sum + a.certificatesEarned, 0),
+
     avgAttendance: Math.round((attendees.reduce((sum, a) => sum + a.eventsAttended, 0) / attendees.length) * 100) / 100,
   }
 
@@ -233,8 +321,12 @@ export default function AttendeeManagementPage() {
           <p className="text-gray-600 mt-1">Manage event attendees and track engagement</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleExportData}>
-            <Download className="h-4 w-4 mr-2" />
+          <Button 
+            variant="outline" 
+            onClick={handleExportData}
+            className="flex items-center gap-2"
+          >
+            <Download className="h-4 w-4" />
             Export Data
           </Button>
           <Button onClick={() => setShowInvitationModal(true)}>
@@ -268,17 +360,7 @@ export default function AttendeeManagementPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Certificates Issued</p>
-                <p className="text-2xl font-bold">{stats.certificates}</p>
-              </div>
-              <Award className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -296,7 +378,7 @@ export default function AttendeeManagementPage() {
         <TabsList>
           <TabsTrigger value="attendees">All Attendees</TabsTrigger>
           <TabsTrigger value="engagement">Engagement Analytics</TabsTrigger>
-          <TabsTrigger value="certificates">Certificates</TabsTrigger>
+
         </TabsList>
 
         <TabsContent value="attendees" className="space-y-4">
@@ -337,13 +419,29 @@ export default function AttendeeManagementPage() {
                     <SelectItem value="standard">Standard</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>
                   <Filter className="h-4 w-4 mr-2" />
                   More Filters
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Comprehensive Filters */}
+          {showFilters && (
+            <Card>
+              <CardContent className="p-4">
+                <ComprehensiveFilters
+                  onFiltersChange={setFilters}
+                  initialFilters={filters}
+                  showSectors={true}
+                  showOrganizationTypes={true}
+                  showExperience={true}
+                  userType="manager"
+                />
+              </CardContent>
+            </Card>
+          )}
 
           {/* Bulk Actions */}
           {selectedAttendees.length > 0 && (
@@ -356,10 +454,7 @@ export default function AttendeeManagementPage() {
                       <Mail className="h-4 w-4 mr-2" />
                       Send Email
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => handleBulkAction("certificate")}>
-                      <Award className="h-4 w-4 mr-2" />
-                      Issue Certificate
-                    </Button>
+
                     <Button size="sm" variant="outline" onClick={() => handleBulkAction("export")}>
                       <Download className="h-4 w-4 mr-2" />
                       Export Selected
@@ -418,7 +513,7 @@ export default function AttendeeManagementPage() {
                     <div className="flex items-center space-x-4">
                       <div className="text-right text-sm">
                         <p className="font-medium">{attendee.eventsAttended} events</p>
-                        <p className="text-gray-500">{attendee.certificatesEarned} certificates</p>
+      
                         <p className="text-xs text-gray-400">Last: {attendee.lastEventDate}</p>
                       </div>
                       <div className="flex gap-1">
@@ -442,17 +537,9 @@ export default function AttendeeManagementPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "edit")}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Profile
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "view")}>
                               <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <FileText className="h-4 w-4 mr-2" />
-                              View Certificates
+                              View Profile
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -460,7 +547,7 @@ export default function AttendeeManagementPage() {
                               onClick={() => handleAttendeeAction(attendee.id, "delete")}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Remove
+                              Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -532,98 +619,92 @@ export default function AttendeeManagementPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="certificates" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>Certificate Management</CardTitle>
-                  <CardDescription>Manage and track professional certificates</CardDescription>
-                </div>
-                <Button onClick={() => setShowCertificateModal(true)}>
-                  <Award className="h-4 w-4 mr-2" />
-                  Issue Certificate
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-blue-600">{stats.certificates}</div>
-                      <div className="text-sm text-gray-600">Total Certificates</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-green-600">24</div>
-                      <div className="text-sm text-gray-600">This Month</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4">
-                      <div className="text-2xl font-bold text-purple-600">4</div>
-                      <div className="text-sm text-gray-600">Certificate Types</div>
-                    </CardContent>
-                  </Card>
-                </div>
 
-                <div className="space-y-3">
-                  <h4 className="font-semibold">Recent Certificates Issued</h4>
-                  {[
-                    { name: "Sarah Johnson", course: "ESG Investment Fundamentals", date: "2024-01-20", type: "CPE" },
-                    {
-                      name: "Michael Chen",
-                      course: "Risk Management Certification",
-                      date: "2024-01-18",
-                      type: "Completion",
-                    },
-                    {
-                      name: "Emily Rodriguez",
-                      course: "Alternative Investments",
-                      date: "2024-01-15",
-                      type: "Achievement",
-                    },
-                    { name: "David Wilson", course: "Regulatory Compliance", date: "2024-01-12", type: "Attendance" },
-                  ].map((cert, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <Award className="h-8 w-8 text-yellow-500" />
-                        <div>
-                          <p className="font-medium">{cert.name}</p>
-                          <p className="text-sm text-gray-600">{cert.course}</p>
-                          <Badge variant="outline" className="text-xs mt-1">
-                            {cert.type}
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">{cert.date}</p>
-                        <div className="flex gap-2 mt-2">
-                          <Button size="sm" variant="outline">
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Download className="h-4 w-4 mr-1" />
-                            Download
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       {/* Modals */}
       <SendInvitationModal open={showInvitationModal} onOpenChange={setShowInvitationModal} events={mockEvents} />
+      
+      {selectedAttendeeForMessage && (
+        <SendMessageModal
+          isOpen={showMessageModal}
+          onClose={() => {
+            setShowMessageModal(false)
+            setSelectedAttendeeForMessage(null)
+          }}
+          recipientName={selectedAttendeeForMessage.name}
+          recipientTitle={selectedAttendeeForMessage.title}
+          organizationName={selectedAttendeeForMessage.organization}
+        />
+      )}
 
-      <IssueCertificateModal open={showCertificateModal} onOpenChange={setShowCertificateModal} />
+      {/* View Profile Modal */}
+      {selectedAttendeeForView && (
+        <Dialog open={showViewProfileModal} onOpenChange={setShowViewProfileModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Attendee Profile</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Header with avatar and basic info */}
+              <div className="flex items-center space-x-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-semibold">
+                  {selectedAttendeeForView.name
+                    .split(" ")
+                    .map((n: string) => n[0])
+                    .join("")}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold">{selectedAttendeeForView.name}</h3>
+                  <p className="text-gray-600">{selectedAttendeeForView.title}</p>
+                  <p className="text-sm text-gray-500">{selectedAttendeeForView.organization}</p>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Contact Information</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Email:</span> {selectedAttendeeForView.email}</p>
+                    <p><span className="font-medium">Phone:</span> {selectedAttendeeForView.phone}</p>
+                    <p><span className="font-medium">Location:</span> {selectedAttendeeForView.location}</p>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Membership Details</h4>
+                  <div className="space-y-2 text-sm">
+                    <p><span className="font-medium">Status:</span> {getStatusBadge(selectedAttendeeForView.status)}</p>
+                    <p><span className="font-medium">Member Type:</span> {getMemberTypeBadge(selectedAttendeeForView.memberType)}</p>
+                    <p><span className="font-medium">Registration Date:</span> {selectedAttendeeForView.registrationDate}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Engagement Statistics */}
+              <div>
+                <h4 className="font-medium text-gray-900 mb-2">Engagement Statistics</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-blue-50 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">{selectedAttendeeForView.eventsAttended}</p>
+                    <p className="text-sm text-gray-600">Events Attended</p>
+                  </div>
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{selectedAttendeeForView.certificatesEarned || 0}</p>
+                    <p className="text-sm text-gray-600">Certificates Earned</p>
+                  </div>
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <p className="text-2xl font-bold text-purple-600">{selectedAttendeeForView.lastEventDate}</p>
+                    <p className="text-sm text-gray-600">Last Event</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+
     </div>
   )
 }

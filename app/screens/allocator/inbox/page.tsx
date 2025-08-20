@@ -31,6 +31,8 @@ import { useApp } from "../../../../context/AppContext"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 // Custom Dropdown Component
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+
 function CustomDropdown({
   trigger,
   items,
@@ -40,51 +42,26 @@ function CustomDropdown({
   items: Array<{ label: string; onClick: () => void }>
   align?: "start" | "end"
 }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen])
-
   return (
-    <div className="relative" ref={dropdownRef}>
-      <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
-      {isOpen && (
-        <div
-          className={`absolute top-full mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 ${
-            align === "end" ? "right-0" : "left-0"
-          }`}
-        >
-          <div className="py-1">
-            {items.map((item, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  item.onClick()
-                  setIsOpen(false)
-                }}
-                className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        {trigger}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align={align === "end" ? "end" : "start"} className="w-48">
+        {items.map((item, index) => (
+          <DropdownMenuItem
+            key={index}
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              item.onClick()
+            }}
+          >
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -385,6 +362,8 @@ export default function AllocatorInbox() {
 
   // Form states
   const [composeTo, setComposeTo] = useState("")
+  const [composeCc, setComposeCc] = useState("")
+  const [composeBcc, setComposeBcc] = useState("")
   const [composeSubject, setComposeSubject] = useState("")
   const [composeMessage, setComposeMessage] = useState("")
   const [replyMessage, setReplyMessage] = useState("")
@@ -483,6 +462,8 @@ export default function AllocatorInbox() {
   function closeCompose() {
     setShowCompose(false)
     setComposeTo("")
+    setComposeCc("")
+    setComposeBcc("")
     setComposeSubject("")
     setComposeMessage("")
     setComposeAttachments([])
@@ -513,7 +494,10 @@ export default function AllocatorInbox() {
       showToast("Please fill in all required fields", "error")
       return
     }
-    showToast(`Message sent to ${composeTo}`)
+    const recipients = [composeTo]
+    if (composeCc.trim()) recipients.push(`CC: ${composeCc}`)
+    if (composeBcc.trim()) recipients.push(`BCC: ${composeBcc}`)
+    showToast(`Message sent to ${recipients.join(", ")}`)
     closeCompose()
   }
 
@@ -1026,6 +1010,24 @@ export default function AllocatorInbox() {
               />
             </div>
             <div>
+              <Label htmlFor="compose-cc">CC</Label>
+              <Input
+                id="compose-cc"
+                placeholder="Enter CC recipients (optional)"
+                value={composeCc}
+                onChange={(e) => setComposeCc(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="compose-bcc">BCC</Label>
+              <Input
+                id="compose-bcc"
+                placeholder="Enter BCC recipients (optional)"
+                value={composeBcc}
+                onChange={(e) => setComposeBcc(e.target.value)}
+              />
+            </div>
+            <div>
               <Label htmlFor="compose-subject">Subject</Label>
               <Input
                 id="compose-subject"
@@ -1184,6 +1186,9 @@ export default function AllocatorInbox() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Toast Container */}
+      <ToastContainer toasts={toasts} />
     </div>
   )
 }

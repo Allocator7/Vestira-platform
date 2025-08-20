@@ -229,6 +229,18 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
           description: `Email sent to ${attendee?.name}.`,
         })
         break
+      case "message":
+        toast({
+          title: "Message Sent",
+          description: `Message sent to ${attendee?.name}.`,
+        })
+        break
+      case "edit":
+        toast({
+          title: "Edit Details",
+          description: `Opening edit form for ${attendee?.name}.`,
+        })
+        break
     }
   }
 
@@ -285,19 +297,11 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-blue-50 p-3 rounded-lg">
                   <div className="text-2xl font-bold text-blue-600">{attendeeStats.total}</div>
-                  <div className="text-sm text-blue-800">Total Registered</div>
+                  <div className="text-sm text-blue-800">Registered</div>
                 </div>
                 <div className="bg-purple-50 p-3 rounded-lg">
                   <div className="text-2xl font-bold text-purple-600">{attendeeStats.attended}</div>
                   <div className="text-sm text-purple-800">Attended</div>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{attendeeStats.confirmed}</div>
-                  <div className="text-sm text-green-800">Confirmed</div>
-                </div>
-                <div className="bg-yellow-50 p-3 rounded-lg">
-                  <div className="text-2xl font-bold text-yellow-600">{attendeeStats.registered}</div>
-                  <div className="text-sm text-yellow-800">Registered</div>
                 </div>
               </div>
             </div>
@@ -307,7 +311,6 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
           <Tabs defaultValue="attendees" className="space-y-4">
             <TabsList>
               <TabsTrigger value="attendees">Attendee List ({attendeeStats.total})</TabsTrigger>
-              <TabsTrigger value="checkin">Check-in Management</TabsTrigger>
             </TabsList>
 
             <TabsContent value="attendees" className="space-y-4">
@@ -415,59 +418,13 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
                           Check In
                         </Button>
                       )}
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button size="sm" variant="outline">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleAttendeeAction(attendee.id, "email")}>
-                            <Mail className="h-4 w-4 mr-2" />
-                            Send Email
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <MessageSquare className="h-4 w-4 mr-2" />
-                            Send Message
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Details
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
                   </div>
                 ))}
               </div>
             </TabsContent>
 
-            <TabsContent value="checkin" className="space-y-4">
-              <div className="text-center py-8">
-                <UserCheck className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Check-in Management</h3>
-                <p className="text-gray-600 mb-4">Manage attendee check-ins for this event</p>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">{attendeeStats.attended}</div>
-                    <div className="text-sm text-purple-800">Checked In</div>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">{attendeeStats.confirmed}</div>
-                    <div className="text-sm text-green-800">Confirmed</div>
-                  </div>
-                  <div className="bg-yellow-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-yellow-600">{attendeeStats.registered}</div>
-                    <div className="text-sm text-yellow-800">Registered</div>
-                  </div>
-                  <div className="bg-red-50 p-4 rounded-lg">
-                    <div className="text-2xl font-bold text-red-600">{attendeeStats.noShow}</div>
-                    <div className="text-sm text-red-800">No Show</div>
-                  </div>
-                </div>
-              </div>
-            </TabsContent>
+
           </Tabs>
         </div>
 
@@ -475,7 +432,69 @@ export function EventDetailsModal({ event, isOpen, onClose }: EventDetailsModalP
         <div className="flex justify-between items-center pt-4 border-t">
           <Button
             variant="outline"
-            onClick={() => toast({ title: "Export Started", description: "Attendee data is being prepared." })}
+            onClick={() => {
+              try {
+                toast({ title: "Export Started", description: "Attendee data is being prepared." })
+                
+                // Prepare export data
+                const exportData = attendees.map(attendee => ({
+                  name: attendee.name,
+                  email: attendee.email,
+                  organization: attendee.organization,
+                  title: attendee.title,
+                  status: attendee.status,
+                  registrationDate: attendee.registrationDate,
+                  phone: attendee.phone,
+                  location: attendee.location,
+                  memberType: attendee.memberType,
+                  checkInTime: attendee.checkInTime
+                }))
+                
+                // Create CSV content
+                const headers = ["Name", "Email", "Organization", "Title", "Status", "Registration Date", "Phone", "Location", "Member Type", "Check-in Time"]
+                const csvContent = [
+                  headers.join(","),
+                  ...exportData.map(row => [
+                    `"${row.name}"`,
+                    `"${row.email}"`,
+                    `"${row.organization}"`,
+                    `"${row.title}"`,
+                    `"${row.status}"`,
+                    `"${row.registrationDate}"`,
+                    `"${row.phone}"`,
+                    `"${row.location}"`,
+                    `"${row.memberType}"`,
+                    `"${row.checkInTime || ''}"`
+                  ].join(","))
+                ].join("\n")
+                
+                // Create and download file
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+                const link = document.createElement("a")
+                const url = URL.createObjectURL(blob)
+                link.setAttribute("href", url)
+                link.setAttribute("download", `attendees-${event.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`)
+                link.style.visibility = "hidden"
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                
+                // Show success toast
+                setTimeout(() => {
+                  toast({ 
+                    title: "Export Complete", 
+                    description: `Attendee data has been exported successfully. (${exportData.length} attendees)` 
+                  })
+                }, 1000)
+              } catch (error) {
+                console.error("Export error:", error)
+                toast({
+                  title: "Export Failed",
+                  description: "There was an error exporting the attendee data. Please try again.",
+                  variant: "destructive",
+                })
+              }
+            }}
           >
             <Download className="h-4 w-4 mr-2" />
             Export Attendees

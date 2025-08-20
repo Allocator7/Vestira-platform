@@ -15,126 +15,90 @@ import { MapPin, Building2, TrendingUp, Users, MessageCircle, Calendar, Eye, Dol
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { ScheduleMeetingModal } from "@/components/profile-modals/ScheduleMeetingModal"
 
-interface Client {
-  id: string
+interface Contact {
   name: string
   title: string
-  organization: string
+  email: string
+  strategies: string[]
+  isMainContact: boolean
+}
+
+interface ClientFirm {
+  id: string
+  firmName: string
   organizationType: string
   location: string
   aum: string
   commitment: string
   assetClasses: string[]
   strategies: string[]
-  avatar: string
+  logo: string
   lastContact: string
   relationship: string
-  status: string
   description: string
+  contacts: Contact[]
 }
 
-const mockClients: Client[] = [
+const mockClientFirms: ClientFirm[] = [
   {
     id: "1",
-    name: "Sarah Johnson",
-    title: "Chief Investment Officer",
-    organization: "State Teachers' Pension Fund",
+    firmName: "State Teachers' Pension Fund",
     organizationType: "Pension Fund",
     location: "Austin, TX",
     aum: "$45B",
     commitment: "$250M",
     assetClasses: ["Private Equity & Other Alternatives"],
     strategies: ["Private Equity", "Growth Equity"],
-    avatar: "/placeholder-user.jpg",
+    logo: "/pension-fund-allocation.png",
     lastContact: "2024-01-10",
     relationship: "Active Client",
-    status: "Committed",
     description: "Long-term institutional investor focused on alternative investments and ESG strategies.",
+    contacts: [
+      {
+        name: "Sarah Johnson",
+        title: "Chief Investment Officer",
+        email: "sarah.johnson@statepension.gov",
+        strategies: ["Private Equity", "Growth Equity"],
+        isMainContact: true,
+      },
+      {
+        name: "Michael Chen",
+        title: "Alternative Investments Director",
+        email: "michael.chen@statepension.gov",
+        strategies: ["Private Equity"],
+        isMainContact: false,
+      },
+    ],
   },
   {
     id: "2",
-    name: "Michael Chen",
-    title: "Portfolio Manager",
-    organization: "University Endowment Foundation",
+    firmName: "University Endowment Foundation",
     organizationType: "Endowment",
     location: "Boston, MA",
     aum: "$12B",
     commitment: "$150M",
     assetClasses: ["Public Equities", "Private Equity & Other Alternatives"],
     strategies: ["Large Cap Equity", "Venture Capital"],
-    avatar: "/placeholder-user.jpg",
+    logo: "/abstract-ej-typography.png",
     lastContact: "2024-01-08",
     relationship: "Active Client",
-    status: "Committed",
     description: "Endowment manager with focus on long-term growth and diversified portfolio strategies.",
-  },
-  {
-    id: "3",
-    name: "Jennifer Rodriguez",
-    title: "Senior Investment Director",
-    organization: "Global Insurance Group",
-    organizationType: "Insurance Company",
-    location: "New York, NY",
-    aum: "$85B",
-    commitment: "$400M",
-    assetClasses: ["Public Fixed Income", "Private Fixed Income"],
-    strategies: ["Investment Grade Corporate Bonds", "Direct Lending"],
-    avatar: "/placeholder-user.jpg",
-    lastContact: "2024-01-05",
-    relationship: "Active Client",
-    status: "Committed",
-    description: "Insurance investment professional specializing in fixed income and credit strategies.",
-  },
-  {
-    id: "4",
-    name: "David Park",
-    title: "Managing Director",
-    organization: "Sovereign Wealth Fund",
-    organizationType: "Sovereign Wealth Fund",
-    location: "Singapore",
-    aum: "$320B",
-    commitment: "$800M",
-    assetClasses: ["Real Estate", "Private Fixed Income"],
-    strategies: ["Real Estate Equity", "Infrastructure Debt"],
-    avatar: "/placeholder-user.jpg",
-    lastContact: "2024-01-03",
-    relationship: "Prospect",
-    status: "In Discussion",
-    description: "Sovereign wealth fund manager focused on infrastructure and real estate investments.",
-  },
-  {
-    id: "5",
-    name: "Lisa Thompson",
-    title: "Chief Investment Officer",
-    organization: "Family Office Partners",
-    organizationType: "Family Office",
-    location: "San Francisco, CA",
-    aum: "$8B",
-    commitment: "$100M",
-    assetClasses: ["Public Equities", "Private Equity & Other Alternatives"],
-    strategies: ["ESG/Sustainable Equity", "Venture Capital"],
-    avatar: "/placeholder-user.jpg",
-    lastContact: "2023-12-28",
-    relationship: "Prospect",
-    status: "Evaluating",
-    description: "Family office CIO with emphasis on sustainable investing and technology ventures.",
-  },
-  {
-    id: "6",
-    name: "Robert Williams",
-    title: "Investment Committee Chair",
-    organization: "Healthcare Foundation",
-    organizationType: "Foundation",
-    location: "Chicago, IL",
-    aum: "$3.5B",
-    commitment: "$75M",
-    assetClasses: ["Public Fixed Income", "Public Equities"],
-    strategies: ["Core Fixed Income", "Large Cap Equity"],
-    avatar: "/placeholder-user.jpg",
-    lastContact: "2023-12-20",
-    relationship: "Past Client",
-    status: "Completed",
-    description: "Foundation investment leader focused on healthcare sector and conservative strategies.",
+    contacts: [
+      {
+        name: "Jennifer Rodriguez",
+        title: "Portfolio Manager",
+        email: "jennifer.rodriguez@universityendowment.edu",
+        strategies: ["Large Cap Equity", "Venture Capital"],
+        isMainContact: true,
+      },
+      {
+        name: "David Park",
+        title: "Investment Director",
+        email: "david.park@universityendowment.edu",
+        strategies: ["Venture Capital"],
+        isMainContact: false,
+      },
+    ],
   },
 ]
 
@@ -147,9 +111,11 @@ export default function ManagerClientsPage() {
     strategies: [] as string[],
     organizationTypes: [] as string[],
   })
-  const [filteredClients, setFilteredClients] = useState(mockClients)
+  const [filteredClientFirms, setFilteredClientFirms] = useState(mockClientFirms)
+  const [showFilters, setShowFilters] = useState(false)
 
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [selectedClient, setSelectedClient] = useState<ClientFirm | null>(null)
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false)
 
@@ -157,13 +123,15 @@ export default function ManagerClientsPage() {
     router.push(`/screens/general/allocator-profile?id=${clientId}`)
   }
 
-  const handleSendMessage = (client: Client) => {
+  const handleSendMessage = (client: ClientFirm, contact?: Contact) => {
     setSelectedClient(client)
+    setSelectedContact(contact || client.contacts[0])
     setIsMessageModalOpen(true)
   }
 
-  const handleScheduleMeeting = (client: Client) => {
+  const handleScheduleMeeting = (client: ClientFirm, contact?: Contact) => {
     setSelectedClient(client)
+    setSelectedContact(contact || client.contacts[0])
     setIsMeetingModalOpen(true)
   }
 
@@ -178,11 +146,14 @@ export default function ManagerClientsPage() {
       organizationTypes: newFilters.organizationTypes || [],
     })
 
-    const filtered = mockClients.filter((client) => {
+    const filtered = mockClientFirms.filter((client) => {
       const matchesSearch =
-        client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.organization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        client.description.toLowerCase().includes(searchTerm.toLowerCase())
+        client.firmName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.contacts.some(contact => 
+          contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          contact.title.toLowerCase().includes(searchTerm.toLowerCase())
+        )
 
       const matchesAssetClass =
         newFilters.assetClasses.length === 0 || newFilters.assetClasses.some((ac) => client.assetClasses.includes(ac))
@@ -212,37 +183,34 @@ export default function ManagerClientsPage() {
         return aumB - aumA
       })
     } else if (sortBy === "name") {
-      filtered.sort((a, b) => a.name.localeCompare(b.name))
+      filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
     } else if (sortBy === "lastContact") {
       filtered.sort((a, b) => new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime())
     }
 
-    setFilteredClients(filtered)
+    setFilteredClientFirms(filtered)
   }
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
-    handleFiltersChange(filters)
+    // Re-apply filters with new search term
+    const currentFilters = {
+      assetClasses: filters.assetClasses,
+      strategies: filters.strategies,
+      organizationTypes: filters.organizationTypes,
+    }
+    handleFiltersChange(currentFilters)
   }
 
   const handleSortChange = (value: string) => {
     setSortBy(value)
-    handleFiltersChange(filters)
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Committed":
-        return "bg-green-100 text-green-800"
-      case "In Discussion":
-        return "bg-blue-100 text-blue-800"
-      case "Evaluating":
-        return "bg-yellow-100 text-yellow-800"
-      case "Completed":
-        return "bg-gray-100 text-gray-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+    // Re-apply filters with new sort
+    const currentFilters = {
+      assetClasses: filters.assetClasses,
+      strategies: filters.strategies,
+      organizationTypes: filters.organizationTypes,
     }
+    handleFiltersChange(currentFilters)
   }
 
   const getRelationshipColor = (relationship: string) => {
@@ -267,7 +235,7 @@ export default function ManagerClientsPage() {
             <p className="text-baseGray mt-1">Manage relationships with your institutional clients</p>
           </div>
           <ExportButton
-            data={filteredClients}
+            data={filteredClientFirms}
             filename="client-portfolio"
             className="bg-electric-blue hover:bg-electric-blue/90 text-white"
           />
@@ -297,15 +265,24 @@ export default function ManagerClientsPage() {
                         { value: "lastContact", label: "Recent Contact" },
                       ]}
                     />
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowFilters(!showFilters)}
+                    >
+                      Filters
+                    </Button>
                   </div>
                 </div>
 
-                <ComprehensiveFilters
-                  onFiltersChange={handleFiltersChange}
-                  initialFilters={filters}
-                  showOrganizationTypes={true}
-                  userType="allocator"
-                />
+                {showFilters && (
+                  <div className="mb-6">
+                    <ComprehensiveFilters 
+                      onFiltersChange={handleFiltersChange} 
+                      initialFilters={filters} 
+                      showSectors={false}
+                    />
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -313,29 +290,29 @@ export default function ManagerClientsPage() {
           {/* Results Summary */}
           <div className="flex items-center justify-between">
             <p className="text-baseGray">
-              Showing {filteredClients.length} of {mockClients.length} clients
+              Showing {filteredClientFirms.length} of {mockClientFirms.length} firms
             </p>
             <div className="flex gap-4 text-sm text-baseGray">
-              <span>Active: {filteredClients.filter((c) => c.relationship === "Active Client").length}</span>
-              <span>Prospects: {filteredClients.filter((c) => c.relationship === "Prospect").length}</span>
+              <span>Active: {filteredClientFirms.filter((c) => c.relationship === "Active Client").length}</span>
+              <span>Prospects: {filteredClientFirms.filter((c) => c.relationship === "Prospect").length}</span>
               <span>
                 Total Commitments: $
-                {filteredClients.reduce((sum, c) => sum + Number.parseFloat(c.commitment.replace(/[$M]/g, "")), 0)}M
+                {filteredClientFirms.reduce((sum, c) => sum + Number.parseFloat(c.commitment.replace(/[$M]/g, "")), 0)}M
               </span>
             </div>
           </div>
 
-          {/* Clients Grid */}
+          {/* Client Firms Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredClients.map((client) => (
-              <Card key={client.id} className="hover:shadow-lg transition-shadow h-full">
-                <CardContent className="p-6 h-full flex flex-col">
-                  {/* Header Section */}
+            {filteredClientFirms.map((client) => (
+              <Card key={client.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-6">
+                  {/* Firm Header Section */}
                   <div className="flex items-start gap-4 mb-4">
                     <Avatar className="h-16 w-16 flex-shrink-0">
-                      <AvatarImage src={client.avatar || "/placeholder.svg"} alt={client.name} />
+                      <AvatarImage src={client.logo || "/placeholder.svg"} alt={client.firmName} />
                       <AvatarFallback className="text-lg bg-electric-blue/10 text-electric-blue">
-                        {client.name
+                        {client.firmName
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
@@ -344,36 +321,29 @@ export default function ManagerClientsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <CardTitle className="text-lg text-deepBrand mb-1">{client.name}</CardTitle>
-                          <p className="text-sm text-baseGray mb-1">{client.title}</p>
+                          <CardTitle className="text-lg text-deepBrand mb-1">{client.firmName}</CardTitle>
+                          <p className="text-sm text-baseGray mb-1">{client.organizationType}</p>
                         </div>
                         <div className="flex flex-col gap-1">
                           <Badge className={getRelationshipColor(client.relationship)} variant="secondary">
                             {client.relationship}
                           </Badge>
-                          <Badge className={getStatusColor(client.status)} variant="outline">
-                            {client.status}
-                          </Badge>
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Building2 className="h-3 w-3 text-baseGray flex-shrink-0" />
-                        <span className="text-sm text-baseGray truncate">{client.organization}</span>
+                        <MapPin className="h-3 w-3 text-baseGray flex-shrink-0" />
+                        <span className="text-sm text-baseGray truncate">{client.location}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Description Section */}
-                  <div className="mb-4 h-10">
+                  <div className="mb-4">
                     <p className="text-sm text-baseGray line-clamp-2">{client.description}</p>
                   </div>
 
-                  {/* Info Grid Section */}
-                  <div className="grid grid-cols-2 gap-3 text-sm mb-4 h-16">
-                    <div className="flex items-center gap-1">
-                      <MapPin className="h-3 w-3 text-baseGray flex-shrink-0" />
-                      <span className="text-baseGray truncate">{client.location}</span>
-                    </div>
+                  {/* Firm Info Grid Section */}
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-4">
                     <div className="flex items-center gap-1">
                       <TrendingUp className="h-3 w-3 text-baseGray flex-shrink-0" />
                       <span className="text-baseGray">AUM: {client.aum}</span>
@@ -386,28 +356,70 @@ export default function ManagerClientsPage() {
                       <Calendar className="h-3 w-3 text-baseGray flex-shrink-0" />
                       <span className="text-baseGray">Last: {new Date(client.lastContact).toLocaleDateString()}</span>
                     </div>
+                    <div className="flex items-center gap-1">
+                      <Users className="h-3 w-3 text-baseGray flex-shrink-0" />
+                      <span className="text-baseGray">{client.contacts.length} contacts</span>
+                    </div>
                   </div>
 
                   {/* Badges Section */}
-                  <div className="space-y-2 mb-4 h-16">
-                    <div className="flex flex-wrap gap-1 h-6">
+                  <div className="space-y-2 mb-4">
+                    <div className="flex flex-wrap gap-1">
                       {client.assetClasses.map((assetClass) => (
-                        <Badge key={assetClass} variant="secondary" className="text-xs h-5">
+                        <Badge key={assetClass} variant="secondary" className="text-xs">
                           {assetClass}
                         </Badge>
                       ))}
                     </div>
-                    <div className="flex flex-wrap gap-1 h-6">
+                    <div className="flex flex-wrap gap-1">
                       {client.strategies.map((strategy) => (
-                        <Badge key={strategy} variant="outline" className="text-xs h-5">
+                        <Badge key={strategy} variant="outline" className="text-xs">
                           {strategy}
                         </Badge>
                       ))}
                     </div>
                   </div>
 
+                  {/* Contacts Section */}
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-deepBrand mb-2">Contacts</h4>
+                    <div className="space-y-2">
+                      {client.contacts.map((contact, index) => (
+                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium">{contact.name}</span>
+                              {contact.isMainContact && (
+                                <Badge variant="outline" className="text-xs">Primary</Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-baseGray">{contact.title}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-xs"
+                              onClick={() => handleSendMessage(client, contact)}
+                            >
+                              <MessageCircle className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-6 px-2 text-xs"
+                              onClick={() => handleScheduleMeeting(client, contact)}
+                            >
+                              <Calendar className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                   {/* Bottom Section */}
-                  <div className="mt-auto pt-4 border-t">
+                  <div className="pt-4 border-t">
                     <div className="flex items-center justify-between">
                       <div className="text-xs text-baseGray">
                         <span>{client.organizationType}</span>
@@ -420,7 +432,7 @@ export default function ManagerClientsPage() {
                           onClick={() => handleViewProfile(client.id)}
                         >
                           <Eye className="h-3 w-3 mr-1" />
-                          View
+                          View Profile
                         </Button>
                         <Button
                           size="sm"
@@ -447,30 +459,32 @@ export default function ManagerClientsPage() {
             ))}
           </div>
 
-          {filteredClients.length === 0 && (
+          {filteredClientFirms.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">
                 <Users className="h-12 w-12 text-baseGray mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-deepBrand mb-2">No clients found</h3>
-                <p className="text-baseGray">Try adjusting your search terms or filters to find relevant clients.</p>
+                <h3 className="text-lg font-medium text-deepBrand mb-2">No client firms found</h3>
+                <p className="text-baseGray">Try adjusting your search terms or filters to find relevant client firms.</p>
               </CardContent>
             </Card>
           )}
         </div>
       </div>
-      {selectedClient && (
+      {selectedClient && selectedContact && (
         <>
           <SendMessageModal
             isOpen={isMessageModalOpen}
             onClose={() => setIsMessageModalOpen(false)}
-            recipientName={selectedClient.name}
-            organizationName={selectedClient.organization}
+            recipientName={selectedContact.name}
+            recipientTitle={selectedContact.title}
+            organizationName={selectedClient.firmName}
           />
           <ScheduleMeetingModal
             isOpen={isMeetingModalOpen}
             onClose={() => setIsMeetingModalOpen(false)}
-            recipientName={selectedClient.name}
-            recipientEmail={`${selectedClient.name.toLowerCase().replace(" ", ".")}@${selectedClient.organization.toLowerCase().replace(/\s+/g, "")}.com`}
+            recipientName={selectedContact.name}
+            recipientEmail={selectedContact.email}
+            organizationName={selectedClient.firmName}
           />
         </>
       )}

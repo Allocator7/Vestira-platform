@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -32,7 +32,7 @@ interface SignupData {
   confirmPassword: string
 
   // Organization Information
-  organizationType: "allocator" | "manager" | "consultant" | ""
+  organizationType: "allocator" | "manager" | "consultant" | "industry-group" | ""
   organizationName: string
   organizationSize: string
   aum: string
@@ -60,6 +60,44 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+
+  // Track signup state for navigation
+  const saveSignupState = (step: number, data: SignupData) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('signup-state', JSON.stringify({
+        step,
+        data,
+        timestamp: Date.now()
+      }))
+    }
+  }
+
+  const loadSignupState = () => {
+    if (typeof window !== 'undefined') {
+      const saved = sessionStorage.getItem('signup-state')
+      if (saved) {
+        const state = JSON.parse(saved)
+        // Only restore if within last 30 minutes
+        if (Date.now() - state.timestamp < 30 * 60 * 1000) {
+          setCurrentStep(state.step)
+          setFormData(state.data)
+          return true
+        }
+      }
+    }
+    return false
+  }
+
+  const clearSignupState = () => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('signup-state')
+    }
+  }
+
+  // Load signup state on component mount
+  useEffect(() => {
+    loadSignupState()
+  }, [])
 
   const [formData, setFormData] = useState<SignupData>({
     firstName: "",
@@ -120,13 +158,17 @@ export default function SignupPage() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(currentStep + 1)
+      const nextStep = currentStep + 1
+      setCurrentStep(nextStep)
+      saveSignupState(nextStep, formData)
     }
   }
 
   const handleBack = () => {
-    setCurrentStep(currentStep - 1)
+    const prevStep = currentStep - 1
+    setCurrentStep(prevStep)
     setErrors({})
+    saveSignupState(prevStep, formData)
   }
 
   const handleSubmit = async () => {
@@ -136,24 +178,60 @@ export default function SignupPage() {
     setError("")
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password,
+          organizationType: formData.organizationType,
+          organizationName: formData.organizationName,
+          jobTitle: formData.jobTitle,
+          department: formData.department,
+          phoneNumber: formData.phoneNumber,
+          aum: formData.aum,
+          organizationSize: formData.organizationSize,
+          hearAboutUs: formData.hearAboutUs,
+          specificNeeds: formData.specificNeeds,
+        }),
+      })
 
-      // Mock successful signup
-      setSuccess("Account created successfully! Please check your email to verify your account.")
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || data.details || "Failed to create account")
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || data.details || "Failed to create account")
+      }
+
+      setSuccess(data.message || "Account created! Please check your email to verify your account.")
+      clearSignupState() // Clear signup state after successful submission
+
+      // If manual verification is needed, show the verification URL
+      if (data.manualVerification && data.verificationUrl) {
+        setSuccess(`Account created! Please check your email to verify your account.\n\nIf you don't receive an email, you can verify your account by clicking this link: ${data.verificationUrl}`)
+      }
 
       setTimeout(() => {
         router.push("/login?signup=success")
-      }, 3000)
-    } catch (err) {
-      setError("Failed to create account. Please try again.")
+      }, 5000) // Give more time to read the verification URL
+    } catch (err: any) {
+      setError(err.message || "Failed to create account. Please try again.")
     } finally {
       setIsLoading(false)
     }
   }
 
   const updateFormData = (field: keyof SignupData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+    const updatedData = { ...formData, [field]: value }
+    setFormData(updatedData)
+    saveSignupState(currentStep, updatedData)
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }))
     }
@@ -167,6 +245,8 @@ export default function SignupPage() {
         return <Users className="h-5 w-5 text-green-600" />
       case "consultant":
         return <Shield className="h-5 w-5 text-purple-600" />
+      case "industry-group":
+        return <Zap className="h-5 w-5 text-orange-600" />
       default:
         return <Zap className="h-5 w-5 text-gray-400" />
     }
@@ -392,7 +472,7 @@ export default function SignupPage() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="organizationType">I am a/an *</Label>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       <Button
                         type="button"
                         variant={formData.organizationType === "allocator" ? "default" : "outline"}
@@ -468,6 +548,32 @@ export default function SignupPage() {
                         </div>
                         <span className={formData.organizationType === "consultant" ? "text-white" : "text-deep-brand"}>
                           Consultant
+                        </span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant={formData.organizationType === "industry-group" ? "default" : "outline"}
+                        className={`h-auto py-4 flex flex-col items-center justify-center gap-2 ${
+                          formData.organizationType === "industry-group"
+                            ? "bg-orange-600 hover:bg-orange-700"
+                            : "hover:bg-orange-50 hover:border-orange-300"
+                        }`}
+                        onClick={() => updateFormData("organizationType", "industry-group")}
+                      >
+                        <div
+                          className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                            formData.organizationType === "industry-group" ? "bg-orange-500" : "bg-orange-100"
+                          }`}
+                        >
+                          <Zap
+                            className={`h-5 w-5 ${
+                              formData.organizationType === "industry-group" ? "text-white" : "text-orange-600"
+                            }`}
+                          />
+                        </div>
+                        <span className={`${formData.organizationType === "industry-group" ? "text-white" : "text-deep-brand"} text-sm leading-tight text-center`}>
+                          Industry<br />Group
                         </span>
                       </Button>
                     </div>
