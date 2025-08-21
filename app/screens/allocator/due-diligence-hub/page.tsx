@@ -81,8 +81,30 @@ function CustomDropdown({
 export default function AllocatorDueDiligenceHubPage() {
   const [error, setError] = useState<string | null>(null)
   
-  // Simple error boundary
+  // Add global error handler
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error("Global error caught:", event.error)
+      setError(event.error?.message || "An unexpected error occurred")
+    }
+    
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error("Unhandled promise rejection:", event.reason)
+      setError(event.reason?.message || "An unexpected error occurred")
+    }
+    
+    window.addEventListener('error', handleError)
+    window.addEventListener('unhandledrejection', handleUnhandledRejection)
+    
+    return () => {
+      window.removeEventListener('error', handleError)
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+    }
+  }, [])
+  
+  // Add error boundary with debugging
   if (error) {
+    console.error("AllocatorDueDiligenceHubPage error:", error)
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -209,11 +231,9 @@ export default function AllocatorDueDiligenceHubPage() {
   // Check for tab parameter on mount
   useEffect(() => {
     try {
-      if (searchParams) {
-        const tab = searchParams.get("tab")
-        if (tab === "active") {
-          setActiveTab("active")
-        }
+      const tab = searchParams?.get("tab")
+      if (tab === "active") {
+        setActiveTab("active")
       }
     } catch (error) {
       console.error("Error accessing search params:", error)
@@ -272,26 +292,13 @@ export default function AllocatorDueDiligenceHubPage() {
   ])
   
   // Get context and router with fallbacks
-  let userRole = null
-  let currentPersonProfile = null
-  
-  try {
-    const appContext = useApp()
-    userRole = appContext?.userRole || null
-    currentPersonProfile = appContext?.currentPersonProfile || null
-  } catch (error) {
-    console.error("Error accessing app context:", error)
-  }
-  
+  const appContext = useApp()
   const router = useRouter()
+  const searchParams = useSearchParams()
   
-  // Handle useSearchParams with proper error handling
-  let searchParams = null
-  try {
-    searchParams = useSearchParams()
-  } catch (error) {
-    console.error("Error accessing search params:", error)
-  }
+  // Extract values from context with fallbacks
+  const userRole = appContext?.userRole || null
+  const currentPersonProfile = appContext?.currentPersonProfile || null
 
   // Real manager data from the system
   const availableManagers = [
