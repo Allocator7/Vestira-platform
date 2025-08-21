@@ -208,20 +208,28 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Check for tab parameter on mount
   useEffect(() => {
-    const tab = searchParams.get("tab")
-    if (tab === "active") {
-      setActiveTab("active")
+    try {
+      if (searchParams) {
+        const tab = searchParams.get("tab")
+        if (tab === "active") {
+          setActiveTab("active")
+        }
+      }
+    } catch (error) {
+      console.error("Error accessing search params:", error)
     }
   }, [searchParams])
 
   // Load custom templates from localStorage on mount
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('custom-ddq-templates')
-    if (savedTemplates) {
+    if (typeof window !== 'undefined') {
       try {
-        const parsedTemplates = JSON.parse(savedTemplates)
-        // Update the customTemplates array with saved templates
-        setCustomTemplates(prev => [...prev, ...parsedTemplates])
+        const savedTemplates = localStorage.getItem('custom-ddq-templates')
+        if (savedTemplates) {
+          const parsedTemplates = JSON.parse(savedTemplates)
+          // Update the customTemplates array with saved templates
+          setCustomTemplates(prev => [...prev, ...parsedTemplates])
+        }
       } catch (error) {
         console.error("Error loading custom templates:", error)
       }
@@ -230,11 +238,13 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Load current DDQ questions from localStorage on mount
   useEffect(() => {
-    const savedQuestions = localStorage.getItem('current-ddq-questions')
-    if (savedQuestions) {
+    if (typeof window !== 'undefined') {
       try {
-        const parsedQuestions = JSON.parse(savedQuestions)
-        setCurrentDDQQuestions(parsedQuestions)
+        const savedQuestions = localStorage.getItem('current-ddq-questions')
+        if (savedQuestions) {
+          const parsedQuestions = JSON.parse(savedQuestions)
+          setCurrentDDQQuestions(parsedQuestions)
+        }
       } catch (error) {
         console.error("Error loading current DDQ questions:", error)
       }
@@ -369,11 +379,15 @@ export default function AllocatorDueDiligenceHubPage() {
     
     // Get context and router with fallbacks
     const { userRole, currentPersonProfile } = useApp() || { userRole: null, currentPersonProfile: null }
-    console.log('Due Diligence Hub: Context loaded', { userRole, currentPersonProfile })
-    
     const router = useRouter()
-    const searchParams = useSearchParams()
-    console.log('Due Diligence Hub: Router and search params loaded')
+    
+    // Handle useSearchParams with proper error handling
+    let searchParams = null
+    try {
+      searchParams = useSearchParams()
+    } catch (error) {
+      console.error("Error accessing search params:", error)
+    }
 
   // Real manager data from the system
   const availableManagers = [
@@ -1347,12 +1361,18 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
         const mockQuestions = generateTemplateQuestions(template)
         
         // Store the questions in localStorage for the current DDQ session
-        const currentQuestions = JSON.parse(localStorage.getItem('current-ddq-questions') || '[]')
-        const updatedQuestions = [...currentQuestions, ...mockQuestions]
-        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-        
-        // Also store in sessionStorage for immediate access
-        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        if (typeof window !== 'undefined') {
+          try {
+            const currentQuestions = JSON.parse(localStorage.getItem('current-ddq-questions') || '[]')
+            const updatedQuestions = [...currentQuestions, ...mockQuestions]
+            localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+            
+            // Also store in sessionStorage for immediate access
+            sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+          } catch (error) {
+            console.error("Error storing DDQ questions:", error)
+          }
+        }
         
         showNotification(`Added all ${template.questionCount} questions from ${template.name} to your DDQ`)
       } catch (error) {
@@ -1486,12 +1506,18 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
       }
       
       // Store in localStorage for persistence
-      const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
-      existingSessions.push(informalSession)
-      localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
-      
-      // Store current session in sessionStorage
-      sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+      if (typeof window !== 'undefined') {
+        try {
+          const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
+          existingSessions.push(informalSession)
+          localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+          
+          // Store current session in sessionStorage
+          sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+        } catch (error) {
+          console.error("Error storing informal DD session:", error)
+        }
+      }
       
       showNotification("Informal Due Diligence session started")
       
@@ -1539,9 +1565,15 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
     }
 
     // Save to localStorage
-    const existingTemplates = JSON.parse(localStorage.getItem('custom-ddq-templates') || '[]')
-    existingTemplates.push(customTemplate)
-    localStorage.setItem('custom-ddq-templates', JSON.stringify(existingTemplates))
+    if (typeof window !== 'undefined') {
+      try {
+        const existingTemplates = JSON.parse(localStorage.getItem('custom-ddq-templates') || '[]')
+        existingTemplates.push(customTemplate)
+        localStorage.setItem('custom-ddq-templates', JSON.stringify(existingTemplates))
+      } catch (error) {
+        console.error("Error saving custom template:", error)
+      }
+    }
 
     // Update custom templates state
           setCustomTemplates(prev => [...prev, customTemplate])
@@ -1600,8 +1632,14 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
       setCurrentDDQQuestions(prev => {
         const updatedQuestions = [...prev, questionWithId]
         // Store in localStorage and sessionStorage
-        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+            sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+          } catch (error) {
+            console.error("Error storing DDQ questions:", error)
+          }
+        }
         return updatedQuestions
       })
       showNotification("Question added to DDQ")
@@ -1714,8 +1752,14 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
     if (isQuestionSelectorForDDQ) {
       setCurrentDDQQuestions(prev => {
         const updatedQuestions = [...prev, ...selectedQuestions]
-        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+            sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+          } catch (error) {
+            console.error("Error storing DDQ questions:", error)
+          }
+        }
         return updatedQuestions
       })
       showNotification(`Added ${selectedQuestions.length} questions to DDQ`)
@@ -2082,7 +2126,13 @@ const handleUseTemplate = () => {
     })
 
     // Update localStorage
-    localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
+      } catch (error) {
+        console.error("Error updating DDQs in localStorage:", error)
+      }
+    }
     
     showNotification("DDQ updated successfully")
     setShowEditDDQModal(false)
@@ -2383,8 +2433,14 @@ const handleUseTemplate = () => {
                                   setCurrentDDQQuestions(questions)
                                   
                                   // Store in localStorage and sessionStorage
-                                  localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
-                                  sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
+                                  if (typeof window !== 'undefined') {
+                                    try {
+                                      localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
+                                      sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
+                                    } catch (error) {
+                                      console.error("Error storing DDQ questions:", error)
+                                    }
+                                  }
                                   
                                   // Force a re-render by updating a timestamp
                                   setCreateDDQForm(prev => ({
@@ -3953,8 +4009,14 @@ const handleUseTemplate = () => {
                                           q.source === question.source && 
                                           q.templateName === question.templateName)
                                       )
-                                      localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-                                      sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                      if (typeof window !== 'undefined') {
+                                        try {
+                                          localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                          sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                        } catch (error) {
+                                          console.error("Error storing DDQ questions:", error)
+                                        }
+                                      }
                                       return updatedQuestions
                                     })
                                     showNotification("Question removed from DDQ")
