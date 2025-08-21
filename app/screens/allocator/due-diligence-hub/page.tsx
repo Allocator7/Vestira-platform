@@ -364,75 +364,10 @@ export default function AllocatorDueDiligenceHubPage() {
     },
   ])
   
-  try {
-    console.log('Due Diligence Hub: Starting component initialization')
-    
-    // Get context and router with fallbacks
-    const { userRole, currentPersonProfile } = useApp() || { userRole: null, currentPersonProfile: null }
-    console.log('Due Diligence Hub: Context loaded', { userRole, currentPersonProfile })
-    
-    const router = useRouter()
-    const searchParams = useSearchParams()
-    console.log('Due Diligence Hub: Router and search params loaded')
-
-  // Real manager data from the system
-  const availableManagers = [
-    { 
-      id: "1", 
-      name: "Growth Capital Partners", 
-      contact: "David Rodriguez", 
-      title: "Managing Partner",
-      firm: "Growth Capital Partners",
-      firmType: "Private Equity",
-      location: "San Francisco, CA",
-      aum: "$2.5B",
-      email: "david.rodriguez@growthcapital.com"
-    },
-    { 
-      id: "2", 
-      name: "Sustainable Equity Fund", 
-      contact: "Sarah Chen", 
-      title: "Portfolio Manager",
-      firm: "Sustainable Equity Fund",
-      firmType: "Hedge Fund",
-      location: "New York, NY",
-      aum: "$1.2B",
-      email: "sarah.chen@sustainableequity.com"
-    },
-    { 
-      id: "3", 
-      name: "Infrastructure Capital", 
-      contact: "Michael Thompson", 
-      title: "Senior Managing Director",
-      firm: "Infrastructure Capital",
-      firmType: "Infrastructure",
-      location: "London, UK",
-      aum: "$3.8B",
-      email: "michael.thompson@infrastructurecapital.com"
-    },
-    { 
-      id: "4", 
-      name: "Venture Dynamics", 
-      contact: "Jennifer Park", 
-      title: "Founding Partner",
-      firm: "Venture Dynamics",
-      firmType: "Venture Capital",
-      location: "Palo Alto, CA",
-      aum: "$800M",
-      email: "jennifer.park@venturedynamics.com"
-    },
-    { 
-      id: "5", 
-      name: "Fixed Income Strategies", 
-      contact: "Robert Wilson", 
-      title: "Chief Investment Officer",
-      firm: "Fixed Income Strategies",
-      firmType: "Credit",
-      location: "Chicago, IL",
-      aum: "$4.2B",
-      email: "robert.wilson@fixedincome.com"
-    }
-  ]
+  // Get context and router with fallbacks
+  const { userRole, currentPersonProfile } = useApp() || { userRole: null, currentPersonProfile: null }
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   // Available strategies
   const availableStrategies = [
@@ -1045,79 +980,7 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
     },
   ]
 
-  // Vestira Standard Templates - Featured prominently
-  const [vestiraTemplates, setVestiraTemplates] = useState([
-    {
-      id: "vestira-1",
-      name: "Vestira Infrastructure Fund DDQ",
-      description: "Comprehensive due diligence questionnaire for infrastructure investment strategies",
-      category: "Infrastructure",
-      questionCount: 127,
-      estimatedTime: "4-6 hours",
-      lastUpdated: "2024-01-15",
-      version: "3.2",
-      isVestiraStandard: true,
-      usage: "Completed by 89% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-    {
-      id: "vestira-2",
-      name: "Vestira Private Equity Fund DDQ",
-      description: "Standard due diligence questionnaire for private equity fund evaluation",
-      category: "Private Equity",
-      questionCount: 98,
-      estimatedTime: "3-4 hours",
-      lastUpdated: "2024-01-10",
-      version: "2.8",
-      isVestiraStandard: true,
-      usage: "Completed by 92% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-    {
-      id: "vestira-3",
-      name: "Vestira Real Estate Fund DDQ",
-      description: "Specialized questionnaire for real estate investment strategies",
-      category: "Real Estate",
-      questionCount: 115,
-      estimatedTime: "4-5 hours",
-      lastUpdated: "2024-01-08",
-      version: "2.1",
-      isVestiraStandard: true,
-      usage: "Completed by 76% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-    {
-      id: "vestira-4",
-      name: "Vestira Credit Fund DDQ",
-      description: "Comprehensive questionnaire for credit and debt strategies",
-      category: "Credit",
-      questionCount: 89,
-      estimatedTime: "3-4 hours",
-      lastUpdated: "2024-01-12",
-      version: "1.9",
-      isVestiraStandard: true,
-      usage: "Completed by 68% of Managers",
-      compliance: "SOC 2 Compliant",
-    },
-  ])
 
-  // Custom templates
-  const [customTemplates, setCustomTemplates] = useState([
-    {
-      id: "custom-1",
-      name: "ESG Assessment Questionnaire",
-      description: "Environmental, social, and governance evaluation template",
-      category: "ESG",
-      questionCount: 65,
-      estimatedTime: "2-3 hours",
-      lastUpdated: "2024-01-05",
-      version: "1.2",
-      isVestiraStandard: false,
-      usage: "Custom template",
-      compliance: "Internal Use",
-      questions: []
-    },
-  ])
 
   // Enhanced file upload handler for DDQ creation
   const handleDDQFileUpload = (event) => {
@@ -4204,15 +4067,4 @@ const handleUseTemplate = () => {
       )}
     </Screen>
   )
-  } catch (err) {
-    console.error('Error in Due Diligence Hub:', err)
-    console.error('Error stack:', err instanceof Error ? err.stack : 'No stack trace')
-    console.error('Error details:', {
-      name: err instanceof Error ? err.name : 'Unknown',
-      message: err instanceof Error ? err.message : String(err),
-      type: typeof err
-    })
-    setError(err instanceof Error ? err.message : 'An unexpected error occurred')
-    return null
-  }
 }
