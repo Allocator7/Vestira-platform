@@ -81,6 +81,11 @@ function CustomDropdown({
 export default function AllocatorDueDiligenceHubPage() {
   const [error, setError] = useState<string | null>(null)
   
+  // Add missing hooks
+  const { userRole, currentPersonProfile } = useApp()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
   // Simple error boundary
   if (error) {
     return (
