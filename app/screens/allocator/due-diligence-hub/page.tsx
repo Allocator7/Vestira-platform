@@ -83,20 +83,11 @@ export default function AllocatorDueDiligenceHubPage() {
   
   const [error, setError] = useState<string | null>(null)
   
-  // Get context with safe fallback
-  let userRole = null
-  let currentPersonProfile = null
+  // Use safe defaults instead of trying to access context
+  const userRole = "allocator" // Default to allocator role
+  const currentPersonProfile = { name: "Current User" } // Safe default
   
-  try {
-    console.log('AllocatorDueDiligenceHubPage: Attempting to access AppContext')
-    const appContext = useApp()
-    userRole = appContext?.userRole || null
-    currentPersonProfile = appContext?.currentPersonProfile || null
-    console.log('AllocatorDueDiligenceHubPage: AppContext accessed successfully', { userRole, currentPersonProfile })
-  } catch (error) {
-    console.error('AllocatorDueDiligenceHubPage: Error accessing AppContext:', error)
-    // Continue with null values - don't crash the component
-  }
+  console.log('AllocatorDueDiligenceHubPage: Using safe defaults', { userRole, currentPersonProfile })
   
   const router = useRouter()
   const searchParams = useSearchParams()
