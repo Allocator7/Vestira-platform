@@ -93,7 +93,9 @@ export default function ConsultantDueDiligenceHubPage() {
   const [selectedDDQ, setSelectedDDQ] = useState(null)
   const [messageContent, setMessageContent] = useState("")
   const [messageTopic, setMessageTopic] = useState("")
+  const [selectedManagersForMessage, setSelectedManagersForMessage] = useState<string[]>([])
   const [showMeetingModal, setShowMeetingModal] = useState(false)
+  const [selectedManagersForMeeting, setSelectedManagersForMeeting] = useState<string[]>([])
   const [meetingDetails, setMeetingDetails] = useState({
     topic: "",
     purpose: "",
@@ -685,7 +687,7 @@ export default function ConsultantDueDiligenceHubPage() {
     setFilteredDDQs(filtered)
   }, [searchQuery, selectedStrategy, selectedStatus])
 
-  // Add completed searches data
+  // Add completed searches data with full structure for viewing
   const completedDDQs = [
     {
       id: "completed-1",
@@ -699,6 +701,38 @@ export default function ConsultantDueDiligenceHubPage() {
       investmentType: "fund",
       fundSize: "$2.8B",
       vintage: "2023",
+      sections: [
+        {
+          id: "section-1",
+          name: "Organization & Management",
+          questions: [
+            {
+              id: "q-1",
+              question: "Please provide a detailed overview of your organization's structure and key personnel.",
+              answer: "Infrastructure Capital operates as a specialized investment firm with 25 professionals across investment, operations, and support functions. Our team includes 8 senior investment professionals with an average of 15 years of experience in infrastructure investments.",
+              status: "completed"
+            },
+            {
+              id: "q-2", 
+              question: "Describe your governance framework and decision-making processes.",
+              answer: "We have a three-tier governance structure: Investment Committee (final decisions), Investment Team (analysis and recommendations), and Operations Team (execution and monitoring). All major decisions require Investment Committee approval.",
+              status: "completed"
+            }
+          ]
+        },
+        {
+          id: "section-2",
+          name: "Investment Strategy",
+          questions: [
+            {
+              id: "q-3",
+              question: "What is your investment strategy and target markets?",
+              answer: "We focus on core infrastructure assets in North America and Europe, targeting transportation, energy, and utilities sectors. Our strategy emphasizes stable cash flows and long-term value creation.",
+              status: "completed"
+            }
+          ]
+        }
+      ]
     },
     {
       id: "completed-2",
@@ -1605,6 +1639,21 @@ const handleUseTemplate = () => {
     }
   }
 
+  const handleViewCompletedDDQ = (ddqId: string) => {
+    const ddq = completedDDQs.find((d) => d.id === ddqId)
+    if (ddq) {
+      setSelectedDDQForReview(ddq)
+      setShowReviewModal(true)
+      setViewMode("overview") // Reset to overview when opening
+      setCurrentQuestionIndex(0)
+      setCurrentSectionIndex(0)
+      setActiveSection("firm") // Reset to first section
+      showNotification(`Opening completed DDQ: ${ddq.contactName} - ${ddq.templateName}`)
+    } else {
+      showNotification("DDQ not found")
+    }
+  }
+
   const handleUpdateQuestions = (updatedQuestions: any[]) => {
     if (selectedDDQForReview) {
       setSelectedDDQForReview((prev) => ({
@@ -1628,28 +1677,39 @@ const handleUseTemplate = () => {
   }
 
   const handleSendMessage = () => {
-    if (!messageContent.trim() || !messageTopic.trim()) {
-      showNotification("Please fill in all required fields")
+    if (!messageContent.trim() || !messageTopic.trim() || selectedManagersForMessage.length === 0) {
+      showNotification("Please fill in all required fields and select at least one recipient")
       return
     }
 
-    console.log("Sending message to:", selectedDDQ?.contactName)
+    const selectedManagerNames = availableManagers
+      .filter(m => selectedManagersForMessage.includes(m.id))
+      .map(m => m.name)
+      .join(", ")
+
+    console.log("Sending message to:", selectedManagerNames)
     console.log("Message content:", messageContent)
 
-    showNotification(`Message sent to ${selectedDDQ?.contactName} at ${selectedDDQ?.managerName}`)
+    showNotification(`Message sent to ${selectedManagerNames}`)
     setShowMessageModal(false)
     setSelectedDDQ(null)
     setMessageContent("")
     setMessageTopic("")
+    setSelectedManagersForMessage([])
   }
 
   const handleScheduleMeeting = () => {
-    if (!meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time) {
-      showNotification("Please fill in all required fields")
+    if (!meetingDetails.topic.trim() || !meetingDetails.date || !meetingDetails.time || selectedManagersForMeeting.length === 0) {
+      showNotification("Please fill in all required fields and select at least one participant")
       return
     }
 
-    showNotification(`Check-in meeting scheduled with ${selectedDDQ?.contactName} at ${selectedDDQ?.managerName}`)
+    const selectedManagerNames = availableManagers
+      .filter(m => selectedManagersForMeeting.includes(m.id))
+      .map(m => m.name)
+      .join(", ")
+
+    showNotification(`Check-in meeting scheduled with ${selectedManagerNames}`)
     setShowMeetingModal(false)
     setSelectedDDQ(null)
     setMeetingDetails({
@@ -1660,6 +1720,7 @@ const handleUseTemplate = () => {
       duration: "60",
       type: "video",
     })
+    setSelectedManagersForMeeting([])
   }
 
   const closeMessageModal = () => {
@@ -1667,6 +1728,7 @@ const handleUseTemplate = () => {
     setSelectedDDQ(null)
     setMessageContent("")
     setMessageTopic("")
+    setSelectedManagersForMessage([])
   }
 
   const closeMeetingModal = () => {
@@ -1680,6 +1742,7 @@ const handleUseTemplate = () => {
       duration: "60",
       type: "video",
     })
+    setSelectedManagersForMeeting([])
   }
 
   const getStatusBadge = (status: string) => {
@@ -1939,8 +2002,8 @@ const handleUseTemplate = () => {
       
       showNotification("Informal Due Diligence session started successfully")
       
-      // Navigate to the main DDQ hub with a success message
-      router.push('/consultant/due-diligence-hub?tab=active&message=informal-started')
+      // Navigate to the informal due diligence page
+      router.push('/screens/consultant/informal-due-diligence')
       
     } catch (error) {
       console.error("Error starting informal due diligence:", error)
@@ -2869,6 +2932,46 @@ const handleUseTemplate = () => {
 
             <div className="space-y-4">
               <div className="space-y-2">
+                <Label>Select Recipients *</Label>
+                <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
+                  <div className="flex items-center space-x-3 py-3 border-b border-gray-100">
+                    <Checkbox
+                      id="all-managers-message"
+                      checked={selectedManagersForMessage.length === availableManagers.length}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedManagersForMessage(availableManagers.map(m => m.id))
+                        } else {
+                          setSelectedManagersForMessage([])
+                        }
+                      }}
+                    />
+                    <Label htmlFor="all-managers-message" className="font-medium cursor-pointer">
+                      All Managers ({availableManagers.length})
+                    </Label>
+                  </div>
+                  {availableManagers.map((manager) => (
+                    <div key={manager.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
+                      <Checkbox
+                        id={`message-${manager.id}`}
+                        checked={selectedManagersForMessage.includes(manager.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedManagersForMessage([...selectedManagersForMessage, manager.id])
+                          } else {
+                            setSelectedManagersForMessage(selectedManagersForMessage.filter(id => id !== manager.id))
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`message-${manager.id}`} className="cursor-pointer">
+                        {manager.name} • {manager.title}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="messageTopic">Subject *</Label>
                 <Input
                   id="messageTopic"
@@ -2917,6 +3020,46 @@ const handleUseTemplate = () => {
             </div>
 
             <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Participants *</Label>
+                <div className="border border-gray-300 rounded-lg p-4 max-h-60 overflow-y-auto">
+                  <div className="flex items-center space-x-3 py-3 border-b border-gray-100">
+                    <Checkbox
+                      id="all-managers-meeting"
+                      checked={selectedManagersForMeeting.length === availableManagers.length}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedManagersForMeeting(availableManagers.map(m => m.id))
+                        } else {
+                          setSelectedManagersForMeeting([])
+                        }
+                      }}
+                    />
+                    <Label htmlFor="all-managers-meeting" className="font-medium cursor-pointer">
+                      All Managers ({availableManagers.length})
+                    </Label>
+                  </div>
+                  {availableManagers.map((manager) => (
+                    <div key={manager.id} className="flex items-center space-x-3 py-3 border-b border-gray-100 last:border-b-0">
+                      <Checkbox
+                        id={`meeting-${manager.id}`}
+                        checked={selectedManagersForMeeting.includes(manager.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedManagersForMeeting([...selectedManagersForMeeting, manager.id])
+                          } else {
+                            setSelectedManagersForMeeting(selectedManagersForMeeting.filter(id => id !== manager.id))
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`meeting-${manager.id}`} className="cursor-pointer">
+                        {manager.name} • {manager.title}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="meetingTopic">Meeting Topic *</Label>
                 <Input
@@ -3251,7 +3394,7 @@ const handleUseTemplate = () => {
                         <Button 
                           variant="outline" 
                           size="sm"
-                          onClick={() => handleReviewDDQ(ddq.id)}
+                          onClick={() => handleViewCompletedDDQ(ddq.id)}
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
