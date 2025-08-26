@@ -86,6 +86,30 @@ export default function AllocatorDueDiligenceHubPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   
+  // Helper function to safely access localStorage and sessionStorage
+  const safeStorage = {
+    localStorage: {
+      getItem: (key: string) => {
+        if (typeof window !== 'undefined') {
+          return localStorage.getItem(key)
+        }
+        return null
+      },
+      setItem: (key: string, value: string) => {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(key, value)
+        }
+      }
+    },
+    sessionStorage: {
+      setItem: (key: string, value: string) => {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(key, value)
+        }
+      }
+    }
+  }
+  
   // Simple error boundary
   if (error) {
     return (
@@ -221,7 +245,7 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Load custom templates from localStorage on mount
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('custom-ddq-templates')
+    const savedTemplates = safeStorage.localStorage.getItem('custom-ddq-templates')
     if (savedTemplates) {
       try {
         const parsedTemplates = JSON.parse(savedTemplates)
@@ -235,7 +259,7 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Load current DDQ questions from localStorage on mount
   useEffect(() => {
-    const savedQuestions = localStorage.getItem('current-ddq-questions')
+    const savedQuestions = safeStorage.localStorage.getItem('current-ddq-questions')
     if (savedQuestions) {
       try {
         const parsedQuestions = JSON.parse(savedQuestions)
@@ -1352,12 +1376,12 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
         const mockQuestions = generateTemplateQuestions(template)
         
         // Store the questions in localStorage for the current DDQ session
-        const currentQuestions = JSON.parse(localStorage.getItem('current-ddq-questions') || '[]')
+        const currentQuestions = JSON.parse(safeStorage.localStorage.getItem('current-ddq-questions') || '[]')
         const updatedQuestions = [...currentQuestions, ...mockQuestions]
-        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        safeStorage.localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
         
         // Also store in sessionStorage for immediate access
-        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        safeStorage.sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
         
         showNotification(`Added all ${template.questionCount} questions from ${template.name} to your DDQ`)
       } catch (error) {
