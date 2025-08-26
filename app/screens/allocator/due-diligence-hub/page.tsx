@@ -43,6 +43,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useApp } from "../../../../context/AppContext"
 import { BranchingQuestionManager } from "../../../../components/BranchingQuestionManager"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../../../components/ui/dialog"
 
 export default function AllocatorDueDiligenceHubPage() {
   console.log('AllocatorDueDiligenceHubPage: Component starting to render')
@@ -54,8 +55,8 @@ export default function AllocatorDueDiligenceHubPage() {
   const [selectedStatus, setSelectedStatus] = useState("All")
   const [notification, setNotification] = useState("")
   const [showMessageModal, setShowMessageModal] = useState(false)
-  const [selectedManager, setSelectedManager] = useState(null)
-  const [selectedDDQ, setSelectedDDQ] = useState(null)
+  const [selectedManager, setSelectedManager] = useState<any>(null)
+  const [selectedDDQ, setSelectedDDQ] = useState<any>(null)
   const [messageContent, setMessageContent] = useState("")
   const [messageTopic, setMessageTopic] = useState("")
   const [showMeetingModal, setShowMeetingModal] = useState(false)
@@ -396,10 +397,32 @@ export default function AllocatorDueDiligenceHubPage() {
                             <Eye className="h-4 w-4 mr-2" />
                             Review
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleExportDDQ(ddq)}
+                          >
                             <FileText className="h-4 w-4 mr-2" />
                             Export
                           </Button>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Users className="h-4 w-4 mr-2" />
+                                Actions
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleSendMessage(ddq, ddq)}>
+                                <FileText className="h-4 w-4 mr-2" />
+                                Send Message
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleScheduleMeeting(ddq, ddq)}>
+                                <Calendar className="h-4 w-4 mr-2" />
+                                Schedule Meeting
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </div>
                     </CardContent>
@@ -426,6 +449,157 @@ export default function AllocatorDueDiligenceHubPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Message Modal */}
+      {showMessageModal && selectedManager && selectedDDQ && (
+        <Dialog open={showMessageModal} onOpenChange={setShowMessageModal}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Send Message to {selectedManager.contactName}</DialogTitle>
+              <DialogDescription>
+                Send a message regarding the {selectedDDQ.templateName} DDQ.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="topic">Topic</Label>
+                <Input
+                  id="topic"
+                  value={messageTopic}
+                  onChange={(e) => setMessageTopic(e.target.value)}
+                  placeholder="Enter message topic"
+                />
+              </div>
+              <div>
+                <Label htmlFor="message">Message</Label>
+                <Textarea
+                  id="message"
+                  value={messageContent}
+                  onChange={(e) => setMessageContent(e.target.value)}
+                  placeholder="Enter your message..."
+                  rows={6}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMessageModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                showNotification("Message sent successfully")
+                setShowMessageModal(false)
+                setMessageTopic("")
+                setMessageContent("")
+              }}>
+                Send Message
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Meeting Modal */}
+      {showMeetingModal && selectedManager && selectedDDQ && (
+        <Dialog open={showMeetingModal} onOpenChange={setShowMeetingModal}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Schedule Meeting with {selectedManager.contactName}</DialogTitle>
+              <DialogDescription>
+                Schedule a meeting to discuss the {selectedDDQ.templateName} DDQ.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="meeting-topic">Meeting Topic</Label>
+                <Input
+                  id="meeting-topic"
+                  value={meetingDetails.topic}
+                  onChange={(e) => setMeetingDetails({...meetingDetails, topic: e.target.value})}
+                  placeholder="Enter meeting topic"
+                />
+              </div>
+              <div>
+                <Label htmlFor="meeting-purpose">Purpose</Label>
+                <Textarea
+                  id="meeting-purpose"
+                  value={meetingDetails.purpose}
+                  onChange={(e) => setMeetingDetails({...meetingDetails, purpose: e.target.value})}
+                  placeholder="Describe the meeting purpose..."
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="meeting-date">Date</Label>
+                  <Input
+                    id="meeting-date"
+                    type="date"
+                    value={meetingDetails.date}
+                    onChange={(e) => setMeetingDetails({...meetingDetails, date: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="meeting-time">Time</Label>
+                  <Input
+                    id="meeting-time"
+                    type="time"
+                    value={meetingDetails.time}
+                    onChange={(e) => setMeetingDetails({...meetingDetails, time: e.target.value})}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="meeting-duration">Duration (minutes)</Label>
+                  <Select value={meetingDetails.duration} onValueChange={(value) => setMeetingDetails({...meetingDetails, duration: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">30 minutes</SelectItem>
+                      <SelectItem value="60">1 hour</SelectItem>
+                      <SelectItem value="90">1.5 hours</SelectItem>
+                      <SelectItem value="120">2 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="meeting-type">Meeting Type</Label>
+                  <Select value={meetingDetails.type} onValueChange={(value) => setMeetingDetails({...meetingDetails, type: value})}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="video">Video Call</SelectItem>
+                      <SelectItem value="phone">Phone Call</SelectItem>
+                      <SelectItem value="in-person">In Person</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowMeetingModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                showNotification("Meeting scheduled successfully")
+                setShowMeetingModal(false)
+                setMeetingDetails({
+                  topic: "",
+                  purpose: "",
+                  date: "",
+                  time: "",
+                  duration: "60",
+                  type: "video",
+                })
+              }}>
+                Schedule Meeting
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </Screen>
   )
 }
