@@ -481,7 +481,7 @@ export default function AllocatorDueDiligenceHubPage() {
   }
 
   // Filter active DDQs based on search, strategy, and status
-  const filteredActiveDDQs = activeDDQs.filter((ddq) => {
+  const filteredActiveDDQs = (activeDDQs || []).filter((ddq) => {
     const matchesSearch = searchQuery === "" || 
       ddq.templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ddq.managerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1515,12 +1515,12 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
       }
       
       // Store in localStorage for persistence
-      const existingSessions = JSON.parse(safeStorage.localStorage.getItem('informal-dd-sessions') || '[]')
+      const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
       existingSessions.push(informalSession)
-      safeStorage.localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+      localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
       
       // Store current session in sessionStorage
-      safeStorage.sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+      sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
       
       showNotification("Informal Due Diligence session started")
       
@@ -1568,9 +1568,9 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
     }
 
     // Save to localStorage
-    const existingTemplates = JSON.parse(safeStorage.localStorage.getItem('custom-ddq-templates') || '[]')
+    const existingTemplates = JSON.parse(localStorage.getItem('custom-ddq-templates') || '[]')
     existingTemplates.push(customTemplate)
-    safeStorage.localStorage.setItem('custom-ddq-templates', JSON.stringify(existingTemplates))
+    localStorage.setItem('custom-ddq-templates', JSON.stringify(existingTemplates))
 
     // Update custom templates state
           setCustomTemplates(prev => [...prev, customTemplate])
@@ -1629,8 +1629,8 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
       setCurrentDDQQuestions(prev => {
         const updatedQuestions = [...prev, questionWithId]
         // Store in localStorage and sessionStorage
-        safeStorage.localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-        safeStorage.sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
         return updatedQuestions
       })
       showNotification("Question added to DDQ")
@@ -1743,8 +1743,8 @@ Last Updated: ${new Date(ddq.lastUpdated).toLocaleDateString()}
     if (isQuestionSelectorForDDQ) {
       setCurrentDDQQuestions(prev => {
         const updatedQuestions = [...prev, ...selectedQuestions]
-        safeStorage.localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-        safeStorage.sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+        sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
         return updatedQuestions
       })
       showNotification(`Added ${selectedQuestions.length} questions to DDQ`)
@@ -2111,7 +2111,7 @@ const handleUseTemplate = () => {
     })
 
     // Update localStorage
-    safeStorage.localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
+    localStorage.setItem('active-ddqs', JSON.stringify(updatedDDQs))
     
     showNotification("DDQ updated successfully")
     setShowEditDDQModal(false)
@@ -2412,8 +2412,8 @@ const handleUseTemplate = () => {
                                   setCurrentDDQQuestions(questions)
                                   
                                   // Store in localStorage and sessionStorage
-                                  safeStorage.localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
-                                  safeStorage.sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
+                                  localStorage.setItem('current-ddq-questions', JSON.stringify(questions))
+                                  sessionStorage.setItem('current-ddq-questions', JSON.stringify(questions))
                                   
                                   // Force a re-render by updating a timestamp
                                   setCreateDDQForm(prev => ({
@@ -3982,8 +3982,8 @@ const handleUseTemplate = () => {
                                           q.source === question.source && 
                                           q.templateName === question.templateName)
                                       )
-                                      safeStorage.localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
-                                      safeStorage.sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                      localStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
+                                      sessionStorage.setItem('current-ddq-questions', JSON.stringify(updatedQuestions))
                                       return updatedQuestions
                                     })
                                     showNotification("Question removed from DDQ")
