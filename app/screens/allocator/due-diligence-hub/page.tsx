@@ -83,9 +83,9 @@ export default function AllocatorDueDiligenceHubPage() {
   
   const [error, setError] = useState<string | null>(null)
   
-  // Use safe defaults instead of trying to access context
-  const userRole = "allocator" // Default to allocator role
-  const currentPersonProfile = { name: "Current User" } // Safe default
+  // Use safe defaults instead of context
+  const userRole = "allocator"
+  const currentPersonProfile = { name: "Current User" }
   
   console.log('AllocatorDueDiligenceHubPage: Using safe defaults', { userRole, currentPersonProfile })
   
