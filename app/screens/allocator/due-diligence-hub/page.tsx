@@ -79,32 +79,29 @@ function CustomDropdown({
 }
 
 export default function AllocatorDueDiligenceHubPage() {
+  console.log('AllocatorDueDiligenceHubPage: Component starting to render')
+  
   const [error, setError] = useState<string | null>(null)
   
-  // Add missing hooks with error handling
+  // Get context with safe fallback
   let userRole = null
   let currentPersonProfile = null
   
   try {
+    console.log('AllocatorDueDiligenceHubPage: Attempting to access AppContext')
     const appContext = useApp()
     userRole = appContext?.userRole || null
     currentPersonProfile = appContext?.currentPersonProfile || null
+    console.log('AllocatorDueDiligenceHubPage: AppContext accessed successfully', { userRole, currentPersonProfile })
   } catch (error) {
-    console.error('Error accessing AppContext:', error)
-    setError('Failed to load user context')
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Something went wrong</h2>
-          <p className="text-gray-600 mb-4">Failed to load user context. Please refresh the page.</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
-        </div>
-      </div>
-    )
+    console.error('AllocatorDueDiligenceHubPage: Error accessing AppContext:', error)
+    // Continue with null values - don't crash the component
   }
   
   const router = useRouter()
   const searchParams = useSearchParams()
+  
+  console.log('AllocatorDueDiligenceHubPage: Hooks initialized successfully')
   
   // Helper function to safely access localStorage and sessionStorage
   const safeStorage = {
