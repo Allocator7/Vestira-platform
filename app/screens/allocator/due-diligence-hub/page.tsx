@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Screen } from "../../../../components/Screen"
 import { Button } from "../../../../components/ui/button"
 import { Card, CardContent } from "../../../../components/ui/card"
@@ -38,36 +38,46 @@ import {
   FileUp,
   Plus,
   LayoutTemplateIcon as Template,
+  MessageSquare,
+  Clock,
+  Download,
+  Edit,
+  Trash2,
+  Copy,
+  Share,
+  Filter,
+  Search,
+  Settings,
+  BarChart3,
+  TrendingUp,
+  Award,
+  Shield,
+  Globe,
+  Building,
+  DollarSign,
+  PieChart,
+  Target,
+  Zap,
+  BookOpen,
+  FileCheck,
+  UserCheck,
+  AlertCircle,
+  Info,
+  HelpCircle,
 } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
 import { useApp } from "../../../../context/AppContext"
+import { useRouter, useSearchParams } from "next/navigation"
 import { BranchingQuestionManager } from "../../../../components/BranchingQuestionManager"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../../../components/ui/dialog"
+import { Progress } from "../../../../components/ui/progress"
+import { Separator } from "../../../../components/ui/separator"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../../../../components/ui/tooltip"
+import { Alert, AlertDescription } from "../../../../components/ui/alert"
+import { Avatar, AvatarFallback, AvatarImage } from "../../../../components/ui/avatar"
 
 export default function AllocatorDueDiligenceHubPage() {
   console.log('AllocatorDueDiligenceHubPage: Component starting to render')
-  
-  const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState("active")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedStrategy, setSelectedStrategy] = useState("All")
-  const [selectedStatus, setSelectedStatus] = useState("All")
-  const [notification, setNotification] = useState("")
-  const [showMessageModal, setShowMessageModal] = useState(false)
-  const [selectedManager, setSelectedManager] = useState<any>(null)
-  const [selectedDDQ, setSelectedDDQ] = useState<any>(null)
-  const [messageContent, setMessageContent] = useState("")
-  const [messageTopic, setMessageTopic] = useState("")
-  const [showMeetingModal, setShowMeetingModal] = useState(false)
-  const [meetingDetails, setMeetingDetails] = useState({
-    topic: "",
-    purpose: "",
-    date: "",
-    time: "",
-    duration: "60",
-    type: "video",
-  })
   
   // Get context with safe fallback
   let userRole = "allocator"
@@ -88,9 +98,221 @@ export default function AllocatorDueDiligenceHubPage() {
   
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  // Basic state
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("active")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedStrategy, setSelectedStrategy] = useState("All")
+  const [selectedStatus, setSelectedStatus] = useState("All")
+  const [notification, setNotification] = useState("")
+  
+  // Modal states
+  const [showMessageModal, setShowMessageModal] = useState(false)
+  const [selectedManager, setSelectedManager] = useState<any>(null)
+  const [selectedDDQ, setSelectedDDQ] = useState<any>(null)
+  const [messageContent, setMessageContent] = useState("")
+  const [messageTopic, setMessageTopic] = useState("")
+  const [showMeetingModal, setShowMeetingModal] = useState(false)
+  const [meetingDetails, setMeetingDetails] = useState({
+    topic: "",
+    purpose: "",
+    date: "",
+    time: "",
+    duration: "60",
+    type: "video",
+  })
+
+  // Enhanced DDQ Creation Modal States
+  const [showCreateDDQModal, setShowCreateDDQModal] = useState(false)
+  const [ddqCreationMethod, setDdqCreationMethod] = useState("template") // "template" or "upload"
+  const [createDDQForm, setCreateDDQForm] = useState({
+    ddqName: "",
+    selectedTemplate: "",
+    selectedManagers: [],
+    dueDate: "",
+    description: "",
+    strategies: [],
+    fundTypes: {
+      fund: false,
+      sma: false,
+      other: false,
+    },
+    fundSize: "",
+    visibility: "private",
+  })
+
+  // File upload states for DDQ creation
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [isParsingFile, setIsParsingFile] = useState(false)
+  const [parsedDDQData, setParsedDDQData] = useState(null)
+  const [showParsedPreview, setShowParsedPreview] = useState(false)
+  const [showCreateTemplateModal, setShowCreateTemplateModal] = useState(false)
+  const [showQuestionSelector, setShowQuestionSelector] = useState(false)
+  const [selectedQuestions, setSelectedQuestions] = useState([])
+  const [newTemplate, setNewTemplate] = useState({
+    name: "",
+    description: "",
+    category: "General",
+    questions: []
+  })
+  const [currentDDQQuestions, setCurrentDDQQuestions] = useState([])
+  const [isQuestionSelectorForDDQ, setIsQuestionSelectorForDDQ] = useState(false)
+  const [selectedQuestionsInSelector, setSelectedQuestionsInSelector] = useState([])
+  
+  // Template management state
+  const [customTemplates, setCustomTemplates] = useState<any[]>([])
+  
+  // DDQ Editing State
+  const [showEditDDQModal, setShowEditDDQModal] = useState(false)
+  const [editingDDQ, setEditingDDQ] = useState(null)
+  const [editDDQForm, setEditDDQForm] = useState({
+    ddqName: "",
+    description: "",
+    dueDate: "",
+    selectedManagers: [],
+    strategies: [],
+    fundTypes: {
+      fund: false,
+      sma: false,
+      other: false,
+    },
+    fundSize: "",
+    visibility: "private",
+  })
+
+  const [showTemplatePreviewModal, setShowTemplatePreviewModal] = useState(false)
+  const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState(null)
+  const [showUseTemplateModal, setShowUseTemplateModal] = useState(false)
+  const [selectedTemplateForUse, setSelectedTemplateForUse] = useState(null)
+  const [useTemplateForm, setUseTemplateForm] = useState({
+    ddqName: "",
+    selectedManagers: [],
+    dueDate: "",
+    description: "",
+  })
+
+  // Add Review Modal state
+  const [showReviewModal, setShowReviewModal] = useState(false)
+  const [selectedDDQForReview, setSelectedDDQForReview] = useState(null)
+
+  // New state for question-by-question view
+  const [viewMode, setViewMode] = useState<"overview" | "question-by-question">("overview")
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [currentSectionIndex, setCurrentSectionIndex] = useState(0)
+
+  // New state for sectioned organization
+  const [activeSection, setActiveSection] = useState("firm")
+
+  // Standard DDQ sections
+  const ddqSections = [
+    { id: "firm", name: "Firm", icon: "🏢" },
+    { id: "investments", name: "Investments", icon: "📈" },
+    { id: "compliance", name: "Compliance", icon: "⚖️" },
+    { id: "risk-management", name: "Risk Management", icon: "🛡️" },
+    { id: "operations", name: "Operations", icon: "⚙️" },
+    { id: "technology", name: "Technology", icon: "💻" },
+    { id: "general", name: "Other", icon: "📋" },
+  ]
   
   console.log('AllocatorDueDiligenceHubPage: Hooks initialized successfully')
   
+  // Check for tab parameter on mount
+  useEffect(() => {
+    const tab = searchParams.get("tab")
+    if (tab === "active") {
+      setActiveTab("active")
+    }
+  }, [searchParams])
+
+  // Load custom templates from localStorage on mount
+  useEffect(() => {
+    const savedTemplates = localStorage.getItem('custom-ddq-templates')
+    if (savedTemplates) {
+      try {
+        const parsedTemplates = JSON.parse(savedTemplates)
+        // Update the customTemplates array with saved templates
+        setCustomTemplates(prev => [...prev, ...parsedTemplates])
+      } catch (error) {
+        console.error("Error loading custom templates:", error)
+      }
+    }
+  }, [])
+
+  // Load current DDQ questions from localStorage on mount
+  useEffect(() => {
+    const savedQuestions = localStorage.getItem('current-ddq-questions')
+    if (savedQuestions) {
+      try {
+        const parsedQuestions = JSON.parse(savedQuestions)
+        setCurrentDDQQuestions(parsedQuestions)
+      } catch (error) {
+        console.error("Error loading current DDQ questions:", error)
+      }
+    }
+  }, [])
+
+  // Real manager data from the system
+  const availableManagers = [
+    { 
+      id: "1", 
+      name: "Growth Capital Partners", 
+      contact: "David Rodriguez", 
+      title: "Managing Partner",
+      firm: "Growth Capital Partners",
+      firmType: "Private Equity",
+      location: "San Francisco, CA",
+      aum: "$2.5B",
+      email: "david.rodriguez@growthcapital.com"
+    },
+    { 
+      id: "2", 
+      name: "Sustainable Equity Fund", 
+      contact: "Sarah Chen", 
+      title: "Portfolio Manager",
+      firm: "Sustainable Equity Fund",
+      firmType: "Hedge Fund",
+      location: "New York, NY",
+      aum: "$1.2B",
+      email: "sarah.chen@sustainableequity.com"
+    },
+    { 
+      id: "3", 
+      name: "Infrastructure Capital", 
+      contact: "Michael Thompson", 
+      title: "Senior Managing Director",
+      firm: "Infrastructure Capital",
+      firmType: "Infrastructure",
+      location: "London, UK",
+      aum: "$3.8B",
+      email: "michael.thompson@infrastructurecapital.com"
+    },
+    { 
+      id: "4", 
+      name: "Venture Dynamics", 
+      contact: "Jennifer Park", 
+      title: "Founding Partner",
+      firm: "Venture Dynamics",
+      firmType: "Venture Capital",
+      location: "Palo Alto, CA",
+      aum: "$800M",
+      email: "jennifer.park@venturedynamics.com"
+    },
+    { 
+      id: "5", 
+      name: "Fixed Income Strategies", 
+      contact: "Robert Wilson", 
+      title: "Chief Investment Officer",
+      firm: "Fixed Income Strategies",
+      firmType: "Credit",
+      location: "Chicago, IL",
+      aum: "$4.2B",
+      email: "robert.wilson@fixedincome.com"
+    }
+  ]
+
+
+
   // Helper function to safely access localStorage and sessionStorage
   const safeStorage = {
     localStorage: {
