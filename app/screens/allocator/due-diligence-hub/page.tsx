@@ -660,7 +660,7 @@ export default function AllocatorDueDiligenceHubPage() {
 
   // Apply filters to DDQs
   useEffect(() => {
-    let filtered = activeDDQs
+    let filtered = [...activeDDQs]
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -683,7 +683,7 @@ export default function AllocatorDueDiligenceHubPage() {
     }
 
     setFilteredDDQs(filtered)
-  }, [searchQuery, selectedStrategy, selectedStatus, activeDDQs])
+  }, [searchQuery, selectedStrategy, selectedStatus])
 
   // Add completed searches data
   const completedDDQs = [
