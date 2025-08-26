@@ -1177,7 +1177,19 @@ export default function AllocatorDueDiligenceHubPage() {
           </TabsList>
 
           <TabsContent value="active" className="mt-6">
-            {/* Search and Filters */}
+            {/* Create New DDQ Button */}
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Active Due Diligence Questionnaires</h3>
+                <p className="text-sm text-gray-600">Manage ongoing DDQ reviews and track progress</p>
+              </div>
+              <Button onClick={() => setShowCreateDDQModal(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create New DDQ
+              </Button>
+            </div>
+
+                      {/* Search and Filters */}
             <div className="mb-6 flex flex-col sm:flex-row gap-4">
               <div className="flex-1">
                 <Input
@@ -1220,7 +1232,7 @@ export default function AllocatorDueDiligenceHubPage() {
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No active due diligence questionnaires found</h3>
                   <p className="text-gray-500 mb-4">Get started by creating a new DDQ or inviting managers to complete questionnaires.</p>
-                  <Button onClick={() => showNotification("Create DDQ functionality coming soon")}>
+                  <Button onClick={() => setShowCreateDDQModal(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create New DDQ
                   </Button>
@@ -1351,6 +1363,329 @@ export default function AllocatorDueDiligenceHubPage() {
                 setMessageContent("")
               }}>
                 Send Message
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Template Preview Modal */}
+      {showTemplatePreviewModal && selectedTemplateForPreview && (
+        <Dialog open={showTemplatePreviewModal} onOpenChange={setShowTemplatePreviewModal}>
+          <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Template className="h-5 w-5" />
+                {selectedTemplateForPreview.name}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedTemplateForPreview.description}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Template Info */}
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Category</Label>
+                  <p className="text-sm">{selectedTemplateForPreview.category}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Questions</Label>
+                  <p className="text-sm">{selectedTemplateForPreview.questionCount}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Estimated Time</Label>
+                  <p className="text-sm">{selectedTemplateForPreview.estimatedTime}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Version</Label>
+                  <p className="text-sm">{selectedTemplateForPreview.version}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Usage</Label>
+                  <p className="text-sm">{selectedTemplateForPreview.usage}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-600">Compliance</Label>
+                  <p className="text-sm">{selectedTemplateForPreview.compliance}</p>
+                </div>
+              </div>
+
+              {/* Sample Questions */}
+              <div>
+                <h4 className="font-medium mb-3">Sample Questions</h4>
+                <div className="space-y-3">
+                  {selectedTemplateForPreview.sampleQuestions?.map((question: any, index: number) => (
+                    <Card key={index} className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium mb-1">{question.question}</p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <Badge variant="outline">{question.section}</Badge>
+                            <Badge variant="outline">{question.type}</Badge>
+                            {question.required && <Badge variant="destructive">Required</Badge>}
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplatePreviewModal(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                handleCreateDDQ(selectedTemplateForPreview.id)
+                setShowTemplatePreviewModal(false)
+              }}>
+                Use This Template
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Use Template Modal */}
+      {showUseTemplateModal && selectedTemplateForUse && (
+        <Dialog open={showUseTemplateModal} onOpenChange={setShowUseTemplateModal}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle>Create DDQ from Template</DialogTitle>
+              <DialogDescription>
+                Configure your new DDQ based on the {selectedTemplateForUse.name} template.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="ddq-name">DDQ Name</Label>
+                <Input
+                  id="ddq-name"
+                  value={useTemplateForm.ddqName}
+                  onChange={(e) => setUseTemplateForm({...useTemplateForm, ddqName: e.target.value})}
+                  placeholder="Enter DDQ name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="ddq-description">Description</Label>
+                <Textarea
+                  id="ddq-description"
+                  value={useTemplateForm.description}
+                  onChange={(e) => setUseTemplateForm({...useTemplateForm, description: e.target.value})}
+                  placeholder="Enter DDQ description"
+                  rows={3}
+                />
+              </div>
+              <div>
+                <Label htmlFor="ddq-due-date">Due Date</Label>
+                <Input
+                  id="ddq-due-date"
+                  type="date"
+                  value={useTemplateForm.dueDate}
+                  onChange={(e) => setUseTemplateForm({...useTemplateForm, dueDate: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label>Select Managers</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                  {availableManagers.map((manager) => (
+                    <div key={manager.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`manager-${manager.id}`}
+                        checked={useTemplateForm.selectedManagers.includes(manager.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setUseTemplateForm({
+                              ...useTemplateForm,
+                              selectedManagers: [...useTemplateForm.selectedManagers, manager.id]
+                            })
+                          } else {
+                            setUseTemplateForm({
+                              ...useTemplateForm,
+                              selectedManagers: useTemplateForm.selectedManagers.filter(id => id !== manager.id)
+                            })
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`manager-${manager.id}`} className="text-sm">
+                        {manager.name} - {manager.contact}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUseTemplateModal(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                showNotification("DDQ created successfully")
+                setShowUseTemplateModal(false)
+                setUseTemplateForm({
+                  ddqName: "",
+                  selectedManagers: [],
+                  dueDate: "",
+                  description: "",
+                })
+              }}>
+                Create DDQ
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Create DDQ Modal */}
+      {showCreateDDQModal && (
+        <Dialog open={showCreateDDQModal} onOpenChange={setShowCreateDDQModal}>
+          <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Create New DDQ</DialogTitle>
+              <DialogDescription>
+                Choose how you want to create your due diligence questionnaire.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              {/* Creation Method Selection */}
+              <div>
+                <Label className="text-base font-medium mb-3 block">Creation Method</Label>
+                <RadioGroup value={ddqCreationMethod} onValueChange={setDdqCreationMethod}>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                      <RadioGroupItem value="template" id="template" />
+                      <Label htmlFor="template" className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Template className="h-4 w-4" />
+                          <span className="font-medium">Use Template</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Start with a pre-built Vestira standard template
+                        </p>
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 p-4 border rounded-lg">
+                      <RadioGroupItem value="upload" id="upload" />
+                      <Label htmlFor="upload" className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <Upload className="h-4 w-4" />
+                          <span className="font-medium">Upload Document</span>
+                        </div>
+                        <p className="text-sm text-gray-600 mt-1">
+                          Upload a PDF or Word document to convert to DDQ format
+                        </p>
+                      </Label>
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Template Selection */}
+              {ddqCreationMethod === "template" && (
+                <div>
+                  <Label className="text-base font-medium mb-3 block">Select Template</Label>
+                  <div className="grid grid-cols-1 gap-4">
+                    {vestiraTemplates.map((template) => (
+                      <Card key={template.id} className="p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-medium">{template.name}</h4>
+                              {template.isVestiraStandard && (
+                                <Badge variant="default" className="text-xs">
+                                  <Award className="h-3 w-3 mr-1" />
+                                  Vestira Standard
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                              <span>{template.questionCount} questions</span>
+                              <span>{template.estimatedTime}</span>
+                              <span>v{template.version}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handlePreviewTemplate(template.id)}
+                            >
+                              <Eye className="h-4 w-4 mr-1" />
+                              Preview
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => {
+                                handleCreateDDQ(template.id)
+                                setShowCreateDDQModal(false)
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-1" />
+                              Use Template
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* File Upload */}
+              {ddqCreationMethod === "upload" && (
+                <div>
+                  <Label className="text-base font-medium mb-3 block">Upload Document</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600 mb-2">
+                      Upload a PDF or Word document to convert to DDQ format
+                    </p>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleDDQFileUpload}
+                      className="hidden"
+                      id="ddq-file-upload"
+                    />
+                    <Label htmlFor="ddq-file-upload" className="cursor-pointer">
+                      <Button variant="outline" asChild>
+                        <span>Choose File</span>
+                      </Button>
+                    </Label>
+                    {uploadedFile && (
+                      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="text-sm text-green-800">
+                          File uploaded: {uploadedFile.name}
+                        </p>
+                        <Button
+                          size="sm"
+                          onClick={handleParseUploadedFile}
+                          disabled={isParsingFile}
+                          className="mt-2"
+                        >
+                          {isParsingFile ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Parsing...
+                            </>
+                          ) : (
+                            <>
+                              <FileText className="h-4 w-4 mr-1" />
+                              Parse Document
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDDQModal(false)}>
+                Cancel
               </Button>
             </DialogFooter>
           </DialogContent>
