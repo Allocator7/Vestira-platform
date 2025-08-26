@@ -40,6 +40,9 @@ import {
   LayoutTemplateIcon as Template,
 } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useApp } from "../../../../context/AppContext"
+import { BranchingQuestionManager } from "../../../../components/BranchingQuestionManager"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../../../components/ui/dropdown-menu"
 
 export default function AllocatorDueDiligenceHubPage() {
   console.log('AllocatorDueDiligenceHubPage: Component starting to render')
@@ -50,15 +53,66 @@ export default function AllocatorDueDiligenceHubPage() {
   const [selectedStrategy, setSelectedStrategy] = useState("All")
   const [selectedStatus, setSelectedStatus] = useState("All")
   const [notification, setNotification] = useState("")
+  const [showMessageModal, setShowMessageModal] = useState(false)
+  const [selectedManager, setSelectedManager] = useState(null)
+  const [selectedDDQ, setSelectedDDQ] = useState(null)
+  const [messageContent, setMessageContent] = useState("")
+  const [messageTopic, setMessageTopic] = useState("")
+  const [showMeetingModal, setShowMeetingModal] = useState(false)
+  const [meetingDetails, setMeetingDetails] = useState({
+    topic: "",
+    purpose: "",
+    date: "",
+    time: "",
+    duration: "60",
+    type: "video",
+  })
   
-  // Safe defaults
-  const userRole = "allocator"
-  const currentPersonProfile = { name: "Current User" }
+  // Get context with safe fallback
+  let userRole = "allocator"
+  let currentPersonProfile = { name: "Current User" }
+  
+  try {
+    const appContext = useApp()
+    if (appContext) {
+      userRole = appContext.userRole || "allocator"
+      currentPersonProfile = appContext.currentPersonProfile ? 
+        { name: appContext.currentPersonProfile.firstName + " " + appContext.currentPersonProfile.lastName } : 
+        { name: "Current User" }
+    }
+  } catch (error) {
+    console.error('Error accessing AppContext:', error)
+    // Keep safe defaults
+  }
   
   const router = useRouter()
   const searchParams = useSearchParams()
   
   console.log('AllocatorDueDiligenceHubPage: Hooks initialized successfully')
+  
+  // Helper function to safely access localStorage and sessionStorage
+  const safeStorage = {
+    localStorage: {
+      getItem: (key: string) => {
+        if (typeof window !== 'undefined') {
+          return localStorage.getItem(key)
+        }
+        return null
+      },
+      setItem: (key: string, value: string) => {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(key, value)
+        }
+      }
+    },
+    sessionStorage: {
+      setItem: (key: string, value: string) => {
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem(key, value)
+        }
+      }
+    }
+  }
   
   // Simple error boundary
   if (error) {
