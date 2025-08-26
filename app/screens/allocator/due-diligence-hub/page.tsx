@@ -658,6 +658,33 @@ export default function AllocatorDueDiligenceHubPage() {
   const [showDueSoon, setShowDueSoon] = useState(false)
   const [showCompleted, setShowCompleted] = useState(false)
 
+  // Apply filters to DDQs
+  useEffect(() => {
+    let filtered = activeDDQs
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((ddq) =>
+        ddq.templateName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ddq.managerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ddq.contactName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        ddq.strategy.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    }
+
+    // Apply strategy filter
+    if (selectedStrategy !== "All") {
+      filtered = filtered.filter((ddq) => ddq.strategy === selectedStrategy)
+    }
+
+    // Apply status filter
+    if (selectedStatus !== "All") {
+      filtered = filtered.filter((ddq) => ddq.status === selectedStatus)
+    }
+
+    setFilteredDDQs(filtered)
+  }, [searchQuery, selectedStrategy, selectedStatus, activeDDQs])
+
   // Add completed searches data
   const completedDDQs = [
     {
@@ -1266,16 +1293,10 @@ export default function AllocatorDueDiligenceHubPage() {
       // Store current session in sessionStorage
       sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
       
-      showNotification("Informal Due Diligence session started")
+      showNotification("Informal Due Diligence session started successfully")
       
-      // Use window.location for more reliable navigation with error handling
-      try {
-        window.location.href = '/allocator/informal-due-diligence'
-      } catch (navigationError) {
-        console.error("Navigation error:", navigationError)
-        // Fallback: try router.push
-        router.push('/allocator/informal-due-diligence')
-      }
+      // Navigate to the main DDQ hub with a success message
+      router.push('/allocator/due-diligence-hub?tab=active&message=informal-started')
       
     } catch (error) {
       console.error("Error starting informal due diligence:", error)
@@ -1873,6 +1894,55 @@ const handleUseTemplate = () => {
       fundSize: "",
       visibility: "private",
     })
+  }
+
+  // Export DDQ Function
+  const handleExportDDQ = (ddq: any) => {
+    try {
+      // Create CSV content
+      const csvData = [
+        ["DDQ Export", ddq.templateName],
+        ["Manager", ddq.managerName],
+        ["Contact", `${ddq.contactName} (${ddq.contactTitle})`],
+        ["Status", ddq.status],
+        ["Strategy", ddq.strategy],
+        ["Fund Size", ddq.fundSize],
+        ["Vintage", ddq.vintage],
+        ["Due Date", ddq.dueDate],
+        ["Completion", `${ddq.completionPercentage}%`],
+        ["", ""], // Empty row
+        ["Questions and Answers:", ""],
+        ["Question", "Answer", "Status"]
+      ]
+
+      // Add sample questions (in a real app, this would come from the actual DDQ data)
+      const sampleQuestions = [
+        ["What is your investment strategy?", "Strategy details would be here", "Completed"],
+        ["What is your fund size?", ddq.fundSize, "Completed"],
+        ["What is your track record?", "Track record details would be here", "Completed"]
+      ]
+
+      csvData.push(...sampleQuestions)
+
+      // Convert to CSV string
+      const csvContent = csvData.map(row => row.join(",")).join("\n")
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv" })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${ddq.templateName.replace(/\s+/g, "_")}_export.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+      showNotification("DDQ exported successfully")
+    } catch (error) {
+      console.error("Export error:", error)
+      showNotification("Failed to export DDQ")
+    }
   }
 
   console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
@@ -3043,7 +3113,7 @@ const handleUseTemplate = () => {
 
             {/* DDQ List */}
             <div className="space-y-4">
-              {activeDDQs.map((ddq) => (
+              {filteredDDQs.map((ddq) => (
                 <Card key={ddq.id} className="border border-gray-200 hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -3111,10 +3181,6 @@ const handleUseTemplate = () => {
                           }
                           items={[
                             {
-                              label: "Edit DDQ",
-                              onClick: () => handleEditDDQ(ddq.id),
-                            },
-                            {
                               label: "Send Message",
                               onClick: () => handleMessageManager(ddq),
                             },
@@ -3124,7 +3190,7 @@ const handleUseTemplate = () => {
                             },
                             {
                               label: "Export DDQ",
-                              onClick: () => showNotification(`Exporting DDQ: ${ddq.templateName}`),
+                              onClick: () => handleExportDDQ(ddq),
                             },
                           ]}
                         />
@@ -3179,7 +3245,11 @@ const handleUseTemplate = () => {
                         <Badge variant="outline">{ddq.vintage}</Badge>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleReviewDDQ(ddq.id)}
+                        >
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
@@ -3196,7 +3266,6 @@ const handleUseTemplate = () => {
             {/* Vestira Standard Templates */}
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Star className="h-5 w-5 text-yellow-500" />
                 <h3 className="text-lg font-semibold text-gray-900">Vestira Standard Templates</h3>
                 <Badge className="bg-blue-100 text-blue-800">Recommended</Badge>
               </div>
