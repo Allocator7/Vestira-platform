@@ -132,6 +132,66 @@ export default function AllocatorDueDiligenceHubPage() {
     setTimeout(() => setNotification(""), 3000)
   }
 
+  const handleExportDDQ = (ddq: any) => {
+    try {
+      // Create a CSV-like structure for the DDQ data
+      const csvData = [
+        ["DDQ Template", ddq.templateName],
+        ["Manager", ddq.managerName],
+        ["Contact", `${ddq.contactName} (${ddq.contactTitle})`],
+        ["Status", ddq.status],
+        ["Strategy", ddq.strategy],
+        ["Fund Size", ddq.fundSize],
+        ["Vintage", ddq.vintage],
+        ["Due Date", ddq.dueDate],
+        ["Completion", `${ddq.completionPercentage}%`],
+        ["", ""], // Empty row
+        ["Questions and Answers:", ""],
+        ["Question", "Answer", "Status"]
+      ]
+
+      // Add sample questions (in a real app, this would come from the actual DDQ data)
+      const sampleQuestions = [
+        ["What is your investment strategy?", "Infrastructure focus with 8-12% target returns", "Completed"],
+        ["What is your fund size?", "$2.5 billion", "Completed"],
+        ["What is your track record?", "15+ years in infrastructure investing", "Completed"]
+      ]
+
+      csvData.push(...sampleQuestions)
+
+      // Convert to CSV string
+      const csvContent = csvData.map(row => row.join(",")).join("\n")
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: "text/csv" })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `${ddq.templateName.replace(/\s+/g, "_")}_export.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+      showNotification("DDQ exported successfully")
+    } catch (error) {
+      console.error("Export error:", error)
+      showNotification("Failed to export DDQ")
+    }
+  }
+
+  const handleSendMessage = (manager: any, ddq: any) => {
+    setSelectedManager(manager)
+    setSelectedDDQ(ddq)
+    setShowMessageModal(true)
+  }
+
+  const handleScheduleMeeting = (manager: any, ddq: any) => {
+    setSelectedManager(manager)
+    setSelectedDDQ(ddq)
+    setShowMeetingModal(true)
+  }
+
   // Mock data for testing
   const activeDDQs = [
     {
@@ -175,6 +235,27 @@ export default function AllocatorDueDiligenceHubPage() {
       progress: 100,
       lastUpdated: "2024-01-28T16:45:00Z",
       sections: []
+    },
+    {
+      id: "ddq-3",
+      templateName: "Vestira Real Estate DDQ",
+      managerId: "mgr-3",
+      managerName: "Urban Development Capital",
+      contactName: "Emily Watson",
+      contactTitle: "Senior Director",
+      status: "pending",
+      completionPercentage: 75,
+      submittedDate: "2024-01-28",
+      dueDate: "2024-02-20",
+      strategy: "Real Estate",
+      investmentType: "fund",
+      fundSize: "$1.2B",
+      vintage: "2024",
+      reviewers: ["Alex Thompson", "Rachel Green"],
+      lastActivity: "2024-01-29",
+      progress: 75,
+      lastUpdated: "2024-01-29T14:20:00Z",
+      sections: []
     }
   ]
 
@@ -193,13 +274,21 @@ export default function AllocatorDueDiligenceHubPage() {
 
   const availableStrategies = [
     "Infrastructure",
-    "Private Equity",
+    "Private Equity", 
     "Real Estate",
     "Credit",
     "Hedge Funds",
     "Venture Capital",
     "Distressed Debt",
     "Growth Equity",
+  ]
+
+  const availableStatuses = [
+    "pending",
+    "under_review", 
+    "approved",
+    "rejected",
+    "completed"
   ]
 
   console.log('AllocatorDueDiligenceHubPage: About to render JSX')
