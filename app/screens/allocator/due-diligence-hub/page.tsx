@@ -1156,9 +1156,18 @@ export default function AllocatorDueDiligenceHubPage() {
   return (
     <Screen>
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Due Diligence Hub</h1>
-          <p className="text-gray-600">Manage and review due diligence questionnaires</p>
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Due Diligence Hub</h1>
+            <p className="text-gray-600">Manage and review due diligence questionnaires</p>
+          </div>
+          <Button 
+            onClick={() => setShowCreateDDQModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Launch Due Diligence
+          </Button>
         </div>
 
         {/* Notification */}
@@ -1225,6 +1234,18 @@ export default function AllocatorDueDiligenceHubPage() {
               </Select>
             </div>
 
+            {/* Summary Statistics */}
+            <div className="mb-6 flex gap-4">
+              <div className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                <AlertTriangle className="h-4 w-4 text-orange-600" />
+                <span className="text-sm font-medium text-orange-800">Due Soon (3)</span>
+              </div>
+              <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-green-800">100% Complete (1)</span>
+              </div>
+            </div>
+
             {/* DDQ List */}
             <div className="space-y-4">
               {filteredActiveDDQs.length === 0 ? (
@@ -1241,30 +1262,60 @@ export default function AllocatorDueDiligenceHubPage() {
                 filteredActiveDDQs.map((ddq) => (
                   <Card key={ddq.id} className="hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-start justify-between mb-3">
                             <h3 className="text-lg font-semibold text-gray-900">{ddq.templateName}</h3>
                             <Badge 
                               variant={
                                 ddq.status === "approved" ? "default" :
-                                ddq.status === "under_review" ? "secondary" : "destructive"
+                                ddq.status === "under_review" ? "secondary" : 
+                                ddq.status === "requires_clarification" ? "destructive" : "outline"
+                              }
+                              className={
+                                ddq.status === "requires_clarification" ? "bg-yellow-50 text-yellow-800 border-yellow-200" : ""
                               }
                             >
+                              {ddq.status === "requires_clarification" && <AlertTriangle className="h-3 w-3 mr-1" />}
                               {ddq.status.replace("_", " ")}
                             </Badge>
                           </div>
-                          <p className="text-gray-600 mb-2">{ddq.managerName}</p>
-                          <div className="flex flex-wrap gap-2 text-sm text-gray-500">
-                            <span>Contact: {ddq.contactName}</span>
-                            <span>•</span>
-                            <span>Strategy: {ddq.strategy}</span>
-                            <span>•</span>
-                            <span>Due: {ddq.dueDate}</span>
+                          
+                          <div className="space-y-2 mb-4">
+                            <p className="text-gray-900 font-medium">{ddq.managerName}</p>
+                            <p className="text-gray-600 text-sm">{ddq.contactName} • {ddq.contactTitle}</p>
+                            <p className="text-gray-600 text-sm">{ddq.strategy} {ddq.investmentType} • {ddq.fundSize}</p>
+                          </div>
+
+                          {/* Progress Bar */}
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between text-sm mb-1">
+                              <span className="text-gray-600">Progress</span>
+                              <span className="font-medium text-gray-900">{ddq.completionPercentage}%</span>
+                            </div>
+                            <Progress value={ddq.completionPercentage} className="h-2" />
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              <span>Due: {ddq.dueDate}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              <span>Last activity: {ddq.lastActivity}</span>
+                            </div>
+                            {ddq.reviewers && ddq.reviewers.length > 0 && (
+                              <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                <span>Reviewers: {ddq.reviewers.join(" ")}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                        
+                        <div className="flex items-center gap-2 lg:flex-col lg:items-stretch">
+                          <Button variant="outline" size="sm" className="lg:w-full">
                             <Eye className="h-4 w-4 mr-2" />
                             Review
                           </Button>
@@ -1272,20 +1323,21 @@ export default function AllocatorDueDiligenceHubPage() {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleExportDDQ(ddq)}
+                            className="lg:w-full"
                           >
                             <FileText className="h-4 w-4 mr-2" />
                             Export
                           </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" className="lg:w-full">
                                 <Users className="h-4 w-4 mr-2" />
                                 Actions
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => handleSendMessage(ddq, ddq)}>
-                                <FileText className="h-4 w-4 mr-2" />
+                                <MessageSquare className="h-4 w-4 mr-2" />
                                 Send Message
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleScheduleMeeting(ddq, ddq)}>
@@ -1316,6 +1368,148 @@ export default function AllocatorDueDiligenceHubPage() {
               <Template className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">DDQ Templates</h3>
               <p className="text-gray-500">Manage and create DDQ templates here.</p>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="completed" className="mt-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Completed Due Diligence Questionnaires</h3>
+                <p className="text-sm text-gray-600">Review completed DDQs and final outcomes</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {completedDDQs.map((ddq) => (
+                <Card key={ddq.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-3">
+                          <h3 className="text-lg font-semibold text-gray-900">{ddq.templateName}</h3>
+                          <Badge 
+                            variant={ddq.status === "approved" ? "default" : "destructive"}
+                          >
+                            {ddq.status}
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-2 mb-4">
+                          <p className="text-gray-900 font-medium">{ddq.managerName}</p>
+                          <p className="text-gray-600 text-sm">{ddq.contactName} • {ddq.contactTitle}</p>
+                          <p className="text-gray-600 text-sm">{ddq.strategy} {ddq.investmentType} • {ddq.fundSize}</p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span>Completed: {ddq.completedDate}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Star className="h-4 w-4" />
+                            <span>Final Score: {ddq.finalScore}/100</span>
+                          </div>
+                        </div>
+
+                        {ddq.reviewNotes && (
+                          <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                            <p className="text-sm text-gray-700">{ddq.reviewNotes}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center gap-2 lg:flex-col lg:items-stretch">
+                        <Button variant="outline" size="sm" className="lg:w-full">
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleExportDDQ(ddq)}
+                          className="lg:w-full"
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          Export
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="templates" className="mt-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">DDQ Templates</h3>
+                <p className="text-sm text-gray-600">Browse and use pre-built DDQ templates</p>
+              </div>
+              <Button onClick={() => setShowCreateTemplateModal(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Template
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vestiraTemplates.map((template) => (
+                <Card key={template.id} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900">{template.name}</h4>
+                            {template.isVestiraStandard && (
+                              <Badge variant="default" className="text-xs">
+                                <Award className="h-3 w-3 mr-1" />
+                                Vestira Standard
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+                        <div>
+                          <span className="font-medium">Questions:</span> {template.questionCount}
+                        </div>
+                        <div>
+                          <span className="font-medium">Time:</span> {template.estimatedTime}
+                        </div>
+                        <div>
+                          <span className="font-medium">Version:</span> {template.version}
+                        </div>
+                        <div>
+                          <span className="font-medium">Usage:</span> {template.usage}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePreviewTemplate(template.id)}
+                          className="flex-1"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Preview
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => handleCreateDDQ(template.id)}
+                          className="flex-1"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Use Template
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
         </Tabs>
