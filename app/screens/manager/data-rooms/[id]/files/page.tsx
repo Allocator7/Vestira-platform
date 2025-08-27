@@ -229,14 +229,26 @@ export default function DataRoomFilesPage({ params }: { params: { id: string } }
 
   const handleReplaceDocument = (file: DataRoomFile) => {
     if (file.type === "file") {
-      // Simulate file replacement
+      // Show confirmation dialog
+      if (!confirm(`Are you sure you want to replace "${file.name}"? This action cannot be undone.`)) {
+        return
+      }
+
+      // Create file input for replacement
       const fileInput = document.createElement("input")
       fileInput.type = "file"
-      fileInput.accept = ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+      fileInput.accept = ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif"
       fileInput.onchange = (e) => {
         const target = e.target as HTMLInputElement
         if (target.files && target.files[0]) {
           const newFile = target.files[0]
+          
+          // Validate file size (10MB limit)
+          if (newFile.size > 10 * 1024 * 1024) {
+            alert("File size must be less than 10MB. Please select a smaller file.")
+            return
+          }
+
           // Update the file with new information
           setFiles((prevFiles) =>
             prevFiles.map((f) =>
@@ -253,10 +265,19 @@ export default function DataRoomFilesPage({ params }: { params: { id: string } }
                 : f,
             ),
           )
-          alert(`"${file.name}" has been replaced with "${newFile.name}"`)
+          
+          // Show success message
+          alert(`"${file.name}" has been successfully replaced with "${newFile.name}"`)
+          
+          // Clean up the file input
+          target.value = ""
         }
       }
+      
+      // Trigger file selection
       fileInput.click()
+    } else {
+      alert("Only files can be replaced. Folders cannot be replaced.")
     }
   }
 

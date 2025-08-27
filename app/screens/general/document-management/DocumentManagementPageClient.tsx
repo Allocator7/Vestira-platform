@@ -341,16 +341,160 @@ export default function DocumentManagementPageClient() {
       
       switch (document.classification) {
         case "Restricted Documents":
-          documentContent = `RESTRICTED DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis is a restricted document with confidential information. Please handle with appropriate care.\n\nGenerated: ${timestamp}`
+          documentContent = `RESTRICTED DOCUMENT - CONFIDENTIAL
+================================================================================
+
+DOCUMENT INFORMATION:
+Title: ${document.title}
+Author: ${document.author}
+Organization: ${document.organization}
+Upload Date: ${document.uploadDate}
+Last Accessed: ${document.lastAccessed}
+Document Size: ${document.size}
+Classification: RESTRICTED
+Security Level: HIGH
+
+DESCRIPTION:
+${document.description}
+
+DOCUMENT CONTENT:
+This is a restricted document containing confidential information that requires 
+special handling and access controls. This document may contain:
+
+- Proprietary business information
+- Financial data and projections
+- Strategic planning documents
+- Legal and compliance information
+- Personnel and HR data
+
+SECURITY REQUIREMENTS:
+- Access limited to authorized personnel only
+- No sharing outside the organization
+- Must be stored securely
+- Requires proper disposal procedures
+
+DOCUMENT DETAILS:
+- Created: ${document.uploadDate}
+- Last Modified: ${document.lastAccessed}
+- Access Level: Restricted
+- Retention Period: As per company policy
+
+================================================================================
+Generated: ${timestamp}
+This document was downloaded from the Vestira platform.`
           break
         case "Client-Specific Documents":
-          documentContent = `CLIENT-SPECIFIC DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis document contains client-specific information and should be handled according to client confidentiality requirements.\n\nGenerated: ${timestamp}`
+          documentContent = `CLIENT-SPECIFIC DOCUMENT
+================================================================================
+
+DOCUMENT INFORMATION:
+Title: ${document.title}
+Author: ${document.author}
+Organization: ${document.organization}
+Upload Date: ${document.uploadDate}
+Last Accessed: ${document.lastAccessed}
+Document Size: ${document.size}
+Classification: CLIENT-SPECIFIC
+Security Level: MEDIUM
+
+DESCRIPTION:
+${document.description}
+
+DOCUMENT CONTENT:
+This document contains client-specific information and materials that should be 
+handled according to client confidentiality requirements. This document may include:
+
+- Client investment strategies
+- Portfolio performance data
+- Due diligence materials
+- Client communications
+- Meeting notes and summaries
+
+CLIENT REQUIREMENTS:
+- Handle according to client confidentiality agreements
+- Share only with authorized client representatives
+- Maintain client data security standards
+- Follow client-specific retention policies
+
+DOCUMENT DETAILS:
+- Created: ${document.uploadDate}
+- Last Modified: ${document.lastAccessed}
+- Access Level: Client-Specific
+- Retention Period: As per client agreement
+
+================================================================================
+Generated: ${timestamp}
+This document was downloaded from the Vestira platform.`
           break
         case "Internal Documents":
-          documentContent = `INTERNAL DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nContent:\nThis is an internal document for organizational use only.\n\nGenerated: ${timestamp}`
+          documentContent = `INTERNAL DOCUMENT
+================================================================================
+
+DOCUMENT INFORMATION:
+Title: ${document.title}
+Author: ${document.author}
+Organization: ${document.organization}
+Upload Date: ${document.uploadDate}
+Last Accessed: ${document.lastAccessed}
+Document Size: ${document.size}
+Classification: INTERNAL
+Security Level: STANDARD
+
+DESCRIPTION:
+${document.description}
+
+DOCUMENT CONTENT:
+This is an internal document for organizational use only. This document may contain:
+
+- Marketing materials and presentations
+- Internal policies and procedures
+- Training materials
+- Administrative documents
+- General business information
+
+INTERNAL USE ONLY:
+- For internal organizational use
+- May be shared with team members
+- Follow standard document handling procedures
+- Maintain organizational confidentiality
+
+DOCUMENT DETAILS:
+- Created: ${document.uploadDate}
+- Last Modified: ${document.lastAccessed}
+- Access Level: Internal
+- Retention Period: Standard organizational policy
+
+================================================================================
+Generated: ${timestamp}
+This document was downloaded from the Vestira platform.`
           break
         default:
-          documentContent = `DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nGenerated: ${timestamp}`
+          documentContent = `DOCUMENT
+================================================================================
+
+DOCUMENT INFORMATION:
+Title: ${document.title}
+Author: ${document.author}
+Organization: ${document.organization}
+Upload Date: ${document.uploadDate}
+Last Accessed: ${document.lastAccessed}
+Document Size: ${document.size}
+Classification: GENERAL
+
+DESCRIPTION:
+${document.description}
+
+DOCUMENT CONTENT:
+This is a general document from the Vestira platform.
+
+DOCUMENT DETAILS:
+- Created: ${document.uploadDate}
+- Last Modified: ${document.lastAccessed}
+- Access Level: General
+
+================================================================================
+Generated: ${timestamp}
+This document was downloaded from the Vestira platform.`
       }
 
       // Create and download the file

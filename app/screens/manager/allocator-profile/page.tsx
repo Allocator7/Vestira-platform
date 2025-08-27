@@ -173,6 +173,38 @@ export default function AllocatorProfilePage() {
           bio: "Jennifer oversees due diligence processes and risk assessment for all investment opportunities.",
         },
       ],
+      contacts: [
+        {
+          id: "contact1",
+          name: "David Wilson",
+          title: "Investment Relations Manager",
+          department: "Client Relations",
+          email: "d.wilson@calpers.ca.gov",
+          phone: "+1 (916) 795-3004",
+          role: "Primary Contact",
+          lastContact: "2024-01-20",
+        },
+        {
+          id: "contact2",
+          name: "Emily Thompson",
+          title: "ESG Integration Specialist",
+          department: "ESG & Sustainability",
+          email: "e.thompson@calpers.ca.gov",
+          phone: "+1 (916) 795-3005",
+          role: "ESG Contact",
+          lastContact: "2024-01-18",
+        },
+        {
+          id: "contact3",
+          name: "Robert Kim",
+          title: "Legal Counsel",
+          department: "Legal",
+          email: "r.kim@calpers.ca.gov",
+          phone: "+1 (916) 795-3006",
+          role: "Legal Contact",
+          lastContact: "2024-01-15",
+        },
+      ],
       documents: [
         {
           id: "doc1",
@@ -277,6 +309,28 @@ export default function AllocatorProfilePage() {
           bio: "Lisa oversees TRS Texas' fixed income and asset allocation strategies.",
         },
       ],
+      contacts: [
+        {
+          id: "contact4",
+          name: "Mark Davis",
+          title: "Investment Relations Director",
+          department: "Client Relations",
+          email: "m.davis@trs.texas.gov",
+          phone: "+1 (512) 542-6402",
+          role: "Primary Contact",
+          lastContact: "2024-01-19",
+        },
+        {
+          id: "contact5",
+          name: "Sarah Martinez",
+          title: "Compliance Officer",
+          department: "Compliance",
+          email: "s.martinez@trs.texas.gov",
+          phone: "+1 (512) 542-6403",
+          role: "Compliance Contact",
+          lastContact: "2024-01-17",
+        },
+      ],
       documents: [
         {
           id: "doc6",
@@ -379,6 +433,15 @@ export default function AllocatorProfilePage() {
       title: "Connection Request Sent",
       description: `Connection request sent to ${memberName}.`,
     })
+  }
+
+  // Message contact functionality
+  const handleMessageContact = (contact: any) => {
+    setSelectedAllocator({
+      contactName: contact.name,
+      allocatorName: allocator?.name || "Allocator",
+    })
+    setShowMessageModal(true)
   }
 
   // Team messaging functionality
@@ -712,9 +775,10 @@ export default function AllocatorProfilePage() {
 
         {/* Profile Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
+            <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="activity">Recent Activity</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
           </TabsList>
@@ -875,6 +939,79 @@ export default function AllocatorProfilePage() {
                         >
                           <Users className="h-3 w-3 mr-1" />
                           Connect
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="contacts" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Key Contacts
+                    </CardTitle>
+                    <CardDescription>Primary contacts at {allocator.shortName}</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {allocator.contacts?.map((contact) => (
+                    <div
+                      key={contact.id}
+                      className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    >
+                      <Avatar className="h-12 w-12">
+                        <AvatarFallback className="bg-deep-brand text-white">
+                          {contact.name.split(" ").map((n) => n[0]).join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-semibold text-deep-brand">{contact.name}</h4>
+                          <Badge variant="outline" className="text-xs">
+                            {contact.role}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-base-gray">{contact.title}</p>
+                        <p className="text-sm text-base-gray">{contact.department}</p>
+                        <div className="flex items-center gap-4 mt-2 text-sm text-base-gray">
+                          <span className="flex items-center gap-1">
+                            <Mail className="h-3 w-3" />
+                            {contact.email}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Phone className="h-3 w-3" />
+                            {contact.phone}
+                          </span>
+                        </div>
+                        <p className="text-xs text-base-gray mt-1">
+                          Last contact: {new Date(contact.lastContact).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleConnect(contact.id, contact.name)}
+                        >
+                          <Users className="h-3 w-3 mr-1" />
+                          Connect
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleMessageContact(contact)}
+                        >
+                          <MessageSquare className="h-3 w-3 mr-1" />
+                          Message
                         </Button>
                       </div>
                     </div>

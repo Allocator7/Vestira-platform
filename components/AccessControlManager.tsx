@@ -430,6 +430,8 @@ export function AccessControlManager({
 
   // Handle saving access settings
   const handleSave = async () => {
+    console.log("Save Access Settings button clicked")
+    
     // Show loading state
     const loadingToast = toast({
       title: "Saving access settings...",
@@ -470,10 +472,12 @@ export function AccessControlManager({
       // Show success message
       toast.dismiss(loadingToast)
       toast({
-        title: "Access settings saved",
-        description: `Access permissions for "${resourceName}" have been updated successfully.`,
+        title: "Access settings saved successfully!",
+        description: `Access permissions for "${resourceName}" have been updated and saved.`,
         variant: "success",
       })
+      
+      console.log("Access settings saved successfully:", { users, groups })
     } catch (error) {
       console.error("Error saving access settings:", error)
       toast.dismiss(loadingToast)
