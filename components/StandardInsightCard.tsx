@@ -3,7 +3,8 @@
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { TrendingUp, Users, BookOpen, Share2 } from "lucide-react"
+import { TrendingUp, Users, BookOpen, Share2, Heart, Download, Bookmark } from "lucide-react"
+import { useState } from "react"
 
 interface StandardInsightCardProps {
   insight: {
@@ -27,6 +28,42 @@ interface StandardInsightCardProps {
 }
 
 export default function StandardInsightCard({ insight, onReadMore, onShare }: StandardInsightCardProps) {
+  const [isLiked, setIsLiked] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
+
+  const handleLike = () => {
+    setIsLiked(!isLiked)
+    // In a real app, this would call an API to update the like count
+  }
+
+  const handleBookmark = () => {
+    setIsBookmarked(!isBookmarked)
+    // In a real app, this would call an API to update the bookmark count
+  }
+
+  const handleDownload = () => {
+    // In a real app, this would trigger a download of the article
+    const link = document.createElement('a')
+    link.href = `/api/insights/${insight.id}/download`
+    link.download = `${insight.title}.pdf`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: insight.title,
+        text: insight.description,
+        url: window.location.href,
+      })
+    } else {
+      // Fallback to copying to clipboard
+      navigator.clipboard.writeText(`${insight.title}\n${insight.description}\n${window.location.href}`)
+    }
+  }
+
   return (
     <Card className="overflow-hidden hover:shadow-vestira-lg transition-all duration-200 h-full flex flex-col">
       {/* Image Section */}
@@ -52,12 +89,58 @@ export default function StandardInsightCard({ insight, onReadMore, onShare }: St
         {/* Description */}
         <p className="text-sm text-base-gray line-clamp-3 mb-4 flex-1 leading-relaxed">{insight.description}</p>
 
-        {/* Engagement Metrics */}
-        <div className="flex items-center space-x-4 mb-4 py-2 border-t border-gray-100">
-          <span className="flex items-center gap-1 text-xs text-base-gray">
-            <TrendingUp className="h-3 w-3" />
-            <span className="font-medium">{insight.likes}</span>
-          </span>
+        {/* Engagement Metrics and Actions */}
+        <div className="flex items-center justify-between mb-4 py-2 border-t border-gray-100">
+          <div className="flex items-center space-x-4">
+            <span className="flex items-center gap-1 text-xs text-base-gray">
+              <TrendingUp className="h-3 w-3" />
+              <span className="font-medium">{insight.likes}</span>
+            </span>
+            <span className="flex items-center gap-1 text-xs text-base-gray">
+              <Share2 className="h-3 w-3" />
+              <span className="font-medium">{insight.shares}</span>
+            </span>
+            <span className="flex items-center gap-1 text-xs text-base-gray">
+              <Bookmark className="h-3 w-3" />
+              <span className="font-medium">{insight.bookmarks}</span>
+            </span>
+          </div>
+          
+          {/* Article Actions */}
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLike}
+              className={`h-8 w-8 p-0 ${isLiked ? 'text-red-500' : 'text-base-gray hover:text-red-500'}`}
+            >
+              <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleBookmark}
+              className={`h-8 w-8 p-0 ${isBookmarked ? 'text-blue-500' : 'text-base-gray hover:text-blue-500'}`}
+            >
+              <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDownload}
+              className="h-8 w-8 p-0 text-base-gray hover:text-deep-brand"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleShare}
+              className="h-8 w-8 p-0 text-base-gray hover:text-deep-brand"
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {/* Tags */}
@@ -89,17 +172,6 @@ export default function StandardInsightCard({ insight, onReadMore, onShare }: St
           </div>
 
           <div className="flex items-center gap-2">
-            {onShare && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onShare}
-                className="text-xs px-3 py-1.5 h-auto font-medium flex-shrink-0 bg-transparent"
-              >
-                <Share2 className="h-3 w-3 mr-1" />
-                Share
-              </Button>
-            )}
             <Button
               variant="outline"
               size="sm"

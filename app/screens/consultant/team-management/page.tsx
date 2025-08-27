@@ -21,19 +21,20 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
+import { Toaster } from "@/components/ui/toaster"
 
-// Sample team members data for consultant
+// Sample team members data for consultant with enhanced roles and permissions
 const teamMembersData = [
   {
     id: "1",
     name: "Jennifer Walsh",
     email: "jennifer.walsh@consultant.com",
-    role: "Senior Consultant",
+    role: "Admin",
     department: "Advisory Services",
     status: "active",
     avatar: "/abstract-profile.png",
-    permissions: ["view", "edit", "delete", "invite"],
+    permissions: ["view", "edit", "delete", "invite", "manage_team", "manage_clients", "manage_data_rooms"],
     lastActive: "Today at 2:15 PM",
     joinDate: "Jan 15, 2023",
   },
@@ -41,11 +42,11 @@ const teamMembersData = [
     id: "2",
     name: "Robert Chen",
     email: "robert.chen@consultant.com",
-    role: "Research Analyst",
+    role: "Manager",
     department: "Market Research",
     status: "active",
     avatar: "/stylized-initials-sc.png",
-    permissions: ["view", "edit"],
+    permissions: ["view", "edit", "manage_clients", "manage_data_rooms"],
     lastActive: "Yesterday at 4:30 PM",
     joinDate: "Mar 20, 2023",
   },
@@ -53,11 +54,11 @@ const teamMembersData = [
     id: "3",
     name: "Lisa Martinez",
     email: "lisa.martinez@consultant.com",
-    role: "Junior Consultant",
+    role: "Contributor",
     department: "Client Relations",
     status: "active",
     avatar: "/abstract-dt.png",
-    permissions: ["view"],
+    permissions: ["view", "edit"],
     lastActive: "Today at 10:45 AM",
     joinDate: "May 12, 2023",
   },
@@ -65,7 +66,7 @@ const teamMembersData = [
     id: "4",
     name: "David Kim",
     email: "david.kim@consultant.com",
-    role: "Associate",
+    role: "Viewer",
     department: "Research",
     status: "inactive",
     avatar: "/abstract-ej-typography.png",
@@ -81,7 +82,7 @@ const teamMembersData = [
     department: "Advisory Services",
     status: "active",
     avatar: "/abstract-rk.png",
-    permissions: ["view", "edit"],
+    permissions: ["view", "edit", "manage_clients"],
     lastActive: "Today at 11:20 AM",
     joinDate: "Nov 25, 2022",
   },
@@ -96,10 +97,22 @@ const departments = [
   "Research",
   "Operations",
   "Business Development",
+  "Due Diligence",
+  "Portfolio Management",
 ]
 
-// Sample roles
-const roles = ["All", "Senior Consultant", "Manager", "Research Analyst", "Junior Consultant", "Associate"]
+// Sample roles with permissions mapping
+const roles = ["All", "Admin", "Manager", "Contributor", "Viewer"]
+
+// Role permissions mapping
+const rolePermissions = {
+  Admin: ["view", "edit", "delete", "invite", "manage_team", "manage_clients", "manage_data_rooms", "manage_insights"],
+  Manager: ["view", "edit", "manage_clients", "manage_data_rooms", "manage_insights"],
+  Contributor: ["view", "edit"],
+  Viewer: ["view"],
+}
+
+
 
 export default function ConsultantTeamManagementPage() {
   const [teamMembers, setTeamMembers] = useState(teamMembersData)
@@ -114,7 +127,7 @@ export default function ConsultantTeamManagementPage() {
   const [newMember, setNewMember] = useState({
     name: "",
     email: "",
-    role: "Associate",
+    role: "Viewer",
     department: "Research",
   })
 

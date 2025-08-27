@@ -493,24 +493,6 @@ function ConsultantMarketInsightsPage() {
                 <Upload className="h-4 w-4" />
                 Upload Insight
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 bg-transparent"
-                onClick={() => setShowExportDialog(true)}
-              >
-                <Download className="h-4 w-4" />
-                <span>Export</span>
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1 bg-transparent"
-                onClick={() => setShowShareDialog(true)}
-              >
-                <Share2 className="h-4 w-4" />
-                <span>Share</span>
-              </Button>
             </div>
           </div>
 
