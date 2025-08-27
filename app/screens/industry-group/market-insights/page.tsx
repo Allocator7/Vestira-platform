@@ -22,13 +22,14 @@ import {
 } from "lucide-react"
 import { Input } from "../../../../components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../../../../components/ui/dialog"
-import { useToast } from "../../../../components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { InsightModal } from "../../../../components/InsightModal"
 import { TrendingUp, BookOpen, Users } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 import StandardInsightCard from "../../../../components/StandardInsightCard"
 import EventCard from "../../../../components/EventCard"
 import { UploadInsightModal } from "../../../../components/market-insights/UploadInsightModal"
+import { MarketInsightFilters } from "../../../../components/MarketInsightFilters"
 
 // Industry Group-specific insights data
 const allInsights = [
@@ -142,6 +143,7 @@ export default function IndustryGroupMarketInsightsPage() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [showFilterDropdown, setShowFilterDropdown] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const [filters, setFilters] = useState({ assetClasses: [], strategies: [] })
   const [showUploadModal, setShowUploadModal] = useState(false)
   const [selectedInsight, setSelectedInsight] = useState<any>(null)
   const [showInsightModal, setShowInsightModal] = useState(false)
@@ -183,6 +185,10 @@ export default function IndustryGroupMarketInsightsPage() {
     setShowUploadModal(true)
   }
 
+  const handleFiltersChange = (newFilters: { assetClasses: string[]; strategies: string[] }) => {
+    setFilters(newFilters)
+  }
+
   const handleUploadSuccess = () => {
     toast({
       title: "Insight Uploaded",
@@ -215,48 +221,19 @@ export default function IndustryGroupMarketInsightsPage() {
         {/* Search and Filters */}
         <Card className="bg-white shadow-vestira">
           <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-base-gray" />
-                <Input
-                  placeholder="Search insights..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-base-gray" />
+                  <Input
+                    placeholder="Search insights..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
               </div>
-              <div className="relative">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                  className="gap-2 bg-transparent"
-                >
-                  <Filter className="h-4 w-4" />
-                  Filter
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-                {showFilterDropdown && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white border rounded-lg shadow-lg z-50">
-                    <div className="p-2">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Category</label>
-                        <select
-                          value={selectedCategory}
-                          onChange={(e) => setSelectedCategory(e.target.value)}
-                          className="w-full p-2 border rounded text-sm"
-                        >
-                          <option value="all">All Categories</option>
-                          <option value="member-analytics">Member Analytics</option>
-                          <option value="event-analytics">Event Analytics</option>
-                          <option value="standards">Standards & Best Practices</option>
-                          <option value="compliance">Compliance</option>
-                          <option value="networking">Networking</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
+              <MarketInsightFilters onFiltersChange={handleFiltersChange} initialFilters={filters} />
             </div>
           </CardContent>
         </Card>

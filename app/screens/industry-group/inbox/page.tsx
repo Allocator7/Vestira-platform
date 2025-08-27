@@ -337,12 +337,16 @@ export default function IndustryGroupInbox() {
 
   // Form states
   const [composeTo, setComposeTo] = useState("")
+  const [composeCc, setComposeCc] = useState("")
+  const [composeBcc, setComposeBcc] = useState("")
   const [composeSubject, setComposeSubject] = useState("")
   const [composeMessage, setComposeMessage] = useState("")
   const [composeAttachments, setComposeAttachments] = useState<string[]>([])
   const [replyMessage, setReplyMessage] = useState("")
   const [replyAttachments, setReplyAttachments] = useState<string[]>([])
   const [forwardTo, setForwardTo] = useState("")
+  const [forwardCc, setForwardCc] = useState("")
+  const [forwardBcc, setForwardBcc] = useState("")
   const [forwardMessage, setForwardMessage] = useState("")
 
   // Update unread count in context whenever messages change
@@ -430,8 +434,15 @@ export default function IndustryGroupInbox() {
       showToast("Please fill in all required fields", "error")
       return
     }
-    showToast(`Message sent to ${composeTo}`)
+    
+    const recipients = [composeTo]
+    if (composeCc.trim()) recipients.push(`CC: ${composeCc}`)
+    if (composeBcc.trim()) recipients.push(`BCC: ${composeBcc}`)
+    
+    showToast(`Message sent to ${recipients.join(", ")}`)
     setComposeTo("")
+    setComposeCc("")
+    setComposeBcc("")
     setComposeSubject("")
     setComposeMessage("")
     setComposeAttachments([])
@@ -457,8 +468,15 @@ export default function IndustryGroupInbox() {
       showToast("Please enter a recipient email", "error")
       return
     }
-    showToast(`Message forwarded to ${forwardTo}`)
+    
+    const recipients = [forwardTo]
+    if (forwardCc.trim()) recipients.push(`CC: ${forwardCc}`)
+    if (forwardBcc.trim()) recipients.push(`BCC: ${forwardBcc}`)
+    
+    showToast(`Message forwarded to ${recipients.join(", ")}`)
     setForwardTo("")
+    setForwardCc("")
+    setForwardBcc("")
     setForwardMessage("")
     setForwardOpen(false)
   }
@@ -916,6 +934,24 @@ export default function IndustryGroupInbox() {
               />
             </div>
             <div>
+              <Label htmlFor="compose-cc">CC</Label>
+              <Input
+                id="compose-cc"
+                placeholder="Enter CC recipients (optional)"
+                value={composeCc}
+                onChange={(e) => setComposeCc(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="compose-bcc">BCC</Label>
+              <Input
+                id="compose-bcc"
+                placeholder="Enter BCC recipients (optional)"
+                value={composeBcc}
+                onChange={(e) => setComposeBcc(e.target.value)}
+              />
+            </div>
+            <div>
               <Label htmlFor="compose-subject">Subject</Label>
               <Input
                 id="compose-subject"
@@ -1041,6 +1077,24 @@ export default function IndustryGroupInbox() {
                 placeholder="Enter recipient email"
                 value={forwardTo}
                 onChange={(e) => setForwardTo(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="forward-cc">CC</Label>
+              <Input
+                id="forward-cc"
+                placeholder="Enter CC recipients (optional)"
+                value={forwardCc}
+                onChange={(e) => setForwardCc(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="forward-bcc">BCC</Label>
+              <Input
+                id="forward-bcc"
+                placeholder="Enter BCC recipients (optional)"
+                value={forwardBcc}
+                onChange={(e) => setForwardBcc(e.target.value)}
               />
             </div>
             <div>

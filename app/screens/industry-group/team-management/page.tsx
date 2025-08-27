@@ -21,7 +21,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { Textarea } from "@/components/ui/textarea"
 
 // Sample team members data for industry group
@@ -262,9 +262,12 @@ export default function IndustryGroupTeamManagementPage() {
     )
     setTeamMembers(updatedMembers)
 
+    // Log the update for debugging
+    console.log(`Updated permissions for ${selectedMemberForPermissions.name}:`, newPermissions)
+
     toast({
-      title: "Permissions Updated",
-      description: `${selectedMemberForPermissions.name}'s permissions have been updated.`,
+      title: "Permissions Updated Successfully",
+      description: `${selectedMemberForPermissions.name}'s permissions have been updated and saved.`,
     })
     
     setIsPermissionsOpen(false)

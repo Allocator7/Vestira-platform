@@ -220,9 +220,124 @@ export default function IndustryGroupCommunicationsPage() {
 
   const handleUseTemplate = (templateId: string) => {
     const template = templates.find((t) => t.id === templateId)
+    if (!template) {
+      toast({ title: "Error", description: "Template not found", variant: "destructive" })
+      return
+    }
+    
+    // Populate the campaign form with template-specific content
+    const templateContent = getTemplateContent(template.type)
+    setCampaignForm({
+      name: `${template.name} Campaign`,
+      type: getCampaignTypeFromTemplate(template.type),
+      subject: templateContent.subject,
+      message: templateContent.message,
+      scheduledDate: "",
+      scheduledTime: "",
+    })
+    
     setShowTemplatesModal(false)
     setShowComposeModal(true)
-    toast({ title: "Template Applied", description: `Using template: ${template?.name}` })
+    toast({ title: "Template Applied", description: `Using template: ${template.name}` })
+  }
+
+  const getTemplateContent = (templateType: string) => {
+    switch (templateType) {
+      case "event-announcement":
+        return {
+          subject: "New Event Announcement - [Event Name]",
+          message: `Dear Members,
+
+We're excited to announce our upcoming event: [Event Name]
+
+Event Details:
+- Date: [Event Date]
+- Time: [Event Time]
+- Location: [Event Location]
+- Registration: [Registration Link]
+
+This event will feature [brief description of what attendees can expect].
+
+Please save the date and register early to secure your spot.
+
+Best regards,
+Industry Group Team`
+        }
+      case "newsletter":
+        return {
+          subject: "Monthly Newsletter - [Month Year]",
+          message: `Dear Members,
+
+Welcome to our monthly newsletter for [Month Year].
+
+In this issue:
+• [Key Update 1]
+• [Key Update 2]
+• [Key Update 3]
+• [Upcoming Events]
+
+We hope you find this information valuable. If you have any questions or suggestions, please don't hesitate to reach out.
+
+Best regards,
+Industry Group Team`
+        }
+      case "event-reminder":
+        return {
+          subject: "Reminder: [Event Name] - [Event Date]",
+          message: `Dear Members,
+
+This is a friendly reminder about our upcoming event: [Event Name]
+
+Event Details:
+- Date: [Event Date]
+- Time: [Event Time]
+- Location: [Event Location]
+
+If you haven't registered yet, please do so at [Registration Link].
+
+We look forward to seeing you there!
+
+Best regards,
+Industry Group Team`
+        }
+      case "survey":
+        return {
+          subject: "Member Survey: [Survey Topic]",
+          message: `Dear Members,
+
+We value your feedback and would appreciate your participation in our survey about [Survey Topic].
+
+Survey Link: [Survey URL]
+
+This survey will help us better understand your needs and improve our services.
+
+The survey will take approximately [X] minutes to complete.
+
+Thank you for your time and participation.
+
+Best regards,
+Industry Group Team`
+        }
+      default:
+        return {
+          subject: "Campaign Subject",
+          message: "Campaign message content..."
+        }
+    }
+  }
+
+  const getCampaignTypeFromTemplate = (templateType: string) => {
+    switch (templateType) {
+      case "event-announcement":
+      case "event-reminder":
+        return "announcement"
+      case "newsletter":
+        return "newsletter"
+      case "survey":
+        return "survey"
+      default:
+        return "email"
+    }
   }
 
   const handleEditTemplate = (templateId: string) => {
