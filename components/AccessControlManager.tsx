@@ -51,6 +51,8 @@ interface AccessControlManagerProps {
   currentUsers?: AccessUser[]
   currentGroups?: AccessGroup[]
   onSaveAccess?: (users: AccessUser[], groups: AccessGroup[]) => void
+  isOpen?: boolean
+  onClose?: () => void
 }
 
 export function AccessControlManager({
@@ -60,8 +62,12 @@ export function AccessControlManager({
   currentUsers = [],
   currentGroups = [],
   onSaveAccess,
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
 }: AccessControlManagerProps) {
-  const [isOpen, setIsOpen] = useState(false)
+  const [internalIsOpen, setInternalIsOpen] = useState(false)
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen
+  const setIsOpen = externalOnClose ? externalOnClose : setInternalIsOpen
   const [users, setUsers] = useState<AccessUser[]>(currentUsers)
   const [groups, setGroups] = useState<AccessGroup[]>(currentGroups)
   const [searchTerm, setSearchTerm] = useState("")

@@ -192,6 +192,76 @@ export default function DataRoomFilesPage({ params }: { params: { id: string } }
     fileInput.click()
   }
 
+  const handleDownloadFile = async (file: DataRoomFile) => {
+    if (file.type !== "file") {
+      alert("Only files can be downloaded. Folders cannot be downloaded.")
+      return
+    }
+
+    try {
+      // Show loading state
+      alert(`Preparing ${file.name} for download...`)
+
+      // Simulate download preparation
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      // Create file content based on file type
+      let fileContent = ""
+      const timestamp = new Date().toISOString()
+      
+      // Determine file type from extension
+      const fileExtension = file.name.split('.').pop()?.toLowerCase()
+      
+      switch (fileExtension) {
+        case 'pdf':
+          fileContent = `PDF DOCUMENT\n\nTitle: ${file.name}\nUploaded By: ${file.uploadedBy}\nUpload Date: ${file.uploadedAt}\nSize: ${file.size}\nPermissions: ${file.permissions}\nDownload Count: ${file.downloadCount}\nLast Accessed: ${file.lastAccessed}\n\nThis is a PDF document from the data room.\n\nGenerated: ${timestamp}`
+          break
+        case 'doc':
+        case 'docx':
+          fileContent = `WORD DOCUMENT\n\nTitle: ${file.name}\nUploaded By: ${file.uploadedBy}\nUpload Date: ${file.uploadedAt}\nSize: ${file.size}\nPermissions: ${file.permissions}\nDownload Count: ${file.downloadCount}\nLast Accessed: ${file.lastAccessed}\n\nThis is a Word document from the data room.\n\nGenerated: ${timestamp}`
+          break
+        case 'xls':
+        case 'xlsx':
+          fileContent = `EXCEL SPREADSHEET\n\nTitle: ${file.name}\nUploaded By: ${file.uploadedBy}\nUpload Date: ${file.uploadedAt}\nSize: ${file.size}\nPermissions: ${file.permissions}\nDownload Count: ${file.downloadCount}\nLast Accessed: ${file.lastAccessed}\n\nThis is an Excel spreadsheet from the data room.\n\nGenerated: ${timestamp}`
+          break
+        case 'ppt':
+        case 'pptx':
+          fileContent = `POWERPOINT PRESENTATION\n\nTitle: ${file.name}\nUploaded By: ${file.uploadedBy}\nUpload Date: ${file.uploadedAt}\nSize: ${file.size}\nPermissions: ${file.permissions}\nDownload Count: ${file.downloadCount}\nLast Accessed: ${file.lastAccessed}\n\nThis is a PowerPoint presentation from the data room.\n\nGenerated: ${timestamp}`
+          break
+        case 'txt':
+          fileContent = `TEXT DOCUMENT\n\nTitle: ${file.name}\nUploaded By: ${file.uploadedBy}\nUpload Date: ${file.uploadedAt}\nSize: ${file.size}\nPermissions: ${file.permissions}\nDownload Count: ${file.downloadCount}\nLast Accessed: ${file.lastAccessed}\n\nThis is a text document from the data room.\n\nGenerated: ${timestamp}`
+          break
+        default:
+          fileContent = `DOCUMENT\n\nTitle: ${file.name}\nUploaded By: ${file.uploadedBy}\nUpload Date: ${file.uploadedAt}\nSize: ${file.size}\nPermissions: ${file.permissions}\nDownload Count: ${file.downloadCount}\nLast Accessed: ${file.lastAccessed}\n\nThis is a document from the data room.\n\nGenerated: ${timestamp}`
+      }
+
+      // Create and download the file
+      const blob = new Blob([fileContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = file.name
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      // Update download count
+      setFiles((prevFiles) =>
+        prevFiles.map((f) =>
+          f.id === file.id
+            ? { ...f, downloadCount: f.downloadCount + 1, lastAccessed: new Date().toISOString().split("T")[0] }
+            : f
+        )
+      )
+
+      alert(`${file.name} has been downloaded successfully!`)
+    } catch (error) {
+      console.error("Download error:", error)
+      alert("There was an error downloading the file. Please try again.")
+    }
+  }
+
   const handleDeleteFile = (fileId: string) => {
     const file = files.find((f) => f.id === fileId)
     if (file && confirm(`Are you sure you want to delete "${file.name}"?`)) {
@@ -200,20 +270,7 @@ export default function DataRoomFilesPage({ params }: { params: { id: string } }
     }
   }
 
-  const handleDownloadFile = (file: DataRoomFile) => {
-    if (file.type === "file") {
-      // Simulate download
-      alert(`Downloading "${file.name}"...`)
-      // Update download count
-      setFiles((prevFiles) =>
-        prevFiles.map((f) =>
-          f.id === file.id
-            ? { ...f, downloadCount: (f.downloadCount || 0) + 1, lastAccessed: new Date().toISOString().split("T")[0] }
-            : f,
-        ),
-      )
-    }
-  }
+
 
   const handleShareFile = (file: DataRoomFile) => {
     setSelectedFile(file)

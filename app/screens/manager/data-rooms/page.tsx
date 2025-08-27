@@ -967,20 +967,28 @@ export default function ManagerDataRoomsPage() {
       </Dialog>
 
       {/* Access Management Dialog */}
-      <Dialog open={showAccessDialog} onOpenChange={setShowAccessDialog}>
-        <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Manage Access - {selectedDataRoom?.name}</DialogTitle>
-          </DialogHeader>
-          {selectedDataRoom && (
-            <AccessControlManager
-              dataRoomId={selectedDataRoom.id}
-              dataRoomName={selectedDataRoom.name}
-              onClose={() => setShowAccessDialog(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {selectedDataRoom && (
+        <AccessControlManager
+          resourceId={selectedDataRoom.id.toString()}
+          resourceName={selectedDataRoom.name}
+          resourceType="dataRoom"
+          currentUsers={selectedDataRoom.permissions || []}
+          currentGroups={[]}
+          isOpen={showAccessDialog}
+          onClose={() => setShowAccessDialog(false)}
+          onSaveAccess={(users, groups) => {
+            // Update the data room with new permissions
+            setDataRooms(prevRooms =>
+              prevRooms.map(room =>
+                room.id === selectedDataRoom.id
+                  ? { ...room, permissions: users }
+                  : room
+              )
+            )
+            setShowAccessDialog(false)
+          }}
+        />
+      )}
     </div>
   )
 }
