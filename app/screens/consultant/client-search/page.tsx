@@ -407,20 +407,40 @@ export default function ConsultantAllocatorManagerSearchPage() {
           const aumB = Number.parseFloat(b.aum.replace(/[^0-9.]/g, ""))
           return aumB - aumA
         })
+      } else if (sortBy === "aum-desc") {
+        filtered.sort((a, b) => {
+          const aumA = Number.parseFloat(a.aum.replace(/[^0-9.]/g, ""))
+          const aumB = Number.parseFloat(b.aum.replace(/[^0-9.]/g, ""))
+          return aumA - aumB
+        })
       } else if (sortBy === "aua") {
         filtered.sort((a, b) => {
           const auaA = Number.parseFloat(a.aua.replace(/[^0-9.]/g, ""))
           const auaB = Number.parseFloat(b.aua.replace(/[^0-9.]/g, ""))
           return auaB - auaA
         })
+      } else if (sortBy === "aua-desc") {
+        filtered.sort((a, b) => {
+          const auaA = Number.parseFloat(a.aua.replace(/[^0-9.]/g, ""))
+          const auaB = Number.parseFloat(b.aua.replace(/[^0-9.]/g, ""))
+          return auaA - auaB
+        })
       } else if (sortBy === "tenure") {
         filtered.sort((a, b) => b.tenureAsClient - a.tenureAsClient)
+      } else if (sortBy === "tenure-desc") {
+        filtered.sort((a, b) => a.tenureAsClient - b.tenureAsClient)
       } else if (sortBy === "experience") {
         filtered.sort((a, b) => Number.parseInt(b.experience) - Number.parseInt(a.experience))
+      } else if (sortBy === "experience-desc") {
+        filtered.sort((a, b) => Number.parseInt(a.experience) - Number.parseInt(b.experience))
       } else if (sortBy === "name") {
         filtered.sort((a, b) => a.name.localeCompare(b.name))
+      } else if (sortBy === "name-desc") {
+        filtered.sort((a, b) => b.name.localeCompare(a.name))
       } else if (sortBy === "bookmarked") {
         filtered.sort((a, b) => (b.isBookmarked ? 1 : 0) - (a.isBookmarked ? 1 : 0))
+      } else if (sortBy === "bookmarked-desc") {
+        filtered.sort((a, b) => (a.isBookmarked ? 1 : 0) - (b.isBookmarked ? 1 : 0))
       }
 
       setFilteredData(filtered)
@@ -511,11 +531,17 @@ export default function ConsultantAllocatorManagerSearchPage() {
                         onChange={handleSortChange}
                         options={[
                           { value: "aua", label: "Highest AUA" },
+                          { value: "aua-desc", label: "Lowest AUA" },
                           { value: "tenure", label: "Longest Tenure" },
+                          { value: "tenure-desc", label: "Shortest Tenure" },
                           { value: "name", label: "Name (A–Z)" },
+                          { value: "name-desc", label: "Name (Z–A)" },
                           { value: "aum", label: "Largest Total Assets" },
+                          { value: "aum-desc", label: "Smallest Total Assets" },
                           { value: "experience", label: "Most Experience" },
+                          { value: "experience-desc", label: "Least Experience" },
                           { value: "bookmarked", label: "Bookmarked First" },
+                          { value: "bookmarked-desc", label: "Not Bookmarked First" },
                         ]}
                       />
                       <ExportButton
