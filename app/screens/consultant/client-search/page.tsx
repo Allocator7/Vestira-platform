@@ -343,18 +343,36 @@ export default function ConsultantAllocatorManagerSearchPage() {
   const router = useRouter()
 
   const handleViewProfile = (contact: any) => {
-    const profileType = activeTab === "allocators" ? "allocator-profile" : "manager-profile"
-    router.push(`/screens/general/${profileType}?id=${contact.id}`)
+    try {
+      // Route to the correct profile page with proper parameters
+      const profileType = activeTab === "allocators" ? "allocator-profile" : "manager-profile"
+      const profileUrl = `/screens/general/${profileType}?id=${contact.id}&name=${encodeURIComponent(contact.name)}`
+      router.push(profileUrl)
+    } catch (error) {
+      console.error('Error navigating to profile:', error)
+      // Fallback to a generic error page or show a toast
+      alert(`Unable to load profile for ${contact.name}. Please try again.`)
+    }
   }
 
   const handleSendMessage = (contact: any) => {
-    setSelectedContact(contact)
-    setIsMessageModalOpen(true)
+    try {
+      setSelectedContact(contact)
+      setIsMessageModalOpen(true)
+    } catch (error) {
+      console.error('Error opening message modal:', error)
+      alert(`Unable to open message dialog for ${contact.name}. Please try again.`)
+    }
   }
 
   const handleScheduleMeeting = (contact: any) => {
-    setSelectedContact(contact)
-    setIsMeetingModalOpen(true)
+    try {
+      setSelectedContact(contact)
+      setIsMeetingModalOpen(true)
+    } catch (error) {
+      console.error('Error opening schedule modal:', error)
+      alert(`Unable to open schedule dialog for ${contact.name}. Please try again.`)
+    }
   }
 
   const handleFiltersChange = useCallback(
@@ -547,7 +565,6 @@ export default function ConsultantAllocatorManagerSearchPage() {
                       <ExportButton
                         data={filteredData}
                         filename={`${activeTab}-search-results`}
-                        className="bg-electric-blue hover:bg-electric-blue/90 text-white"
                       />
                     </div>
                   </div>
@@ -731,7 +748,7 @@ export default function ConsultantAllocatorManagerSearchPage() {
             isOpen={isMessageModalOpen}
             onClose={() => setIsMessageModalOpen(false)}
             recipientName={selectedContact.name}
-            recipientEmail={`contact@${selectedContact.shortName.toLowerCase().replace(/\s+/g, "")}.com`}
+            organizationName={selectedContact.shortName}
           />
           <ScheduleMeetingModal
             isOpen={isMeetingModalOpen}

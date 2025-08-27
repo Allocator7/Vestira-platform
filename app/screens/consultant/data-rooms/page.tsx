@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Search, Filter, Calendar, FileText, MessageSquare, MoreHorizontal } from "lucide-react"
@@ -581,6 +581,8 @@ export default function ConsultantDataRoomsPage() {
   const [showMessageModal, setShowMessageModal] = useState(false)
   const [selectedRoomForSchedule, setSelectedRoomForSchedule] = useState<string>("")
   const [selectedRoomForMessage, setSelectedRoomForMessage] = useState<string>("")
+  const [selectedParticipants, setSelectedParticipants] = useState<string[]>([])
+  const [additionalEmails, setAdditionalEmails] = useState("")
   const [filters, setFilters] = useState({
     status: "all",
     strategy: "all",
@@ -589,6 +591,15 @@ export default function ConsultantDataRoomsPage() {
     fundSizeMin: "",
     fundSizeMax: "",
   })
+
+  // Mock participants data for check-ins
+  const availableParticipants = [
+    { id: "1", name: "Sarah Johnson", email: "sarah.johnson@calpers.ca.gov", organization: "CalPERS" },
+    { id: "2", name: "Michael Chen", email: "m.chen@trs.texas.gov", organization: "TRS Texas" },
+    { id: "3", name: "Lisa Rodriguez", email: "l.rodriguez@harvard.edu", organization: "Harvard Endowment" },
+    { id: "4", name: "David Wilson", email: "d.wilson@yale.edu", organization: "Yale Endowment" },
+    { id: "5", name: "Emily Davis", email: "e.davis@stanford.edu", organization: "Stanford Endowment" },
+  ]
 
   // -----------------------
   // Derived & handlers
@@ -867,12 +878,85 @@ export default function ConsultantDataRoomsPage() {
         </Card>
       </div>
 
-      {/* Modals */}
-      <ScheduleCheckinModal
-        isOpen={showScheduleModal}
-        onClose={() => setShowScheduleModal(false)}
-        roomName={selectedRoomForSchedule}
-      />
+      {/* Enhanced Schedule Check-in Modal */}
+      <Dialog open={showScheduleModal} onOpenChange={setShowScheduleModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Schedule Check-in</DialogTitle>
+            <DialogDescription>
+              Schedule a check-in for {selectedRoomForSchedule}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Select Participants</Label>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {availableParticipants.map((participant) => (
+                  <div key={participant.id} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={participant.id}
+                      checked={selectedParticipants.includes(participant.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedParticipants([...selectedParticipants, participant.id])
+                        } else {
+                          setSelectedParticipants(selectedParticipants.filter(id => id !== participant.id))
+                        }
+                      }}
+                    />
+                    <label htmlFor={participant.id} className="text-sm cursor-pointer">
+                      {participant.name} ({participant.organization})
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="additionalEmails">Additional Email Addresses</Label>
+              <Textarea
+                id="additionalEmails"
+                placeholder="Enter additional email addresses separated by commas..."
+                value={additionalEmails}
+                onChange={(e) => setAdditionalEmails(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleModal(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                // Handle check-in scheduling
+                const selectedParticipantEmails = availableParticipants
+                  .filter(p => selectedParticipants.includes(p.id))
+                  .map(p => p.email)
+                
+                const allEmails = [
+                  ...selectedParticipantEmails,
+                  ...additionalEmails.split(',').map(email => email.trim()).filter(email => email)
+                ]
+                
+                toast({
+                  title: "Check-in Scheduled",
+                  description: `Check-in scheduled for ${selectedRoomForSchedule} with ${allEmails.length} participants.`,
+                })
+                
+                setShowScheduleModal(false)
+                setSelectedParticipants([])
+                setAdditionalEmails("")
+              }}
+            >
+              Schedule Check-in
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <SendMessageModal
         isOpen={showMessageModal}
         onClose={() => setShowMessageModal(false)}
