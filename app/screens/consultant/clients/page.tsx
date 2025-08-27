@@ -262,12 +262,17 @@ export default function ConsultantClientsPage() {
   const [selectedStrategy, setSelectedStrategy] = useState<string>("")
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false)
+  const [showContactSelector, setShowContactSelector] = useState(false)
+  const [selectedAction, setSelectedAction] = useState<"message" | "schedule" | null>(null)
 
   const router = useRouter()
 
   const handleViewProfile = (firmId: string) => {
-    // Use Next.js router for faster navigation instead of window.location
-    router.push(`/screens/general/allocator-profile?id=${firmId}`)
+    // Route to the correct client profile page
+    const firm = mockClientFirms.find(f => f.id === firmId)
+    if (firm) {
+      router.push(`/screens/general/allocator-profile?id=${firmId}&name=${encodeURIComponent(firm.firmName)}`)
+    }
   }
 
   const getRelevantContact = (firm: ClientFirm, strategy?: string): Contact => {
@@ -280,19 +285,50 @@ export default function ConsultantClientsPage() {
   }
 
   const handleSendMessage = (firm: ClientFirm, strategy?: string) => {
-    const contact = getRelevantContact(firm, strategy)
-    setSelectedFirm(firm)
-    setSelectedContact(contact)
-    setSelectedStrategy(strategy || "")
-    setIsMessageModalOpen(true)
+    if (firm.contacts.length === 1) {
+      // If only one contact, use it directly
+      const contact = firm.contacts[0]
+      setSelectedFirm(firm)
+      setSelectedContact(contact)
+      setSelectedStrategy(strategy || "")
+      setIsMessageModalOpen(true)
+    } else {
+      // If multiple contacts, show contact selector
+      setSelectedFirm(firm)
+      setSelectedStrategy(strategy || "")
+      setSelectedAction("message")
+      setShowContactSelector(true)
+    }
   }
 
   const handleScheduleMeeting = (firm: ClientFirm, strategy?: string) => {
-    const contact = getRelevantContact(firm, strategy)
-    setSelectedFirm(firm)
+    if (firm.contacts.length === 1) {
+      // If only one contact, use it directly
+      const contact = firm.contacts[0]
+      setSelectedFirm(firm)
+      setSelectedContact(contact)
+      setSelectedStrategy(strategy || "")
+      setIsMeetingModalOpen(true)
+    } else {
+      // If multiple contacts, show contact selector
+      setSelectedFirm(firm)
+      setSelectedStrategy(strategy || "")
+      setSelectedAction("schedule")
+      setShowContactSelector(true)
+    }
+  }
+
+  const handleContactSelect = (contact: Contact) => {
     setSelectedContact(contact)
-    setSelectedStrategy(strategy || "")
-    setIsMeetingModalOpen(true)
+    setShowContactSelector(false)
+    
+    if (selectedAction === "message") {
+      setIsMessageModalOpen(true)
+    } else if (selectedAction === "schedule") {
+      setIsMeetingModalOpen(true)
+    }
+    
+    setSelectedAction(null)
   }
 
   const handleFiltersChange = (newFilters: {
@@ -404,7 +440,6 @@ export default function ConsultantClientsPage() {
           <ExportButton
             data={filteredClients}
             filename="consulting-client-firms"
-            className="bg-electric-blue hover:bg-electric-blue/90 text-white"
           />
         </div>
 
@@ -426,9 +461,8 @@ export default function ConsultantClientsPage() {
                       value={sortBy}
                       onChange={handleSortChange}
                       options={[
-                        { value: "contractValue", label: "Highest Contract Value" },
                         { value: "aua", label: "Largest AUA" },
-                        { value: "projectCount", label: "Most Projects" },
+                        { value: "projectCount", label: "Most Active Searches" },
                         { value: "firmName", label: "Firm Name A-Z" },
                         { value: "lastContact", label: "Recent Contact" },
                       ]}
@@ -454,16 +488,6 @@ export default function ConsultantClientsPage() {
             <div className="flex gap-4 text-sm text-baseGray">
               <span>Active: {filteredClients.filter((c) => c.relationship === "Active Client").length}</span>
               <span>Prospects: {filteredClients.filter((c) => c.relationship === "Prospect").length}</span>
-              <span>
-                Total Value: $
-                {filteredClients.reduce((sum, c) => {
-                  const value =
-                    Number.parseFloat(c.contractValue.replace(/[$MK]/g, "")) *
-                    (c.contractValue.includes("M") ? 1000 : 1)
-                  return sum + value
-                }, 0) / 1000}
-                M
-              </span>
             </div>
           </div>
 
@@ -542,12 +566,8 @@ export default function ConsultantClientsPage() {
                       <span className="text-baseGray">AUA: {firm.aua}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3 text-baseGray flex-shrink-0" />
-                      <span className="text-baseGray">Contract: {firm.contractValue}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
                       <FileText className="h-3 w-3 text-baseGray flex-shrink-0" />
-                      <span className="text-baseGray">{firm.projectCount} projects</span>
+                      <span className="text-baseGray">{firm.projectCount} active searches</span>
                     </div>
                   </div>
 
@@ -651,6 +671,47 @@ export default function ConsultantClientsPage() {
             recipientEmail={selectedContact.email}
           />
         </>
+      )}
+
+      {/* Contact Selector Modal */}
+      {selectedFirm && showContactSelector && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">
+              Select Contact for {selectedAction === "message" ? "Message" : "Meeting"}
+            </h3>
+            <div className="space-y-3">
+              {selectedFirm.contacts.map((contact, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleContactSelect(contact)}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{contact.name}</span>
+                      {contact.isMainContact && (
+                        <Badge variant="secondary" className="text-xs">Primary</Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600">{contact.title}</p>
+                    {contact.strategies.length > 0 && (
+                      <p className="text-xs text-gray-500">Strategies: {contact.strategies.join(", ")}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowContactSelector(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </Screen>
   )

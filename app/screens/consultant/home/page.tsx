@@ -101,35 +101,7 @@ export default function ConsultantHomePage() {
     },
   ]
 
-  const recentConnections = [
-    {
-      id: 1,
-      name: "Sarah Chen",
-      title: "Chief Investment Officer",
-      organization: "CalPERS",
-      initials: "SC",
-      connectionDate: "2 days ago",
-      status: "active",
-    },
-    {
-      id: 2,
-      name: "Michael Rodriguez",
-      title: "Portfolio Manager",
-      organization: "TRS Texas",
-      initials: "MR",
-      connectionDate: "1 week ago",
-      status: "active",
-    },
-    {
-      id: 3,
-      name: "Charles Rockefeller",
-      title: "Managing Partner",
-      organization: "Rockefeller Family Office",
-      initials: "CR",
-      connectionDate: "2 weeks ago",
-      status: "active",
-    },
-  ]
+
 
   const clientMetrics = [
     { label: "Active Clients", value: "24", change: "+3", trend: "up", icon: Users },
@@ -451,77 +423,9 @@ export default function ConsultantHomePage() {
                 </CardContent>
               </Card>
 
-              {/* Recent Connections */}
-              <Card className="shadow-vestira border-gray-100">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-deep-brand">Recent Connections</CardTitle>
-                    <Link href="/screens/general/connection-center">
-                      <Button variant="ghost" size="sm" className="text-electric-blue hover:text-electric-blue/80">
-                        View All
-                      </Button>
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {recentConnections.map((connection) => (
-                    <div
-                      key={connection.id}
-                      className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors"
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-electric-blue/10 text-electric-blue text-xs font-semibold">
-                          {connection.initials}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-deep-brand">{connection.name}</p>
-                        <p className="text-xs text-base-gray">
-                          {connection.organization} • {connection.title}
-                        </p>
-                      </div>
-                      <div className="text-xs text-base-gray">{connection.connectionDate}</div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
 
-              {/* Quick Stats */}
-              <Card className="shadow-vestira border-gray-100">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-deep-brand">This Week</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Eye className="h-4 w-4 text-electric-blue" />
-                      <span className="text-sm text-base-gray">Profile Views</span>
-                    </div>
-                    <span className="text-sm font-semibold text-deep-brand">47</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <MessageCircle className="h-4 w-4 text-electric-blue" />
-                      <span className="text-sm text-base-gray">Messages Sent</span>
-                    </div>
-                    <span className="text-sm font-semibold text-deep-brand">23</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Download className="h-4 w-4 text-electric-blue" />
-                      <span className="text-sm text-base-gray">Documents Shared</span>
-                    </div>
-                    <span className="text-sm font-semibold text-deep-brand">15</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-electric-blue" />
-                      <span className="text-sm text-base-gray">Meetings Scheduled</span>
-                    </div>
-                    <span className="text-sm font-semibold text-deep-brand">6</span>
-                  </div>
-                </CardContent>
-              </Card>
+
+
             </div>
           </div>
         </div>

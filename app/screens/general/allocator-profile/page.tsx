@@ -64,6 +64,16 @@ export default function AllocatorProfilePage() {
   const [shareMessage, setShareMessage] = useState("")
   const [shareSuccess, setShareSuccess] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [selectedPlatformUsers, setSelectedPlatformUsers] = useState<string[]>([])
+
+  // Mock platform users for sharing
+  const platformUsers = [
+    { id: "user1", name: "Sarah Johnson", organization: "CalPERS" },
+    { id: "user2", name: "Michael Chen", organization: "TRS Texas" },
+    { id: "user3", name: "Lisa Rodriguez", organization: "Harvard Endowment" },
+    { id: "user4", name: "David Wilson", organization: "Yale Endowment" },
+    { id: "user5", name: "Emily Davis", organization: "Stanford Endowment" },
+  ]
 
   // Message modal states
   const [messageSubject, setMessageSubject] = useState("")
@@ -481,6 +491,29 @@ export default function AllocatorProfilePage() {
       setShowShareModal(false)
       setShareSuccess(false)
       setShareEmail("")
+      setShareMessage(`I wanted to share ${allocator?.firmName}'s profile with you.`)
+    }, 1500)
+  }
+
+  const handleShareProfile = async () => {
+    if (!shareEmail.trim() && selectedPlatformUsers.length === 0) {
+      toast({
+        title: "No Recipients Selected",
+        description: "Please select platform users or enter an email address.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setShareSuccess(true)
+
+    setTimeout(() => {
+      setShowShareModal(false)
+      setShareSuccess(false)
+      setShareEmail("")
+      setSelectedPlatformUsers([])
       setShareMessage(`I wanted to share ${allocator?.firmName}'s profile with you.`)
     }, 1500)
   }
@@ -1210,6 +1243,91 @@ export default function AllocatorProfilePage() {
                 <Button onClick={handleScheduleMeeting}>
                   <Calendar className="h-4 w-4 mr-2" />
                   Schedule Meeting
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Modal */}
+        <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Share Profile</DialogTitle>
+              <DialogDescription>
+                Share {allocator.firmName}'s profile with others on the platform or via email.
+              </DialogDescription>
+            </DialogHeader>
+
+            {shareSuccess ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="rounded-full bg-green-100 p-3 mb-4">
+                  <CheckCircle2 className="h-8 w-8 text-green-600" />
+                </div>
+                <p className="text-lg font-medium text-center">Profile shared successfully!</p>
+                <p className="text-sm text-center mt-1 text-base-gray">
+                  {shareEmail ? `The profile has been shared with ${shareEmail}` : 'The profile has been shared with selected users.'}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Share with Platform Users</Label>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {platformUsers.map((user) => (
+                      <div key={user.id} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          id={user.id}
+                          checked={selectedPlatformUsers.includes(user.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedPlatformUsers([...selectedPlatformUsers, user.id])
+                            } else {
+                              setSelectedPlatformUsers(selectedPlatformUsers.filter(id => id !== user.id))
+                            }
+                          }}
+                        />
+                        <label htmlFor={user.id} className="text-sm cursor-pointer">
+                          {user.name} ({user.organization})
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="shareEmail">Or Share via Email</Label>
+                  <Input
+                    id="shareEmail"
+                    type="email"
+                    placeholder="Enter email address"
+                    value={shareEmail}
+                    onChange={(e) => setShareEmail(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="shareMessage">Message (Optional)</Label>
+                  <Textarea
+                    id="shareMessage"
+                    placeholder="Add a personal message..."
+                    value={shareMessage}
+                    onChange={(e) => setShareMessage(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareModal(false)}>
+                Cancel
+              </Button>
+              {!shareSuccess && (
+                <Button onClick={handleShareProfile}>
+                  <Send className="h-4 w-4 mr-2" />
+                  Share Profile
                 </Button>
               )}
             </DialogFooter>
