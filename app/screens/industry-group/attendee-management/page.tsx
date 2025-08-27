@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { SendInvitationModal } from "@/components/industry-group/SendInvitationModal"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
@@ -98,6 +98,7 @@ export default function AttendeeManagementPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [memberTypeFilter, setMemberTypeFilter] = useState("all")
+  const [eventFilter, setEventFilter] = useState("all")
   const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
   const [showInvitationModal, setShowInvitationModal] = useState(false)
   const [showMessageModal, setShowMessageModal] = useState(false)
@@ -149,7 +150,8 @@ export default function AttendeeManagementPage() {
       attendee.location.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "all" || attendee.status === statusFilter
     const matchesMemberType = memberTypeFilter === "all" || attendee.memberType === memberTypeFilter
-    return matchesSearch && matchesStatus && matchesMemberType
+    const matchesEvent = eventFilter === "all" || attendee.eventsAttended > 0 // For now, just check if they've attended any events
+    return matchesSearch && matchesStatus && matchesMemberType && matchesEvent
   })
 
   const handleExportData = () => {
@@ -193,7 +195,10 @@ export default function AttendeeManagementPage() {
     document.body.removeChild(link)
     URL.revokeObjectURL(url)
 
-    toast.success("Attendee data exported successfully!")
+    toast({
+      title: "Export Complete",
+      description: "Attendee data exported successfully!",
+    })
   }
 
   const handleBulkAction = (action: string) => {
@@ -308,9 +313,12 @@ export default function AttendeeManagementPage() {
 
   const stats = {
     total: attendees.length,
-    active: attendees.filter((a) => a.status === "confirmed" || a.status === "attended").length,
-
-    avgAttendance: Math.round((attendees.reduce((sum, a) => sum + a.eventsAttended, 0) / attendees.length) * 100) / 100,
+    totalYTD: attendees.filter((a) => {
+      const registrationYear = new Date(a.registrationDate).getFullYear()
+      return registrationYear === new Date().getFullYear()
+    }).length,
+    avgPerEvent: Math.round((attendees.reduce((sum, a) => sum + a.eventsAttended, 0) / attendees.length) * 100) / 100,
+    avgEventsPerAttendee: Math.round((attendees.reduce((sum, a) => sum + a.eventsAttended, 0) / attendees.length) * 100) / 100,
   }
 
   return (
@@ -337,7 +345,7 @@ export default function AttendeeManagementPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -353,10 +361,10 @@ export default function AttendeeManagementPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Active Members</p>
-                <p className="text-2xl font-bold">{stats.active}</p>
+                <p className="text-sm text-gray-600">Total Attendees YTD</p>
+                <p className="text-2xl font-bold">{stats.totalYTD}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-green-600" />
+              <Users className="h-8 w-8 text-green-600" />
             </div>
           </CardContent>
         </Card>
@@ -365,10 +373,22 @@ export default function AttendeeManagementPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Avg. Events Attended</p>
-                <p className="text-2xl font-bold">{stats.avgAttendance}</p>
+                <p className="text-sm text-gray-600">Attendees Per Event</p>
+                <p className="text-2xl font-bold">{stats.avgPerEvent}</p>
               </div>
-              <Calendar className="h-8 w-8 text-orange-600" />
+              <Calendar className="h-8 w-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Avg Events Per Attendee</p>
+                <p className="text-2xl font-bold">{stats.avgEventsPerAttendee}</p>
+              </div>
+              <CheckCircle className="h-8 w-8 text-orange-600" />
             </div>
           </CardContent>
         </Card>
@@ -417,6 +437,16 @@ export default function AttendeeManagementPage() {
                     <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="premium">Premium</SelectItem>
                     <SelectItem value="standard">Standard</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={eventFilter} onValueChange={setEventFilter}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Events</SelectItem>
+                    <SelectItem value="attended">Has Attended Events</SelectItem>
+                    <SelectItem value="not-attended">No Events Attended</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button variant="outline" onClick={() => setShowFilters(!showFilters)}>

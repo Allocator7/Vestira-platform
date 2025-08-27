@@ -368,12 +368,30 @@ export default function IndustryGroupCommunicationsPage() {
   }
 
   const campaignStats = {
-    total: campaigns.length,
-    sent: campaigns.filter((c) => c.status === "sent").length,
-    scheduled: campaigns.filter((c) => c.status === "scheduled").length,
-    draft: campaigns.filter((c) => c.status === "draft").length,
-    totalRecipients: campaigns.reduce((sum, c) => sum + c.recipients, 0),
-    totalOpened: campaigns.reduce((sum, c) => sum + c.opened, 0),
+    total: campaigns.filter((c) => {
+      const campaignYear = new Date(c.sentDate).getFullYear()
+      return campaignYear === new Date().getFullYear()
+    }).length,
+    sent: campaigns.filter((c) => {
+      const campaignYear = new Date(c.sentDate).getFullYear()
+      return c.status === "sent" && campaignYear === new Date().getFullYear()
+    }).length,
+    scheduled: campaigns.filter((c) => {
+      const campaignYear = new Date(c.sentDate).getFullYear()
+      return c.status === "scheduled" && campaignYear === new Date().getFullYear()
+    }).length,
+    draft: campaigns.filter((c) => {
+      const campaignYear = new Date(c.sentDate).getFullYear()
+      return c.status === "draft" && campaignYear === new Date().getFullYear()
+    }).length,
+    totalRecipients: campaigns.filter((c) => {
+      const campaignYear = new Date(c.sentDate).getFullYear()
+      return campaignYear === new Date().getFullYear()
+    }).reduce((sum, c) => sum + c.recipients, 0),
+    totalOpened: campaigns.filter((c) => {
+      const campaignYear = new Date(c.sentDate).getFullYear()
+      return campaignYear === new Date().getFullYear()
+    }).reduce((sum, c) => sum + c.opened, 0),
   }
 
   return (
@@ -402,7 +420,7 @@ export default function IndustryGroupCommunicationsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-base-gray">Total Campaigns</p>
+                <p className="text-sm font-medium text-base-gray">Total Campaigns YTD</p>
                 <p className="text-2xl font-bold text-deep-brand">{campaignStats.total}</p>
               </div>
               <Mail className="h-8 w-8 text-blue-500" />
@@ -413,7 +431,7 @@ export default function IndustryGroupCommunicationsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-base-gray">Sent</p>
+                <p className="text-sm font-medium text-base-gray">Sent YTD</p>
                 <p className="text-2xl font-bold text-green-600">{campaignStats.sent}</p>
               </div>
               <Send className="h-8 w-8 text-green-500" />
@@ -424,7 +442,7 @@ export default function IndustryGroupCommunicationsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-base-gray">Scheduled</p>
+                <p className="text-sm font-medium text-base-gray">Scheduled YTD</p>
                 <p className="text-2xl font-bold text-blue-600">{campaignStats.scheduled}</p>
               </div>
               <Calendar className="h-8 w-8 text-blue-500" />
@@ -435,7 +453,7 @@ export default function IndustryGroupCommunicationsPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-base-gray">Total Recipients</p>
+                <p className="text-sm font-medium text-base-gray">Total Recipients YTD</p>
                 <p className="text-2xl font-bold text-deep-brand">{campaignStats.totalRecipients.toLocaleString()}</p>
               </div>
               <Users className="h-8 w-8 text-purple-500" />

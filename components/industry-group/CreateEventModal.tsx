@@ -54,11 +54,7 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
     "Conference",
     "Workshop",
     "Webinar",
-    "Networking Event",
-    "Symposium",
-    "Panel Discussion",
-    "Training Session",
-    "Social Event"
+    "Networking"
   ]
 
   const handleInputChange = (field: string, value: any) => {
@@ -320,16 +316,35 @@ export function CreateEventModal({ isOpen, onClose }: CreateEventModalProps) {
                 <h3 className="text-lg font-medium text-deep-brand">Location</h3>
               </div>
               
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="virtual"
-                  checked={formData.isVirtual}
-                  onCheckedChange={(checked) => handleInputChange("isVirtual", checked)}
-                />
-                <Label htmlFor="virtual" className="flex items-center gap-2">
-                  {formData.isVirtual ? <Globe className="h-4 w-4" /> : <Building className="h-4 w-4" />}
-                  {formData.isVirtual ? "Virtual Event" : "In-Person Event"}
-                </Label>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="inPerson"
+                    name="eventType"
+                    checked={!formData.isVirtual}
+                    onChange={() => handleInputChange("isVirtual", false)}
+                    className="h-4 w-4 text-electric-blue"
+                  />
+                  <Label htmlFor="inPerson" className="flex items-center gap-2 cursor-pointer">
+                    <Building className="h-4 w-4" />
+                    In-Person Event
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="virtual"
+                    name="eventType"
+                    checked={formData.isVirtual}
+                    onChange={() => handleInputChange("isVirtual", true)}
+                    className="h-4 w-4 text-electric-blue"
+                  />
+                  <Label htmlFor="virtual" className="flex items-center gap-2 cursor-pointer">
+                    <Globe className="h-4 w-4" />
+                    Virtual Event
+                  </Label>
+                </div>
               </div>
 
               {formData.isVirtual ? (

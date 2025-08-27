@@ -247,17 +247,7 @@ export function MemberProfileModal({ open, onOpenChange, member, onMemberUpdate 
                   </div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600">Certificates</p>
-                      <p className="text-2xl font-bold">{engagementData.certificatesEarned}</p>
-                    </div>
-                    <Award className="h-8 w-8 text-purple-600" />
-                  </div>
-                </CardContent>
-              </Card>
+
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
@@ -357,15 +347,46 @@ export function MemberProfileModal({ open, onOpenChange, member, onMemberUpdate 
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex flex-col gap-2">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        // Open default email client
+                        const emailSubject = encodeURIComponent(`Message for ${member.name}`)
+                        const emailBody = encodeURIComponent(`Dear ${member.contactPerson},\n\n`)
+                        window.open(`mailto:${member.email}?subject=${emailSubject}&body=${emailBody}`)
+                        toast({
+                          title: "Email Client Opened",
+                          description: `Email client opened for ${member.contactPerson}`,
+                        })
+                      }}
+                    >
                       <Mail className="h-4 w-4 mr-2" />
                       Send Message
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        toast({
+                          title: "Edit Profile",
+                          description: `Edit profile functionality for ${member.name} would open here.`,
+                        })
+                      }}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       Edit Profile
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        toast({
+                          title: "View Documents",
+                          description: `Document viewer for ${member.name} would open here.`,
+                        })
+                      }}
+                    >
                       <FileText className="h-4 w-4 mr-2" />
                       View Documents
                     </Button>

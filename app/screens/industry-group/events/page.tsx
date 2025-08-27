@@ -390,7 +390,7 @@ export default function IndustryGroupEventsPage() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-white shadow-vestira">
           <CardContent className="p-4">
             <div className="text-2xl font-bold text-deep-brand">{eventStats.total}</div>
@@ -415,12 +415,7 @@ export default function IndustryGroupEventsPage() {
             <div className="text-sm text-base-gray">Completed</div>
           </CardContent>
         </Card>
-        <Card className="bg-white shadow-vestira">
-          <CardContent className="p-4">
-            <div className="text-2xl font-bold text-electric-blue">{eventStats.totalRegistrations}</div>
-            <div className="text-sm text-base-gray">Total Registrations</div>
-          </CardContent>
-        </Card>
+
       </div>
 
       {/* Search and Filters */}
