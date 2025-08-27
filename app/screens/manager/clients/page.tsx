@@ -14,6 +14,7 @@ import { ExportButton } from "@/components/ExportButton"
 import { MapPin, Building2, TrendingUp, Users, MessageCircle, Calendar, Eye, DollarSign } from "lucide-react"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { ScheduleMeetingModal } from "@/components/profile-modals/ScheduleMeetingModal"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface Contact {
   name: string
@@ -118,6 +119,8 @@ export default function ManagerClientsPage() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false)
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false)
+  const [showContactSelector, setShowContactSelector] = useState(false)
+  const [selectedAction, setSelectedAction] = useState<'message' | 'schedule' | null>(null)
 
   const handleViewProfile = (clientId: string) => {
     router.push(`/screens/general/allocator-profile?id=${clientId}`)
@@ -125,14 +128,35 @@ export default function ManagerClientsPage() {
 
   const handleSendMessage = (client: ClientFirm, contact?: Contact) => {
     setSelectedClient(client)
-    setSelectedContact(contact || client.contacts[0])
-    setIsMessageModalOpen(true)
+    if (contact) {
+      setSelectedContact(contact)
+      setIsMessageModalOpen(true)
+    } else {
+      setSelectedAction('message')
+      setShowContactSelector(true)
+    }
   }
 
   const handleScheduleMeeting = (client: ClientFirm, contact?: Contact) => {
     setSelectedClient(client)
-    setSelectedContact(contact || client.contacts[0])
-    setIsMeetingModalOpen(true)
+    if (contact) {
+      setSelectedContact(contact)
+      setIsMeetingModalOpen(true)
+    } else {
+      setSelectedAction('schedule')
+      setShowContactSelector(true)
+    }
+  }
+
+  const handleContactSelect = (contact: Contact) => {
+    setSelectedContact(contact)
+    setShowContactSelector(false)
+    
+    if (selectedAction === 'message') {
+      setIsMessageModalOpen(true)
+    } else if (selectedAction === 'schedule') {
+      setIsMeetingModalOpen(true)
+    }
   }
 
   const handleFiltersChange = (newFilters: {
@@ -176,16 +200,32 @@ export default function ManagerClientsPage() {
         const commitmentB = Number.parseFloat(b.commitment.replace(/[$M]/g, ""))
         return commitmentB - commitmentA
       })
+    } else if (sortBy === "commitment-desc") {
+      filtered.sort((a, b) => {
+        const commitmentA = Number.parseFloat(a.commitment.replace(/[$M]/g, ""))
+        const commitmentB = Number.parseFloat(b.commitment.replace(/[$M]/g, ""))
+        return commitmentA - commitmentB
+      })
     } else if (sortBy === "aum") {
       filtered.sort((a, b) => {
         const aumA = Number.parseFloat(a.aum.replace(/[$B]/g, ""))
         const aumB = Number.parseFloat(b.aum.replace(/[$B]/g, ""))
         return aumB - aumA
       })
+    } else if (sortBy === "aum-desc") {
+      filtered.sort((a, b) => {
+        const aumA = Number.parseFloat(a.aum.replace(/[$B]/g, ""))
+        const aumB = Number.parseFloat(b.aum.replace(/[$B]/g, ""))
+        return aumA - aumB
+      })
     } else if (sortBy === "name") {
       filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
+    } else if (sortBy === "name-desc") {
+      filtered.sort((a, b) => b.firmName.localeCompare(a.firmName))
     } else if (sortBy === "lastContact") {
       filtered.sort((a, b) => new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime())
+    } else if (sortBy === "lastContact-desc") {
+      filtered.sort((a, b) => new Date(a.lastContact).getTime() - new Date(b.lastContact).getTime())
     }
 
     setFilteredClientFirms(filtered)
@@ -237,7 +277,6 @@ export default function ManagerClientsPage() {
           <ExportButton
             data={filteredClientFirms}
             filename="client-portfolio"
-            className="bg-electric-blue hover:bg-electric-blue/90 text-white"
           />
         </div>
 
@@ -260,9 +299,13 @@ export default function ManagerClientsPage() {
                       onChange={handleSortChange}
                       options={[
                         { value: "commitment", label: "Largest Commitment" },
+                        { value: "commitment-desc", label: "Smallest Commitment" },
                         { value: "aum", label: "Largest AUM" },
+                        { value: "aum-desc", label: "Smallest AUM" },
                         { value: "name", label: "Name A-Z" },
+                        { value: "name-desc", label: "Name Z-A" },
                         { value: "lastContact", label: "Recent Contact" },
+                        { value: "lastContact-desc", label: "Oldest Contact" },
                       ]}
                     />
                     <Button
@@ -487,6 +530,38 @@ export default function ManagerClientsPage() {
             organizationName={selectedClient.firmName}
           />
         </>
+      )}
+
+      {/* Contact Selector Modal */}
+      {showContactSelector && selectedClient && (
+        <Dialog open={showContactSelector} onOpenChange={setShowContactSelector}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Select Contact</DialogTitle>
+              <DialogDescription>
+                Choose a contact at {selectedClient.firmName} to {selectedAction === 'message' ? 'message' : 'schedule a meeting with'}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              {selectedClient.contacts.map((contact: Contact, index: number) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => handleContactSelect(contact)}
+                >
+                  <div>
+                    <p className="font-medium">{contact.name}</p>
+                    <p className="text-sm text-gray-600">{contact.title}</p>
+                    <p className="text-xs text-gray-500">{contact.isMainContact ? 'Primary Contact' : 'Contact'}</p>
+                  </div>
+                  <Button size="sm" variant="outline">
+                    {selectedAction === 'message' ? 'Message' : 'Schedule'}
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </Screen>
   )

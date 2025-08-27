@@ -291,12 +291,24 @@ export default function ManagerAllocatorSearchPage() {
           const aumB = Number.parseInt(b.aum.replace(/[^0-9]/g, ""))
           return aumB - aumA
         })
+      } else if (sortBy === "aum-desc") {
+        filtered.sort((a, b) => {
+          const aumA = Number.parseInt(a.aum.replace(/[^0-9]/g, ""))
+          const aumB = Number.parseInt(b.aum.replace(/[^0-9]/g, ""))
+          return aumA - aumB
+        })
       } else if (sortBy === "experience") {
         filtered.sort((a, b) => Number.parseInt(b.experience) - Number.parseInt(a.experience))
+      } else if (sortBy === "experience-desc") {
+        filtered.sort((a, b) => Number.parseInt(a.experience) - Number.parseInt(b.experience))
       } else if (sortBy === "name") {
         filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
+      } else if (sortBy === "name-desc") {
+        filtered.sort((a, b) => b.firmName.localeCompare(a.firmName))
       } else if (sortBy === "bookmarked") {
         filtered.sort((a, b) => (b.isBookmarked ? 1 : 0) - (a.isBookmarked ? 1 : 0))
+      } else if (sortBy === "bookmarked-desc") {
+        filtered.sort((a, b) => (a.isBookmarked ? 1 : 0) - (b.isBookmarked ? 1 : 0))
       }
 
       setFilteredAllocators(filtered)
@@ -366,9 +378,13 @@ export default function ManagerAllocatorSearchPage() {
                     onChange={handleSortChange}
                     options={[
                       { value: "aum", label: "Largest Total Assets" },
+                      { value: "aum-desc", label: "Smallest Total Assets" },
                       { value: "experience", label: "Most Experience" },
+                      { value: "experience-desc", label: "Least Experience" },
                       { value: "name", label: "Firm Name A-Z" },
+                      { value: "name-desc", label: "Firm Name Z-A" },
                       { value: "bookmarked", label: "Bookmarked First" },
+                      { value: "bookmarked-desc", label: "Not Bookmarked First" },
                     ]}
                   />
                   <ExportButton

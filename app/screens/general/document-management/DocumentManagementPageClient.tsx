@@ -335,9 +335,6 @@ export default function DocumentManagementPageClient() {
     })
 
     try {
-      // Import and use the download utility
-      const { downloadUtils } = await import('../../../../utils/downloadUtils')
-      
       // Create document content based on classification
       let documentContent = ""
       const timestamp = new Date().toISOString()
@@ -356,23 +353,21 @@ export default function DocumentManagementPageClient() {
           documentContent = `DOCUMENT\n\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nSize: ${document.size}\n\nDescription:\n${document.description}\n\nGenerated: ${timestamp}`
       }
 
-      await downloadUtils.downloadText(documentContent, `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`, {
-        onComplete: () => {
-          setIsDownloading(false)
-          notify({
-            title: "Download Complete",
-            description: `${document.title} has been downloaded successfully. Check your downloads folder.`,
-          })
-        },
-        onError: (error) => {
-          console.error("Download error:", error)
-          setIsDownloading(false)
-          notify({
-            title: "Download Failed",
-            description: "There was an error downloading the document. Please try again.",
-            variant: "destructive",
-          })
-        }
+      // Create and download the file
+      const blob = new Blob([documentContent], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      setIsDownloading(false)
+      notify({
+        title: "Download Complete",
+        description: `${document.title} has been downloaded successfully.`,
       })
     } catch (error) {
       console.error("Download error:", error)

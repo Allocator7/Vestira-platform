@@ -708,7 +708,9 @@ export default function ManagerDataRoomsPage() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-baseGray" />
-                            <span className="text-baseGray">Due: {room.deadline}</span>
+                            <span className="text-baseGray">
+                              Fundraising Period: {room.deadline === "TBD" || room.deadline === "Open Ended" ? "Open Ended" : `Ends ${room.deadline}`}
+                            </span>
                           </div>
                         </div>
 
@@ -824,13 +826,42 @@ export default function ManagerDataRoomsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="deadline">Deadline (Optional)</Label>
-              <Input
-                id="deadline"
-                type="date"
-                value={newDataRoom.deadline}
-                onChange={(e) => setNewDataRoom({ ...newDataRoom, deadline: e.target.value })}
-              />
+              <Label htmlFor="fundraisingPeriod">Fundraising Period</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="openEnded"
+                    name="fundraisingType"
+                    value="openEnded"
+                    checked={newDataRoom.deadline === "Open Ended"}
+                    onChange={() => setNewDataRoom({ ...newDataRoom, deadline: "Open Ended" })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="openEnded" className="text-sm">Open Ended</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="specificDate"
+                    name="fundraisingType"
+                    value="specificDate"
+                    checked={newDataRoom.deadline !== "Open Ended" && newDataRoom.deadline !== ""}
+                    onChange={() => setNewDataRoom({ ...newDataRoom, deadline: "" })}
+                    className="rounded"
+                  />
+                  <Label htmlFor="specificDate" className="text-sm">Specific End Date</Label>
+                </div>
+                {newDataRoom.deadline !== "Open Ended" && (
+                  <Input
+                    id="deadline"
+                    type="date"
+                    value={newDataRoom.deadline === "Open Ended" ? "" : newDataRoom.deadline}
+                    onChange={(e) => setNewDataRoom({ ...newDataRoom, deadline: e.target.value })}
+                    className="mt-2"
+                  />
+                )}
+              </div>
             </div>
             <div>
               <Label htmlFor="template">Template (Optional)</Label>

@@ -227,6 +227,39 @@ export default function DataRoomFilesPage({ params }: { params: { id: string } }
     setShowRenameDialog(true)
   }
 
+  const handleReplaceDocument = (file: DataRoomFile) => {
+    if (file.type === "file") {
+      // Simulate file replacement
+      const fileInput = document.createElement("input")
+      fileInput.type = "file"
+      fileInput.accept = ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+      fileInput.onchange = (e) => {
+        const target = e.target as HTMLInputElement
+        if (target.files && target.files[0]) {
+          const newFile = target.files[0]
+          // Update the file with new information
+          setFiles((prevFiles) =>
+            prevFiles.map((f) =>
+              f.id === file.id
+                ? {
+                    ...f,
+                    name: newFile.name,
+                    size: `${(newFile.size / 1024 / 1024).toFixed(1)} MB`,
+                    uploadedBy: "Current User",
+                    uploadedAt: new Date().toISOString().split("T")[0],
+                    downloadCount: 0,
+                    lastAccessed: "Never",
+                  }
+                : f,
+            ),
+          )
+          alert(`"${file.name}" has been replaced with "${newFile.name}"`)
+        }
+      }
+      fileInput.click()
+    }
+  }
+
   const handleConfirmShare = async () => {
     if (!selectedFile || !shareSettings.email.trim()) {
       alert("Please enter an email address")
@@ -417,6 +450,10 @@ export default function DataRoomFilesPage({ params }: { params: { id: string } }
                                     <DropdownMenuItem>
                                       <Eye className="mr-2 h-4 w-4" />
                                       Preview
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => handleReplaceDocument(file)}>
+                                      <Upload className="mr-2 h-4 w-4" />
+                                      Replace Document
                                     </DropdownMenuItem>
                                   </>
                                 )}

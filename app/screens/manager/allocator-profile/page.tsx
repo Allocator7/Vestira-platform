@@ -370,6 +370,17 @@ export default function AllocatorProfilePage() {
     }, 1500)
   }
 
+  // Connect functionality
+  const handleConnect = async (memberId: string, memberName: string) => {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    
+    toast({
+      title: "Connection Request Sent",
+      description: `Connection request sent to ${memberName}.`,
+    })
+  }
+
   // Team messaging functionality
   const handleTeamMessage = async () => {
     if (selectedTeamMembers.length === 0) {
@@ -856,6 +867,15 @@ export default function AllocatorProfilePage() {
                       <div className="text-right text-sm text-base-gray">
                         <p>{member.yearsAtCompany} years</p>
                         <p>Active {member.lastActive}</p>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="mt-2"
+                          onClick={() => handleConnect(member.id, member.name)}
+                        >
+                          <Users className="h-3 w-3 mr-1" />
+                          Connect
+                        </Button>
                       </div>
                     </div>
                   ))}

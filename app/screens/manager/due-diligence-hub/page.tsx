@@ -1288,6 +1288,60 @@ export default function ManagerDueDiligenceHubPage() {
     }
   }
 
+  const handleViewSubmittedDDQ = (ddqId: string) => {
+    const ddq = submittedDDQs.find((d) => d.id === ddqId)
+    if (ddq) {
+      // Create a mock DDQ response object for viewing
+      const mockDDQResponse = {
+        ...ddq,
+        sections: [
+          {
+            id: "firm",
+            name: "Firm",
+            questions: [
+              {
+                id: "firm-1",
+                section: "Firm",
+                question: "What is your firm's investment philosophy?",
+                answer: "Our firm focuses on long-term value creation through disciplined investment processes and strong partnerships with management teams.",
+                type: "long_text",
+                required: true,
+                answeredAt: ddq.submittedDate,
+                branches: [],
+              },
+            ],
+          },
+          {
+            id: "investments",
+            name: "Investments",
+            questions: [
+              {
+                id: "investments-1",
+                section: "Investments",
+                question: "Describe your investment strategy and approach.",
+                answer: "We employ a diversified approach across multiple strategies, focusing on risk-adjusted returns and capital preservation.",
+                type: "long_text",
+                required: true,
+                answeredAt: ddq.submittedDate,
+                branches: [],
+              },
+            ],
+          },
+        ],
+        dueDate: ddq.submittedDate,
+        lastActivity: ddq.submittedDate,
+        status: ddq.status,
+      }
+      
+      setSelectedDDQForResponse(mockDDQResponse)
+      setShowDDQResponseModal(true)
+      setViewMode("overview")
+      setCurrentQuestionIndex(0)
+      setActiveSection("firm")
+      showNotification(`Opening submitted DDQ: ${ddq.templateName}`)
+    }
+  }
+
   const handleMessageAllocator = (ddq: any) => {
     console.log("Opening message modal for:", ddq.contactName)
     setSelectedAllocator(ddq)
@@ -2284,7 +2338,11 @@ export default function ManagerDueDiligenceHubPage() {
                       </div>
 
                       <div className="flex items-center gap-2 ml-4">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewSubmittedDDQ(ddq.id)}
+                        >
                           <Eye className="h-4 w-4 mr-2" />
                           View
                         </Button>

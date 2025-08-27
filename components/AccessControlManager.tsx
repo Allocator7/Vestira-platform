@@ -74,6 +74,9 @@ export function AccessControlManager({
   const [notifyUsers, setNotifyUsers] = useState(true)
   const [expirationEnabled, setExpirationEnabled] = useState(false)
   const [expirationDate, setExpirationDate] = useState("")
+  const [showCreateGroupForm, setShowCreateGroupForm] = useState(false)
+  const [newGroupName, setNewGroupName] = useState("")
+  const [newGroupRole, setNewGroupRole] = useState<AccessRole>("viewer")
 
   const { toast } = useToast()
 
@@ -400,6 +403,28 @@ export function AccessControlManager({
       setUsers([...users, newUser])
       setNewUserEmail("")
       setShowInviteForm(false)
+    }
+  }
+
+  // Handle creating a new group
+  const handleCreateGroup = () => {
+    if (newGroupName.trim()) {
+      const newGroup: AccessGroup = {
+        id: `group-${Date.now()}`,
+        name: newGroupName.trim(),
+        memberCount: 0,
+        role: newGroupRole,
+      }
+      setGroups([...groups, newGroup])
+      setNewGroupName("")
+      setNewGroupRole("viewer")
+      setShowCreateGroupForm(false)
+      
+      toast({
+        title: "Group created",
+        description: `Group "${newGroupName}" has been created successfully.`,
+        variant: "success",
+      })
     }
   }
 
@@ -800,14 +825,25 @@ export function AccessControlManager({
 
           <TabsContent value="groups" className="space-y-4">
             {/* Search and add groups */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search groups..."
-                className="pl-10"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Input
+                  placeholder="Search groups..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCreateGroupForm(true)}
+                className="bg-electric-blue text-white hover:bg-electric-blue/80 border-electric-blue"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Create Group
+              </Button>
             </div>
 
             {/* Search results */}
@@ -837,6 +873,51 @@ export function AccessControlManager({
             {/* No results message */}
             {searchTerm && filteredGroups.length === 0 && (
               <div className="text-center p-2 text-sm text-base-gray">No groups found. Try a different search.</div>
+            )}
+
+            {/* Create Group Form */}
+            {showCreateGroupForm && (
+              <div className="border rounded-md p-4 bg-gray-50">
+                <h4 className="text-sm font-medium text-deep-brand mb-3">Create New Group</h4>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs">Group Name</Label>
+                    <Input
+                      placeholder="Enter group name..."
+                      value={newGroupName}
+                      onChange={(e) => setNewGroupName(e.target.value)}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Default Role</Label>
+                    <select
+                      className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm mt-1"
+                      value={newGroupRole}
+                      onChange={(e) => setNewGroupRole(e.target.value as AccessRole)}
+                    >
+                      <option value="viewer">Viewer</option>
+                      <option value="contributor">Contributor</option>
+                      <option value="manager">Manager</option>
+                      {resourceType === "dataRoom" && <option value="admin">Admin</option>}
+                    </select>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setShowCreateGroupForm(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleCreateGroup}
+                      disabled={!newGroupName.trim()}
+                      className="bg-electric-blue text-white hover:bg-electric-blue/80"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Create Group
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Current groups with access */}
