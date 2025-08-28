@@ -37,6 +37,8 @@ export default function PersonalProfilePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const profileId = searchParams.get("id") || "current-user"
+  const profileName = searchParams.get("name") || "Sarah Johnson"
+  const profileType = searchParams.get("type") || "allocator"
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
 
@@ -69,7 +71,7 @@ export default function PersonalProfilePage() {
   // Mock profile data - in a real app, this would come from an API
   const profile = {
     id: profileId,
-    name: "Sarah Johnson",
+    name: profileName,
     title: "Investment Director",
     organization: "State Teachers Pension",
     location: "Boston, MA",

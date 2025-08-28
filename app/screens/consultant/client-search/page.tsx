@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 
 const allocators = [
   {
-    id: 1,
+    id: 101,
     name: "Sovereign Wealth Fund",
     shortName: "SWF",
     type: "Public Pension",
@@ -43,7 +43,7 @@ const allocators = [
     consultingFocus: ["Investment Strategy", "ESG Implementation", "Risk Management"],
   },
   {
-    id: 2,
+    id: 102,
     name: "University Endowment Foundation",
     shortName: "UEF",
     type: "Endowment",
@@ -68,7 +68,7 @@ const allocators = [
     consultingFocus: ["Portfolio Optimization", "Alternative Investments", "Performance Analysis"],
   },
   {
-    id: 3,
+    id: 103,
     name: "Government Pension Investment Fund",
     shortName: "GPIF",
     type: "Sovereign Wealth Fund",
@@ -92,7 +92,7 @@ const allocators = [
     consultingFocus: ["ESG Strategy", "Passive Management", "Global Allocation"],
   },
   {
-    id: 4,
+    id: 104,
     name: "Yale Investments Office",
     shortName: "Yale",
     type: "Endowment",
@@ -117,7 +117,7 @@ const allocators = [
     consultingFocus: ["Endowment Model", "Alternative Investments", "Manager Selection"],
   },
   {
-    id: 5,
+    id: 105,
     name: "Ontario Teachers' Pension Plan",
     shortName: "OTPP",
     type: "Public Pension",
@@ -141,7 +141,7 @@ const allocators = [
     consultingFocus: ["Direct Investing", "Infrastructure Strategy", "Innovation"],
   },
   {
-    id: 6,
+    id: 106,
     name: "Allianz Global Investors",
     shortName: "AGI",
     type: "Insurance Company",
@@ -169,7 +169,7 @@ const allocators = [
 
 const managers = [
   {
-    id: 1,
+    id: 101,
     name: "David Rodriguez",
     shortName: "David Rodriguez",
     type: "Managing Partner",
@@ -194,7 +194,7 @@ const managers = [
     consultingFocus: ["Growth Strategy", "Technology Due Diligence", "Portfolio Optimization"],
   },
   {
-    id: 2,
+    id: 102,
     name: "Sarah Chen",
     shortName: "Sarah Chen",
     type: "Portfolio Manager",
@@ -218,7 +218,7 @@ const managers = [
     consultingFocus: ["ESG Strategy", "Impact Measurement", "Sustainable Investing"],
   },
   {
-    id: 3,
+    id: 103,
     name: "Michael Thompson",
     shortName: "Michael Thompson",
     type: "Senior Managing Director",
@@ -243,7 +243,7 @@ const managers = [
     consultingFocus: ["Infrastructure Strategy", "Global Markets", "Debt Structuring"],
   },
   {
-    id: 4,
+    id: 104,
     name: "Jennifer Park",
     shortName: "Jennifer Park",
     type: "Founding Partner",
@@ -267,7 +267,7 @@ const managers = [
     consultingFocus: ["Venture Strategy", "Technology Assessment", "Growth Planning"],
   },
   {
-    id: 5,
+    id: 105,
     name: "Robert Williams",
     shortName: "Robert Williams",
     type: "Chief Investment Officer",
@@ -297,7 +297,7 @@ const managers = [
     consultingFocus: ["Credit Strategy", "Risk Assessment", "Fixed Income Optimization"],
   },
   {
-    id: 6,
+    id: 106,
     name: "Lisa Anderson",
     shortName: "Lisa Anderson",
     type: "Managing Director",
