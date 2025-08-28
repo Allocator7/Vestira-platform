@@ -56,7 +56,7 @@ interface ClientFirm {
 const mockClientFirms: ClientFirm[] = [
   {
     id: "1",
-    firmName: "State Teachers' Pension Fund",
+    firmName: "Sovereign Wealth Fund",
     organizationType: "Pension Fund",
     location: "Austin, TX",
     aua: "$45B",
@@ -121,8 +121,8 @@ const mockClientFirms: ClientFirm[] = [
     ],
   },
   {
-    id: "3",
-    firmName: "Global Insurance Group",
+    id: "2",
+    firmName: "Global Pension Alliance",
     organizationType: "Insurance Company",
     location: "New York, NY",
     aua: "$85B",
@@ -154,7 +154,7 @@ const mockClientFirms: ClientFirm[] = [
     ],
   },
   {
-    id: "4",
+    id: "1",
     firmName: "Sovereign Wealth Fund",
     organizationType: "Sovereign Wealth Fund",
     location: "Singapore",

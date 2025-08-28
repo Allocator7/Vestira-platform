@@ -19,8 +19,8 @@ import { useRouter } from "next/navigation"
 const allocators = [
   {
     id: 1,
-    name: "California Public Employees' Retirement System",
-    shortName: "CalPERS",
+    name: "Sovereign Wealth Fund",
+    shortName: "SWF",
     type: "Public Pension",
     aum: "$469B",
     aua: "$125M", // Assets Under Advisory with consultant
@@ -44,8 +44,8 @@ const allocators = [
   },
   {
     id: 2,
-    name: "Harvard Management Company",
-    shortName: "HMC",
+    name: "University Endowment Foundation",
+    shortName: "UEF",
     type: "Endowment",
     aum: "$53.2B",
     aua: "$0M", // Prospect - no advisory relationship yet

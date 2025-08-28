@@ -192,7 +192,7 @@ export default function IndustryGroupHomePage() {
                     <Calendar className="h-6 w-6 text-electric-blue" />
                   </div>
                 </div>
-                <p className="text-sm text-base-gray mt-2">Events in progress</p>
+                <p className="text-sm text-base-gray mt-2">Events planned</p>
               </CardContent>
             </Card>
           </Link>
