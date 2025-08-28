@@ -370,7 +370,7 @@ export function MemberProfileModal({ open, onOpenChange, member, onMemberUpdate 
                       onClick={() => {
                         toast({
                           title: "Edit Profile",
-                          description: `Opening edit profile for ${member.name}`,
+                          description: `Opening edit profile for ${member.name} in new window`,
                         })
                       }}
                     >
@@ -383,7 +383,7 @@ export function MemberProfileModal({ open, onOpenChange, member, onMemberUpdate 
                       onClick={() => {
                         toast({
                           title: "View Documents",
-                          description: `Opening document viewer for ${member.name}`,
+                          description: `Opening document viewer for ${member.name} in new window`,
                         })
                       }}
                     >

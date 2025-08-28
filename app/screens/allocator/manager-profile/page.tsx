@@ -267,9 +267,9 @@ export default function ManagerProfilePage() {
           <div className="w-full md:w-2/3 space-y-6">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="flex w-full" style={{ width: '100%' }}>
-                <TabsTrigger value="overview" className="flex-1 text-base font-medium" style={{ flex: '1 1 0%', minWidth: '160px' }}>Overview</TabsTrigger>
-                <TabsTrigger value="team" className="flex-1 text-base font-medium" style={{ flex: '1 1 0%', minWidth: '160px' }}>Team</TabsTrigger>
-                <TabsTrigger value="documents" className="flex-1 text-base font-medium" style={{ flex: '1 1 0%', minWidth: '160px' }}>Documents</TabsTrigger>
+                <TabsTrigger value="overview" className="flex-1 text-base font-medium" style={{ flex: '1 1 0%', minWidth: '200px' }}>Overview</TabsTrigger>
+                <TabsTrigger value="recent-activity" className="flex-1 text-base font-medium" style={{ flex: '1 1 0%', minWidth: '200px' }}>Recent Activity</TabsTrigger>
+                <TabsTrigger value="documents" className="flex-1 text-base font-medium" style={{ flex: '1 1 0%', minWidth: '200px' }}>Documents</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6 pt-4">
@@ -407,7 +407,7 @@ export default function ManagerProfilePage() {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="team" className="pt-4">
+              <TabsContent value="recent-activity" className="pt-4">
                 <Card className="vestira-card-minimal">
                   <CardHeader>
                     <CardTitle>Leadership Team</CardTitle>

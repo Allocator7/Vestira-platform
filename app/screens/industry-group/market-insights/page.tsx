@@ -353,6 +353,16 @@ export default function IndustryGroupMarketInsightsPage() {
               setShowInsightModal(false)
               setSelectedInsight(null)
             }}
+            onLike={(insightId) => {
+              toast({
+                title: "Insight Liked",
+                description: `Insight ${insightId} has been liked.`,
+              })
+            }}
+            onClose={() => {
+              setShowInsightModal(false)
+              setSelectedInsight(null)
+            }}
           />
         )}
 
