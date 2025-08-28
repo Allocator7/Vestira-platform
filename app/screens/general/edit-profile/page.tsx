@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -14,7 +14,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { toast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, Save, Upload, X, Plus } from "lucide-react"
 
 // Define form schema
@@ -36,7 +36,14 @@ type ProfileFormValues = z.infer<typeof profileFormSchema>
 
 export default function EditProfilePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("personal")
+  
+  // Extract URL parameters
+  const profileId = searchParams.get("id") || "current-user"
+  const profileName = searchParams.get("name") || "Current User"
+  const profileType = searchParams.get("type") || "user"
 
   // Default values for the form
   const defaultValues: Partial<ProfileFormValues> = {

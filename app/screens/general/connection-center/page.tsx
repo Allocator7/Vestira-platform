@@ -233,7 +233,7 @@ export default function ConnectionCenterPage() {
     try {
       // Route to individual person profile instead of firm-level profile
       // This prioritizes the actual contact as requested
-      router.push(`/screens/general/person-profile?id=${connection.id}&name=${encodeURIComponent(connection.name)}&type=${connection.type}`)
+      router.push(`/screens/general/person-profile?id=${connection.contactPersonId || connection.id}&name=${encodeURIComponent(connection.contactPerson)}&type=${connection.type}`)
     } catch (error) {
       console.error("Error navigating to profile:", error)
       // Fallback to a safe route

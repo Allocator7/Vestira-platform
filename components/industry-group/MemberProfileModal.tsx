@@ -370,6 +370,8 @@ export function MemberProfileModal({ open, onOpenChange, member, onMemberUpdate 
                       size="sm" 
                       variant="outline"
                       onClick={() => {
+                        const url = `/screens/general/edit-profile?id=${member.id}&name=${encodeURIComponent(member.name)}&type=attendee`
+                        window.open(url, "_blank")
                         toast({
                           title: "Edit Profile",
                           description: `Opening edit profile for ${member.name} in new window`,
@@ -383,6 +385,8 @@ export function MemberProfileModal({ open, onOpenChange, member, onMemberUpdate 
                       size="sm" 
                       variant="outline"
                       onClick={() => {
+                        const url = `/screens/general/document-management?id=${member.id}&name=${encodeURIComponent(member.name)}&type=attendee`
+                        window.open(url, "_blank")
                         toast({
                           title: "View Documents",
                           description: `Opening document viewer for ${member.name} in new window`,

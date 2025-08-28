@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -208,12 +209,18 @@ const mockDocuments: Document[] = [
 ]
 
 export default function DocumentManagementPageClient() {
+  const searchParams = useSearchParams()
   const { toast } = useToast()
 
   // Wrap toast so we never crash if the provider isn't mounted
   const notify = (opts: Parameters<typeof toast>[0]) => {
     return typeof toast === "function" ? toast(opts) : console.log("[toast fallback]", opts)
   }
+  
+  // Extract URL parameters
+  const profileId = searchParams.get("id") || "current-user"
+  const profileName = searchParams.get("name") || "Current User"
+  const profileType = searchParams.get("type") || "user"
 
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("Date")
