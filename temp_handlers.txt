@@ -1,0 +1,43 @@
+const handlers = `onLike={(insightId) => {
+              toast({
+                title: "Insight Liked",
+                description: \`Insight \${insightId} has been liked.\`,
+              })
+            }}
+            onShare={(insight) => {
+              if (navigator.share) {
+                navigator.share({
+                  title: insight.title,
+                  text: insight.summary,
+                  url: window.location.href,
+                })
+              } else {
+                navigator.clipboard.writeText(\`\${insight.title}\n\n\${insight.summary}\n\n\${window.location.href}\`)
+                toast({
+                  title: "Link Copied",
+                  description: "Insight link has been copied to clipboard.",
+                })
+              }
+            }}
+            onBookmark={(insightId) => {
+              toast({
+                title: "Insight Saved",
+                description: \`Insight \${insightId} has been saved to your bookmarks.\`,
+              })
+            }}
+            onExport={(insight) => {
+              const content = \`\${insight.title}\n\n\${insight.summary}\n\nAuthor: \${insight.author}\nDate: \${insight.date}\nCategory: \${insight.category}\`
+              const blob = new Blob([content], { type: "text/plain" })
+              const url = URL.createObjectURL(blob)
+              const link = document.createElement("a")
+              link.href = url
+              link.download = \`\${insight.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt\`
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
+              URL.revokeObjectURL(url)
+              toast({
+                title: "Insight Exported",
+                description: \`\${insight.title} has been downloaded.\`,
+              })
+            }}`
