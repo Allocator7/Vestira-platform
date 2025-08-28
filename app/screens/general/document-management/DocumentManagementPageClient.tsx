@@ -325,7 +325,11 @@ export default function DocumentManagementPageClient() {
 
   // Enhanced Download Function
   const handleDownloadDocument = async (document: Document) => {
-    if (isDownloading) return
+    console.log("Download function called for:", document.title)
+    if (isDownloading) {
+      console.log("Download already in progress")
+      return
+    }
 
     setIsDownloading(true)
 
@@ -514,6 +518,7 @@ This document was downloaded from the Vestira platform.`
         description: `${document.title} has been downloaded successfully.`,
       })
     } catch (error) {
+      console.log("Download error caught:", error)
       console.error("Download error:", error)
       setIsDownloading(false)
       notify({
@@ -657,6 +662,7 @@ This document was downloaded from the Vestira platform.`
         description: `${document.title} has been sent to the printer.`,
       })
     } catch (error) {
+      console.log("Download error caught:", error)
       notify({
         title: "Print Failed",
         description: "There was an error preparing the document for printing. Please try again.",
@@ -800,6 +806,7 @@ This document was downloaded from the Vestira platform.`
 
       handleCloseUploadDialog()
     } catch (error) {
+      console.log("Download error caught:", error)
       notify({
         title: "Upload Failed",
         description: "There was an error uploading your document. Please try again.",
@@ -844,6 +851,7 @@ This document was downloaded from the Vestira platform.`
         })
       }
     } catch (error) {
+      console.log("Download error caught:", error)
       notify({
         title: "Share Failed",
         description: "Could not share the document. Please try again.",

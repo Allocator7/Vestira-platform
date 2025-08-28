@@ -169,7 +169,7 @@ const allocators = [
 
 const managers = [
   {
-    id: 1,
+    id: 101,
     name: "David Rodriguez",
     shortName: "David Rodriguez",
     type: "Managing Partner",
@@ -194,7 +194,7 @@ const managers = [
     consultingFocus: ["Growth Strategy", "Technology Due Diligence", "Portfolio Optimization"],
   },
   {
-    id: 2,
+    id: 102,
     name: "Sarah Chen",
     shortName: "Sarah Chen",
     type: "Portfolio Manager",
@@ -218,7 +218,7 @@ const managers = [
     consultingFocus: ["ESG Strategy", "Impact Measurement", "Sustainable Investing"],
   },
   {
-    id: 3,
+    id: 103,
     name: "Michael Thompson",
     shortName: "Michael Thompson",
     type: "Senior Managing Director",
@@ -243,7 +243,7 @@ const managers = [
     consultingFocus: ["Infrastructure Strategy", "Global Markets", "Debt Structuring"],
   },
   {
-    id: 4,
+    id: 104,
     name: "Jennifer Park",
     shortName: "Jennifer Park",
     type: "Founding Partner",
@@ -267,7 +267,7 @@ const managers = [
     consultingFocus: ["Venture Strategy", "Technology Assessment", "Growth Planning"],
   },
   {
-    id: 5,
+    id: 105,
     name: "Robert Williams",
     shortName: "Robert Williams",
     type: "Chief Investment Officer",
@@ -297,7 +297,7 @@ const managers = [
     consultingFocus: ["Credit Strategy", "Risk Assessment", "Fixed Income Optimization"],
   },
   {
-    id: 6,
+    id: 106,
     name: "Lisa Anderson",
     shortName: "Lisa Anderson",
     type: "Managing Director",

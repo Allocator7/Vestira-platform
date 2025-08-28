@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -49,6 +50,7 @@ interface MemberProfileModalProps {
 
 export function MemberProfileModal({ open, onOpenChange, member, onMemberUpdate }: MemberProfileModalProps) {
   const { toast } = useToast()
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
   if (!member) return null
