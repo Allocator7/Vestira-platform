@@ -231,13 +231,19 @@ export default function ConnectionCenterPage() {
   // Route to appropriate profile based on connection type
   const handleViewProfile = (connection: any) => {
     try {
-      // Route to individual person profile instead of firm-level profile
-      // This prioritizes the actual contact as requested
-      router.push(`/screens/general/person-profile?id=${connection.id}&name=${encodeURIComponent(connection.name)}&type=${connection.type}`)
+      if (connection.type === 'allocator') {
+        router.push(`/screens/general/allocator-profile?id=${connection.id}`)
+      } else if (connection.type === 'manager') {
+        router.push(`/screens/general/manager-profile?id=${connection.id}`)
+      } else if (connection.type === 'consultant') {
+        router.push(`/screens/general/consultant-profile?id=${connection.id}`)
+      } else {
+        console.error('Unknown connection type:', connection.type)
+      }
     } catch (error) {
-      console.error("Error navigating to profile:", error)
+      console.error('Error navigating to profile:', error)
       // Fallback to a safe route
-      router.push("/screens/general/connection-center")
+      router.push('/screens/general/connection-center')
     }
   }
 
