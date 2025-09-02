@@ -432,6 +432,82 @@ export default function AllocatorProfilePage() {
           status: "Active",
         },
       ],
+    6: {
+      // Firm Information (Primary)
+      firmName: "Allianz Global Investors",
+      organizationType: "Insurance Company",
+      location: "Munich, Germany",
+      website: "https://www.allianzgi.com",
+      aum: "$638B",
+      founded: "1890",
+      yearsInBusiness: 134,
+      focus: ["Fixed Income", "Equity", "Multi-Asset", "Alternative Investments"],
+      about: "Allianz Global Investors is a leading active asset manager with over 130 years of investment experience.",
+      keyMetrics: {
+        totalAllocations: "$638B",
+        activeManagers: 200,
+        portfolioCompanies: 800,
+        geographicFocus: ["Europe", "North America", "Asia-Pacific"],
+      },
+      allocationTargets: {
+        fixedIncome: "45%",
+        equity: "35%",
+        multiAsset: "15%",
+        alternatives: "5%",
+      },
+      contacts: [
+        {
+          id: 1,
+          name: "Oliver Schmidt",
+          title: "Head of Institutional Clients",
+          email: "oliver.schmidt@allianzgi.com",
+          phone: "+49 89 12345678",
+          isPrimary: true,
+        },
+        {
+          id: 2,
+          name: "Anna Müller",
+          title: "Senior Portfolio Manager",
+          email: "anna.mueller@allianzgi.com",
+          phone: "+49 89 12345679",
+          isPrimary: false,
+        },
+      ],
+      investmentFocus: ["Fixed Income", "Equity", "Multi-Asset", "Alternative Investments"],
+      geographicFocus: ["Europe", "North America", "Asia-Pacific"],
+      recentActivity: [
+        {
+          id: 1,
+          type: "Meeting",
+          description: "Discussed Q2 performance and market outlook.",
+          date: "2024-07-15",
+        },
+        {
+          id: 2,
+          type: "Document Shared",
+          description: "Shared latest ESG policy document.",
+          date: "2024-07-01",
+        },
+      ],
+      documents: [
+        {
+          id: 1,
+          title: "Allianz GI Annual Report 2023.pdf",
+          type: "Annual Report",
+          size: "5.2 MB",
+          lastModified: "2024-03-01",
+          status: "Active",
+        },
+        {
+          id: 2,
+          title: "ESG Policy Overview.pdf",
+          type: "Policy Document",
+          size: "1.1 MB",
+          lastModified: "2024-06-15",
+          status: "Active",
+        },
+      ],
+    },
     },
   }
 

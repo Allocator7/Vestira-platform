@@ -267,9 +267,9 @@ export default function ManagerProfilePage() {
           <div className="w-full md:w-2/3 space-y-6">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="flex w-full justify-between" style={{ width: '100%' }}>
-                <TabsTrigger value="overview" className="flex-1 text-base font-medium" style={{ flex: '1 1 33.33%', minWidth: '0px' }}>Overview</TabsTrigger>
-                <TabsTrigger value="recent-activity" className="flex-1 text-base font-medium" style={{ flex: '1 1 33.33%', minWidth: '0px' }}>Recent Activity</TabsTrigger>
-                <TabsTrigger value="documents" className="flex-1 text-base font-medium" style={{ flex: '1 1 33.33%', minWidth: '0px' }}>Documents</TabsTrigger>
+                <TabsTrigger value="overview" className="flex-1 text-base font-medium" style={{ flex: '1 1 33.33%', minWidth: '0px', width: '33.33%' }}>Overview</TabsTrigger>
+                <TabsTrigger value="recent-activity" className="flex-1 text-base font-medium" style={{ flex: '1 1 33.33%', minWidth: '0px', width: '33.33%' }}>Recent Activity</TabsTrigger>
+                <TabsTrigger value="documents" className="flex-1 text-base font-medium" style={{ flex: '1 1 33.33%', minWidth: '0px', width: '33.33%' }}>Documents</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="space-y-6 pt-4">

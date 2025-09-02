@@ -436,6 +436,7 @@ export default function AllocatorManagersPage() {
             <p className="text-baseGray">Manage your investment manager relationships</p>
           </div>
           <ExportButton
+            formats={["csv", "xlsx"]}
             data={filteredManagers}
             filename="investment-managers"
             className="bg-electric-blue hover:bg-electric-blue/90 text-white"
@@ -588,7 +589,7 @@ export default function AllocatorManagersPage() {
                           onClick={() => handleScheduleMeeting(manager)}
                         >
                           <Calendar className="h-3 w-3 mr-1" />
-                          Schedule
+                          Schedule Meeting
                         </Button>
                         <Button
                           size="sm"

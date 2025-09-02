@@ -346,174 +346,48 @@ export default function DocumentManagementPageClient() {
     })
 
     try {
-      // Create document content based on classification
       let documentContent = ""
+      let mimeType = "application/octet-stream"
+      let fileExtension = "txt"
       const timestamp = new Date().toISOString()
-      
-      switch (document.classification) {
-        case "Restricted Documents":
-          documentContent = `RESTRICTED DOCUMENT - CONFIDENTIAL
-================================================================================
 
-DOCUMENT INFORMATION:
-Title: ${document.title}
-Author: ${document.author}
-Organization: ${document.organization}
-Upload Date: ${document.uploadDate}
-Last Accessed: ${document.lastAccessed}
-Document Size: ${document.size}
-Classification: RESTRICTED
-Security Level: HIGH
-
-DESCRIPTION:
-${document.description}
-
-DOCUMENT CONTENT:
-This is a restricted document containing confidential information that requires 
-special handling and access controls. This document may contain:
-
-- Proprietary business information
-- Financial data and projections
-- Strategic planning documents
-- Legal and compliance information
-- Personnel and HR data
-
-SECURITY REQUIREMENTS:
-- Access limited to authorized personnel only
-- No sharing outside the organization
-- Must be stored securely
-- Requires proper disposal procedures
-
-DOCUMENT DETAILS:
-- Created: ${document.uploadDate}
-- Last Modified: ${document.lastAccessed}
-- Access Level: Restricted
-- Retention Period: As per company policy
-
-================================================================================
-Generated: ${timestamp}
-This document was downloaded from the Vestira platform.`
-          break
-        case "Client-Specific Documents":
-          documentContent = `CLIENT-SPECIFIC DOCUMENT
-================================================================================
-
-DOCUMENT INFORMATION:
-Title: ${document.title}
-Author: ${document.author}
-Organization: ${document.organization}
-Upload Date: ${document.uploadDate}
-Last Accessed: ${document.lastAccessed}
-Document Size: ${document.size}
-Classification: CLIENT-SPECIFIC
-Security Level: MEDIUM
-
-DESCRIPTION:
-${document.description}
-
-DOCUMENT CONTENT:
-This document contains client-specific information and materials that should be 
-handled according to client confidentiality requirements. This document may include:
-
-- Client investment strategies
-- Portfolio performance data
-- Due diligence materials
-- Client communications
-- Meeting notes and summaries
-
-CLIENT REQUIREMENTS:
-- Handle according to client confidentiality agreements
-- Share only with authorized client representatives
-- Maintain client data security standards
-- Follow client-specific retention policies
-
-DOCUMENT DETAILS:
-- Created: ${document.uploadDate}
-- Last Modified: ${document.lastAccessed}
-- Access Level: Client-Specific
-- Retention Period: As per client agreement
-
-================================================================================
-Generated: ${timestamp}
-This document was downloaded from the Vestira platform.`
-          break
-        case "Internal Documents":
-          documentContent = `INTERNAL DOCUMENT
-================================================================================
-
-DOCUMENT INFORMATION:
-Title: ${document.title}
-Author: ${document.author}
-Organization: ${document.organization}
-Upload Date: ${document.uploadDate}
-Last Accessed: ${document.lastAccessed}
-Document Size: ${document.size}
-Classification: INTERNAL
-Security Level: STANDARD
-
-DESCRIPTION:
-${document.description}
-
-DOCUMENT CONTENT:
-This is an internal document for organizational use only. This document may contain:
-
-- Marketing materials and presentations
-- Internal policies and procedures
-- Training materials
-- Administrative documents
-- General business information
-
-INTERNAL USE ONLY:
-- For internal organizational use
-- May be shared with team members
-- Follow standard document handling procedures
-- Maintain organizational confidentiality
-
-DOCUMENT DETAILS:
-- Created: ${document.uploadDate}
-- Last Modified: ${document.lastAccessed}
-- Access Level: Internal
-- Retention Period: Standard organizational policy
-
-================================================================================
-Generated: ${timestamp}
-This document was downloaded from the Vestira platform.`
-          break
-        default:
-          documentContent = `DOCUMENT
-================================================================================
-
-DOCUMENT INFORMATION:
-Title: ${document.title}
-Author: ${document.author}
-Organization: ${document.organization}
-Upload Date: ${document.uploadDate}
-Last Accessed: ${document.lastAccessed}
-Document Size: ${document.size}
-Classification: GENERAL
-
-DESCRIPTION:
-${document.description}
-
-DOCUMENT CONTENT:
-This is a general document from the Vestira platform.
-
-DOCUMENT DETAILS:
-- Created: ${document.uploadDate}
-- Last Modified: ${document.lastAccessed}
-- Access Level: General
-
-================================================================================
-Generated: ${timestamp}
-This document was downloaded from the Vestira platform.`
+      // Determine file type and content based on classification or title
+      if (document.title.toLowerCase().includes("pdf")) {
+        mimeType = "application/pdf"
+        fileExtension = "pdf"
+        documentContent = `PDF Document: ${document.title}\n\n(Content not available for direct text display)`
+      } else if (document.title.toLowerCase().includes("docx") || document.title.toLowerCase().includes("doc")) {
+        mimeType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        fileExtension = "docx"
+        documentContent = `Word Document: ${document.title}\n\n(Content not available for direct text display)`
+      } else if (document.title.toLowerCase().includes("xlsx") || document.title.toLowerCase().includes("xls")) {
+        mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        fileExtension = "xlsx"
+        documentContent = `Excel Document: ${document.title}\n\n(Content not available for direct text display)`
+      } else {
+        // Default to text content for other classifications
+        switch (document.classification) {
+          case "Restricted Documents":
+            documentContent = `RESTRICTED DOCUMENT - CONFIDENTIAL\n================================================================================\n\nDOCUMENT INFORMATION:\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nDocument Size: ${document.size}\nClassification: RESTRICTED\nSecurity Level: HIGH\n\nDESCRIPTION:\n${document.description}\n\nDOCUMENT CONTENT:\nThis is a restricted document containing confidential information that requires \nspecial handling and access controls. This document may contain:\n\n- Proprietary business information\n- Financial data and projections\n- Strategic planning documents\n- Legal and compliance information\n- Personnel and HR data\n\nSECURITY REQUIREMENTS:\n- Access limited to authorized personnel only\n- No sharing outside the organization\n- Must be stored securely\n- Requires proper disposal procedures\n\nDOCUMENT DETAILS:\n- Created: ${document.uploadDate}\n- Last Modified: ${document.lastAccessed}\n- Access Level: Restricted\n- Retention Period: As per company policy\n\n================================================================================\nGenerated: ${timestamp}\nThis document was downloaded from the Vestira platform.`
+            break
+          case "Client-Specific Documents":
+            documentContent = `CLIENT-SPECIFIC DOCUMENT\n================================================================================\n\nDOCUMENT INFORMATION:\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nDocument Size: ${document.size}\nClassification: CLIENT-SPECIFIC\nSecurity Level: MEDIUM\n\nDESCRIPTION:\n${document.description}\n\nDOCUMENT CONTENT:\nThis document contains client-specific information and materials that should be \nhandled according to client confidentiality requirements. This document may include:\n\n- Client investment strategies\n- Portfolio performance data\n- Due diligence materials\n- Client communications\n- Meeting notes and summaries\n\nCLIENT REQUIREMENTS:\n- Handle according to client confidentiality agreements\n- Share only with authorized client representatives\n- Maintain client data security standards\n- Follow client-specific retention policies\n\nDOCUMENT DETAILS:\n- Created: ${document.uploadDate}\n- Last Modified: ${document.lastAccessed}\n- Access Level: Client-Specific\n- Retention Period: As per client agreement\n\n================================================================================\nGenerated: ${timestamp}\nThis document was downloaded from the Vestira platform.`
+            break
+          case "Internal Documents":
+            documentContent = `INTERNAL DOCUMENT\n================================================================================\n\nDOCUMENT INFORMATION:\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nDocument Size: ${document.size}\nClassification: INTERNAL\nSecurity Level: STANDARD\n\nDESCRIPTION:\n${document.description}\n\nDOCUMENT CONTENT:\nThis is an internal document for organizational use only. This document may contain:\n\n- Marketing materials and presentations\n- Internal policies and procedures\n- Training materials\n- Administrative documents\n- General business information\n\nINTERNAL USE ONLY:\n- For internal organizational use\n- May be shared with team members\n- Follow standard document handling procedures\n- Maintain organizational confidentiality\n\nDOCUMENT DETAILS:\n- Created: ${document.uploadDate}\n- Last Modified: ${document.lastAccessed}\n- Access Level: Internal\n- Retention Period: Standard organizational policy\n\n================================================================================\nGenerated: ${timestamp}\nThis document was downloaded from the Vestira platform.`
+            break
+          default:
+            documentContent = `DOCUMENT\n================================================================================\n\nDOCUMENT INFORMATION:\nTitle: ${document.title}\nAuthor: ${document.author}\nOrganization: ${document.organization}\nUpload Date: ${document.uploadDate}\nLast Accessed: ${document.lastAccessed}\nDocument Size: ${document.size}\nClassification: GENERAL\n\nDESCRIPTION:\n${document.description}\n\nDOCUMENT CONTENT:\nThis is a general document from the Vestira platform.\n\nDOCUMENT DETAILS:\n- Created: ${document.uploadDate}\n- Last Modified: ${document.lastAccessed}\n- Access Level: General\n\n================================================================================\nGenerated: ${timestamp}\nThis document was downloaded from the Vestira platform.`
+        }
+        mimeType = "text/plain"
+        fileExtension = "txt"
       }
 
-      // Create and download the file
-      const blob = new Blob([documentContent], { type: 'text/plain' })
+      const blob = new Blob([documentContent], { type: mimeType })
       const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
+      const link = document.createElement("a")
       link.href = url
-      link.download = `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.txt`
+      link.download = `${document.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.${fileExtension}`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -522,7 +396,7 @@ This document was downloaded from the Vestira platform.`
       setIsDownloading(false)
       notify({
         title: "Download Complete",
-        description: `${document.title} has been downloaded successfully.`,
+        description: `${document.title} has been downloaded successfully as ${fileExtension.toUpperCase()}.`,
       })
     } catch (error) {
       console.log("Download error caught:", error)
@@ -535,8 +409,6 @@ This document was downloaded from the Vestira platform.`
       })
     }
   }
-
-  // Enhanced Print Function
   const handlePrintDocument = async (document: Document) => {
     if (isPrinting) return
 

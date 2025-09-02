@@ -2919,7 +2919,7 @@ const handleUseTemplate = () => {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Send Message</h3>
                 <p className="text-sm text-gray-600">
-                  To: {selectedDDQ.contactName} at {selectedDDQ.managerName}
+                  To:
                 </p>
               </div>
               <Button variant="outline" onClick={closeMessageModal}>
@@ -3008,7 +3008,7 @@ const handleUseTemplate = () => {
               <div>
                 <h3 className="text-xl font-semibold text-gray-900">Schedule Check-in Meeting</h3>
                 <p className="text-sm text-gray-600">
-                  With: {selectedDDQ.contactName} at {selectedDDQ.managerName}
+                  With:
                 </p>
               </div>
               <Button variant="outline" onClick={closeMeetingModal}>
@@ -3300,7 +3300,7 @@ const handleUseTemplate = () => {
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-500">Reviewers:</span>
+                            <span className="text-sm text-gray-500">Internal reviewers:</span>
                             <div className="flex items-center gap-1">
                               {ddq.reviewers.map((reviewer, index) => (
                                 <span key={index} className="text-sm bg-gray-100 px-2 py-1 rounded">

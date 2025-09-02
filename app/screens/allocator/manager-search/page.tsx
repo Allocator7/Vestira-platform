@@ -386,6 +386,7 @@ export default function AllocatorManagerSearchPage() {
                     ]}
                   />
                   <ExportButton
+                    formats={["csv", "xlsx"]}
                     data={filteredManagers}
                     filename="manager-search-results"
                     className="bg-electric-blue hover:bg-electric-blue/90 text-white"

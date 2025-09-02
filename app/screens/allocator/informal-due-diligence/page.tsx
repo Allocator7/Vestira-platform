@@ -66,6 +66,7 @@ export default function InformalDueDiligencePage() {
       const sessionData = sessionStorage.getItem('current-informal-session')
       if (sessionData) {
         const session = JSON.parse(sessionData)
+        setSessionTitle(session.title || "Untitled Session")
         setQuestions(session.questions || [])
         setNotes(session.notes || [])
         setManagers(session.managers || [])
@@ -73,6 +74,8 @@ export default function InformalDueDiligencePage() {
       } else {
         // Create new session
         const newSession = {
+        title: "Untitled Session",
+          title: "Untitled Session",
           id: `informal-${Date.now()}`,
           createdAt: new Date().toISOString(),
           questions: [],
@@ -86,6 +89,7 @@ export default function InformalDueDiligencePage() {
       console.error("Error loading session:", error)
       // Create new session on error
       const newSession = {
+        title: "Untitled Session",
         id: `informal-${Date.now()}`,
         createdAt: new Date().toISOString(),
         questions: [],
@@ -107,6 +111,7 @@ export default function InformalDueDiligencePage() {
       const sessionData = {
         id: `informal-${Date.now()}`,
         createdAt: sessionCreated,
+        title: sessionTitle,
         questions,
         notes,
         managers
@@ -132,6 +137,17 @@ export default function InformalDueDiligencePage() {
     setQuestions(prev => [...prev, question])
     setNewQuestion("")
     showNotification("Question added")
+  }
+
+  const addManager = (managerData: { name: string; firm: string; title: string; email: string }) => {
+    const newManager: InformalManager = {
+      id: `manager-${Date.now()}`,
+      ...managerData,
+      status: "contacted"
+    }
+    setManagers(prev => [...prev, newManager])
+    setShowAddManager(false)
+    showNotification("Manager added successfully")
   }
 
   const addNote = () => {
@@ -184,6 +200,19 @@ export default function InformalDueDiligencePage() {
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Informal Due Diligence</h1>
               <p className="text-gray-600">
+              <div className="mt-4">
+                <label htmlFor="session-title" className="block text-sm font-medium text-gray-700 mb-2">
+                  Session Title
+                </label>
+                <input
+                  id="session-title"
+                  type="text"
+                  value={sessionTitle}
+                  onChange={(e) => setSessionTitle(e.target.value)}
+                  placeholder="Enter session title..."
+                  className="w-full max-w-md px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
                 Session started {sessionCreated ? new Date(sessionCreated).toLocaleDateString() : 'Just now'}
               </p>
             </div>
@@ -218,9 +247,17 @@ export default function InformalDueDiligencePage() {
                 <div className="text-2xl font-bold text-green-600">{notes.length}</div>
                 <div className="text-sm text-gray-600">Notes</div>
               </div>
-              <div className="text-center p-4 bg-purple-50 rounded-lg">
+              <div className="text-center p-4 bg-purple-50 rounded-lg relative">
                 <div className="text-2xl font-bold text-purple-600">{managers.length}</div>
                 <div className="text-sm text-gray-600">Managers</div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowAddManager(true)}
+                  className="mt-2 text-xs"
+                >
+                  Add Manager
+                </Button>
               </div>
               <div className="text-center p-4 bg-orange-50 rounded-lg">
                 <div className="text-2xl font-bold text-orange-600">
@@ -398,6 +435,73 @@ export default function InformalDueDiligencePage() {
             </Card>
           </TabsContent>
         </Tabs>
+        {/* Add Manager Dialog */}
+        {showAddManager && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <h3 className="text-lg font-semibold mb-4">Add Manager to Scorecard</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                  <input
+                    type="text"
+                    id="manager-name"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Manager name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Firm</label>
+                  <input
+                    type="text"
+                    id="manager-firm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Firm name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input
+                    type="text"
+                    id="manager-title"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Job title"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="text"
+                    id="manager-email"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    placeholder="Email address"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowAddManager(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    const name = (document.getElementById("manager-name") as HTMLInputElement)?.value
+                    const firm = (document.getElementById("manager-firm") as HTMLInputElement)?.value
+                    const title = (document.getElementById("manager-title") as HTMLInputElement)?.value
+                    const email = (document.getElementById("manager-email") as HTMLInputElement)?.value
+                    if (name && firm && title && email) {
+                      addManager({ name, firm, title, email })
+                    }
+                  }}
+                >
+                  Add Manager
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

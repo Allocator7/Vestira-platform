@@ -298,6 +298,11 @@ Generated: ${new Date().toISOString()}`
       })
     }
   }
+  const handleManageFiles = () => {
+    // Open file management interface
+    // This could open a modal or navigate to a file management page
+    showNotification("File management feature coming soon!")
+  }
 
   const handleSendMessage = (participant: any) => {
     setSelectedParticipant(participant)
@@ -641,7 +646,7 @@ Generated: ${new Date().toISOString()}`
                 <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                   <CardTitle>Documents ({filteredDocuments.length})</CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={handleManageFiles}>
                       <Settings className="h-4 w-4 mr-1" />
                       Manage Files
                     </Button>
@@ -788,7 +793,7 @@ Generated: ${new Date().toISOString()}`
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className="bg-green-100 text-green-800">Active</Badge>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleSendMessage({ name: "State Teachers Pension", title: "Pension Fund", company: "State Teachers Pension", email: "contact@stateteachers.org" })}>
                           <MessageSquare className="h-4 w-4 mr-1" />
                           Message
                         </Button>
@@ -807,7 +812,7 @@ Generated: ${new Date().toISOString()}`
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className="bg-blue-100 text-blue-800">Reviewing</Badge>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleSendMessage({ name: "State Teachers Pension", title: "Pension Fund", company: "State Teachers Pension", email: "contact@stateteachers.org" })}>
                           <MessageSquare className="h-4 w-4 mr-1" />
                           Message
                         </Button>
@@ -826,7 +831,7 @@ Generated: ${new Date().toISOString()}`
                       </div>
                       <div className="flex items-center gap-2">
                         <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => handleSendMessage({ name: "State Teachers Pension", title: "Pension Fund", company: "State Teachers Pension", email: "contact@stateteachers.org" })}>
                           <MessageSquare className="h-4 w-4 mr-1" />
                           Message
                         </Button>
