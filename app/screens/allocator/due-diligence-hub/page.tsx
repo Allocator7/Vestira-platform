@@ -2008,6 +2008,8 @@ const handleUseTemplate = () => {
     }
   }
 
+
+
   console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
 
   return (
@@ -2018,6 +2020,16 @@ const handleUseTemplate = () => {
           {notification}
         </div>
       )}
+
+      {/* Start Informal Due Diligence Button */}
+      <div className="p-6">
+        <Button 
+          onClick={handleStartInformalDueDiligence}
+          className="mb-4"
+        >
+          Start Informal Due Diligence
+        </Button>
+      </div>
 
       {/* Enhanced Create DDQ Modal with File Upload Option */}
       {showCreateDDQModal && (
