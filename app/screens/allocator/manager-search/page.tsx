@@ -118,7 +118,7 @@ export default function AllocatorManagerSearchPage() {
   const router = useRouter()
 
   const handleViewProfile = (manager: any) => {
-    router.push(`/screens/general/manager-profile?id=${manager.id}`)
+    router.push(`/screens/general/manager-profile?id=${manager.id}&view=firm`)
   }
 
   const handleSendMessage = (manager: any, strategy?: string) => {

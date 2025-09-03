@@ -2021,15 +2021,7 @@ const handleUseTemplate = () => {
         </div>
       )}
 
-      {/* Start Informal Due Diligence Button */}
-      <div className="p-6">
-        <Button 
-          onClick={handleStartInformalDueDiligence}
-          className="mb-4"
-        >
-          Start Informal Due Diligence
-        </Button>
-      </div>
+
 
       {/* Enhanced Create DDQ Modal with File Upload Option */}
       {showCreateDDQModal && (

@@ -52,6 +52,7 @@ export default function InformalDueDiligencePage() {
   const [activeTab, setActiveTab] = useState("overview")
   const [newQuestion, setNewQuestion] = useState("")
   const [newNote, setNewNote] = useState("")
+  const [sessionTitle, setSessionTitle] = useState("Untitled Session")
   
   // Simple state management
   const [questions, setQuestions] = useState<InformalQuestion[]>([])
@@ -74,7 +75,6 @@ export default function InformalDueDiligencePage() {
       } else {
         // Create new session
         const newSession = {
-        title: "Untitled Session",
           title: "Untitled Session",
           id: `informal-${Date.now()}`,
           createdAt: new Date().toISOString(),
