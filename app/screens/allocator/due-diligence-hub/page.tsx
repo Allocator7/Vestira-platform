@@ -2010,8 +2010,6 @@ const handleUseTemplate = () => {
 
 
 
-
-
   console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
 
   return (
@@ -2022,8 +2020,6 @@ const handleUseTemplate = () => {
           {notification}
         </div>
       )}
-
-
 
       {/* Enhanced Create DDQ Modal with File Upload Option */}
       {showCreateDDQModal && (

@@ -57,6 +57,7 @@ export default function ManagerProfilePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const managerId = searchParams.get("id")
+  const viewType = searchParams.get("view")
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
 
@@ -751,13 +752,161 @@ export default function ManagerProfilePage() {
     },
   }
 
+  // Firm profiles data for when view=firm
+  const firmProfiles = {
+    1: {
+      name: "Growth Capital Partners",
+      description: "Leading private equity firm focused on growth-stage technology and healthcare companies",
+      firmType: "Private Equity",
+      location: "San Francisco, CA",
+      website: "https://growthcapitalpartners.com",
+      email: "contact@growthcapital.com",
+      phone: "+1 (415) 555-0123",
+      avatar: "/placeholder-user.jpg",
+      aum: "$2.5B",
+      founded: "2008",
+      yearsInBusiness: 16,
+      focus: ["Growth Equity", "Technology", "Healthcare", "Buyouts"],
+      about: "Growth Capital Partners is a leading private equity firm with over 16 years of experience in growth-stage technology and healthcare investments. We focus on partnering with exceptional entrepreneurs to build category-defining companies.",
+      keyMetrics: {
+        totalFunds: 4,
+        activeInvestments: 23,
+        portfolioCompanies: 45,
+        geographicFocus: ["North America", "Europe"],
+      },
+      trackRecord: {
+        irr: "22.5%",
+        multiple: "2.8x",
+        totalReturns: "$1.2B",
+      },
+      contacts: [
+        {
+          name: "David Rodriguez",
+          title: "Managing Partner",
+          role: "Primary Contact",
+          email: "david.rodriguez@growthcapital.com",
+          phone: "+1 (415) 555-0123",
+          isConnected: true,
+        },
+        {
+          name: "Sarah Johnson",
+          title: "Senior Vice President",
+          role: "Investment Contact",
+          email: "sarah.johnson@growthcapital.com",
+          phone: "+1 (415) 555-0124",
+          isConnected: false,
+        },
+        {
+          name: "Michael Chen",
+          title: "Director of Investor Relations",
+          role: "IR Contact",
+          email: "michael.chen@growthcapital.com",
+          phone: "+1 (415) 555-0125",
+          isConnected: false,
+        },
+      ],
+    },
+    2: {
+      name: "Sustainable Equity Fund",
+      description: "ESG-focused portfolio manager specializing in sustainable equity strategies and impact investing",
+      firmType: "Hedge Fund",
+      location: "New York, NY",
+      website: "https://sustainableequity.com",
+      email: "contact@sustainableequity.com",
+      phone: "+1 (212) 555-0123",
+      avatar: "/placeholder-user.jpg",
+      aum: "$1.2B",
+      founded: "2015",
+      yearsInBusiness: 9,
+      focus: ["ESG/Sustainable Equity", "Long/Short Equity", "Impact Investing"],
+      about: "Sustainable Equity Fund is dedicated to generating superior returns while making a positive impact on society and the environment through responsible investment strategies.",
+      keyMetrics: {
+        totalFunds: 2,
+        activeInvestments: 45,
+        portfolioCompanies: 78,
+        geographicFocus: ["North America", "Europe"],
+      },
+      trackRecord: {
+        irr: "18.2%",
+        multiple: "2.1x",
+        totalReturns: "$450M",
+      },
+      contacts: [
+        {
+          name: "Sarah Chen",
+          title: "Portfolio Manager",
+          role: "Primary Contact",
+          email: "sarah@sustainableequity.com",
+          phone: "+1 (212) 555-0123",
+          isConnected: true,
+        },
+        {
+          name: "Lisa Thompson",
+          title: "ESG Director",
+          role: "ESG Contact",
+          email: "lisa.thompson@sustainableequity.com",
+          phone: "+1 (212) 555-0124",
+          isConnected: false,
+        },
+      ],
+    },
+    3: {
+      name: "Infrastructure Capital",
+      description: "Infrastructure investment specialist with extensive experience in debt and equity investments across global markets",
+      firmType: "Infrastructure",
+      location: "London, UK",
+      website: "https://infrastructurecapital.com",
+      email: "contact@infrastructurecapital.com",
+      phone: "+44 20 7123 4567",
+      avatar: "/placeholder-user.jpg",
+      aum: "$3.8B",
+      founded: "2002",
+      yearsInBusiness: 22,
+      focus: ["Infrastructure Debt", "Real Estate Debt", "Transportation", "Utilities"],
+      about: "Infrastructure Capital is a global infrastructure investment firm with over 22 years of experience in infrastructure debt and equity investments across transportation, utilities, and real estate sectors.",
+      keyMetrics: {
+        totalFunds: 6,
+        activeInvestments: 78,
+        portfolioCompanies: 156,
+        geographicFocus: ["Europe", "North America", "Asia Pacific"],
+      },
+      trackRecord: {
+        irr: "12.8%",
+        multiple: "1.7x",
+        totalReturns: "$2.1B",
+      },
+      contacts: [
+        {
+          name: "Michael Thompson",
+          title: "Senior Managing Director",
+          role: "Primary Contact",
+          email: "michael.thompson@infrastructurecapital.com",
+          phone: "+44 20 7123 4567",
+          isConnected: true,
+        },
+        {
+          name: "Emma Wilson",
+          title: "Head of Infrastructure",
+          role: "Infrastructure Contact",
+          email: "emma.wilson@infrastructurecapital.com",
+          phone: "+44 20 7123 4568",
+          isConnected: false,
+        },
+      ],
+    },
+  }
+
+  // Determine which profile to show based on view parameter
+  const currentProfile = viewType === "firm" ? firmProfiles[managerId as keyof typeof firmProfiles] : managerProfiles[managerId as keyof typeof managerProfiles]
+  const isFirmView = viewType === "firm"
+
   const [manager, setManager] = useState<any>(null)
 
   useEffect(() => {
-    if (managerId && managerProfiles[managerId as keyof typeof managerProfiles]) {
-      setManager(managerProfiles[managerId as keyof typeof managerProfiles])
+    if (managerId && currentProfile) {
+      setManager(currentProfile)
     }
-  }, [managerId])
+  }, [managerId, currentProfile])
 
   const handleSendMessage = () => {
     setSelectedMessageContact(manager.contacts[0])
@@ -878,9 +1027,15 @@ export default function ManagerProfilePage() {
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-deepBrand mb-2">{manager.name}</h1>
-                  <p className="text-xl text-base-gray mb-1">{manager.title}</p>
-                  <p className="text-lg font-semibold text-deepBrand mb-3">{manager.firm}</p>
+                  <h1 className="text-3xl font-bold text-deepBrand mb-2">
+                    {isFirmView ? manager.name : manager.name}
+                  </h1>
+                  <p className="text-xl text-base-gray mb-1">
+                    {isFirmView ? manager.description : manager.title}
+                  </p>
+                  {!isFirmView && (
+                    <p className="text-lg font-semibold text-deepBrand mb-3">{manager.firm}</p>
+                  )}
                   <div className="flex items-center gap-4 text-sm text-base-gray">
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
@@ -894,6 +1049,12 @@ export default function ManagerProfilePage() {
                       <TrendingUp className="h-4 w-4" />
                       <span>AUM: {manager.aum}</span>
                     </div>
+                    {isFirmView && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        <span>Founded: {manager.founded}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -933,7 +1094,9 @@ export default function ManagerProfilePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-base-gray leading-relaxed">{manager.about}</p>
+                  <p className="text-base-gray leading-relaxed">
+                    {isFirmView ? manager.about : manager.about}
+                  </p>
                 </CardContent>
               </Card>
 
