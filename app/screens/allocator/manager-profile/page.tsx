@@ -28,13 +28,18 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { SendMessageModal } from "../../../../components/profile-modals/SendMessageModal"
 import { ScheduleMeetingModal } from "../../../../components/profile-modals/ScheduleMeetingModal"
 import { ShareProfileModal } from "../../../../components/profile-modals/ShareProfileModal"
 import { useToast } from "../../../../hooks/use-toast"
 
 export default function ManagerProfilePage() {
+  const searchParams = useSearchParams()
+  const managerId = searchParams.get("id")
+  const viewType = searchParams.get("view")
+  
   const [activeAssetClassFilter, setActiveAssetClassFilter] = useState("all")
   const [activeYearFilter, setActiveYearFilter] = useState("all")
   const [activeVehicleFilter, setActiveVehicleFilter] = useState("all")
@@ -47,36 +52,117 @@ export default function ManagerProfilePage() {
   const [selectedScheduleContacts, setSelectedScheduleContacts] = useState<string[]>([])
   const { toast } = useToast()
 
-  // Mock contacts data for BlackRock
-  const managerContacts = [
-    {
-      id: "1",
-      name: "Robert Williams",
-      title: "Chief Investment Officer",
-      email: "robert.williams@blackrock.com",
-      role: "Primary Contact"
+  // Firm profiles data
+  const firmProfiles = {
+    1: {
+      name: "Growth Capital Partners",
+      primaryContact: "David Rodriguez",
+      email: "contact@growthcapital.com",
+      profileUrl: "https://vestira.com/manager/growth-capital-partners",
+      description: "Leading private equity firm focused on growth-stage technology and healthcare companies",
+      aum: "$2.5B",
+      founded: "2008",
+      location: "San Francisco, CA",
+      contacts: [
+        {
+          id: "1",
+          name: "David Rodriguez",
+          title: "Managing Partner",
+          email: "david.rodriguez@growthcapital.com",
+          role: "Primary Contact"
+        },
+        {
+          id: "2", 
+          name: "Sarah Johnson",
+          title: "Senior Vice President",
+          email: "sarah.johnson@growthcapital.com",
+          role: "Investment Contact"
+        },
+        {
+          id: "3",
+          name: "Michael Chen", 
+          title: "Director of Investor Relations",
+          email: "michael.chen@growthcapital.com",
+          role: "IR Contact"
+        }
+      ]
     },
-    {
-      id: "2", 
-      name: "James Thompson",
-      title: "Client Relationship Manager",
-      email: "james.thompson@blackrock.com",
-      role: "Client Relations"
+    2: {
+      name: "Sustainable Equity Fund",
+      primaryContact: "Sarah Chen",
+      email: "contact@sustainableequity.com",
+      profileUrl: "https://vestira.com/manager/sustainable-equity-fund",
+      description: "ESG-focused portfolio manager specializing in sustainable equity strategies and impact investing",
+      aum: "$1.2B",
+      founded: "2015",
+      location: "New York, NY",
+      contacts: [
+        {
+          id: "1",
+          name: "Sarah Chen",
+          title: "Portfolio Manager",
+          email: "sarah@sustainableequity.com",
+          role: "Primary Contact"
+        },
+        {
+          id: "2", 
+          name: "Lisa Thompson",
+          title: "ESG Director",
+          email: "lisa.thompson@sustainableequity.com",
+          role: "ESG Contact"
+        },
+        {
+          id: "3",
+          name: "James Liu", 
+          title: "Senior Analyst",
+          email: "james.liu@sustainableequity.com",
+          role: "Investment Contact"
+        }
+      ]
     },
-    {
-      id: "3",
-      name: "Lisa Parker", 
-      title: "Investment Specialist",
-      email: "lisa.parker@blackrock.com",
-      role: "Investment Team"
+    3: {
+      name: "Infrastructure Capital",
+      primaryContact: "Michael Thompson",
+      email: "contact@infrastructurecapital.com",
+      profileUrl: "https://vestira.com/manager/infrastructure-capital",
+      description: "Infrastructure investment specialist with extensive experience in debt and equity investments across global markets",
+      aum: "$3.8B",
+      founded: "2002",
+      location: "London, UK",
+      contacts: [
+        {
+          id: "1",
+          name: "Michael Thompson",
+          title: "Senior Managing Director",
+          email: "michael.thompson@infrastructurecapital.com",
+          role: "Primary Contact"
+        },
+        {
+          id: "2", 
+          name: "Emma Wilson",
+          title: "Head of Infrastructure",
+          email: "emma.wilson@infrastructurecapital.com",
+          role: "Infrastructure Contact"
+        },
+        {
+          id: "3",
+          name: "James Anderson", 
+          title: "Director of Real Estate",
+          email: "james.anderson@infrastructurecapital.com",
+          role: "Real Estate Contact"
+        }
+      ]
     }
-  ]
+  }
 
+  // Get the current firm profile based on ID and view type
+  const currentFirm = firmProfiles[managerId as keyof typeof firmProfiles] || firmProfiles[1]
+  const managerContacts = currentFirm.contacts
   const managerInfo = {
-    name: "BlackRock",
-    primaryContact: "Robert Williams",
-    email: "contact@blackrock.com",
-    profileUrl: "https://vestira.com/manager/blackrock",
+    name: currentFirm.name,
+    primaryContact: currentFirm.primaryContact,
+    email: currentFirm.email,
+    profileUrl: currentFirm.profileUrl,
   }
 
   const handleStarToggle = () => {
@@ -159,12 +245,12 @@ export default function ManagerProfilePage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <div className="relative h-16 w-16 rounded-md overflow-hidden">
-                      <Image src="/abstract-geometric-br.png" alt="BlackRock Logo" fill className="object-cover" />
+                      <Image src="/abstract-geometric-br.png" alt={`${currentFirm.name} Logo`} fill className="object-cover" />
                     </div>
                     <div>
-                      <CardTitle className="text-2xl">BlackRock</CardTitle>
-                      <CardDescription className="text-lg">Asset Management</CardDescription>
-                      <p className="text-sm text-muted-foreground mt-1">Parent Company: BlackRock, Inc.</p>
+                      <CardTitle className="text-2xl">{currentFirm.name}</CardTitle>
+                      <CardDescription className="text-lg">{currentFirm.description}</CardDescription>
+                      <p className="text-sm text-muted-foreground mt-1">Founded: {currentFirm.founded} • {currentFirm.location}</p>
                     </div>
                   </div>
                   <Button
@@ -183,22 +269,15 @@ export default function ManagerProfilePage() {
                   <div className="grid grid-cols-1 gap-2">
                     <div className="flex items-center gap-2 text-sm">
                       <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>contact@blackrock.com</span>
+                      <span>{currentFirm.email}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>+1 (212) 810-5300</span>
+                      <span>Contact via email</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm">
                       <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
-                      <a
-                        href="https://www.blackrock.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
-                        www.blackrock.com
-                      </a>
+                      <span className="text-muted-foreground">Website coming soon</span>
                     </div>
                   </div>
                 </div>
@@ -209,8 +288,12 @@ export default function ManagerProfilePage() {
                   <h3 className="text-sm font-medium">Key Metrics</h3>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <p className="text-xs text-muted-foreground"># of Clients</p>
-                      <p className="text-sm font-medium">2,500+</p>
+                      <p className="text-xs text-muted-foreground">AUM</p>
+                      <p className="text-sm font-medium">{currentFirm.aum}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Founded</p>
+                      <p className="text-sm font-medium">{currentFirm.founded}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Active Funds</p>

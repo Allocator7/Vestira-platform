@@ -2010,6 +2010,8 @@ const handleUseTemplate = () => {
 
 
 
+
+
   console.log("Allocator Due Diligence Hub rendered with", activeDDQs.length, "DDQs")
 
   return (
