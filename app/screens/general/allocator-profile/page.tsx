@@ -48,7 +48,6 @@ export default function AllocatorProfilePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const allocatorId = searchParams.get("id")
-  const contactsParam = searchParams.get("contacts")
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
 
@@ -433,172 +432,6 @@ export default function AllocatorProfilePage() {
           status: "Active",
         },
       ],
-    4: {
-      // Firm Information (Primary)
-      firmName: "Yale Investments Office",
-      organizationType: "Endowment",
-      location: "New Haven, CT",
-      website: "https://investments.yale.edu",
-      aum: "$41.4B",
-      founded: "1985",
-      yearsInBusiness: 39,
-      focus: ["Alternative Investments", "Private Equity", "Real Estate", "Natural Resources"],
-      about: "Yale's endowment is managed by the Yale Investments Office, which pioneered the endowment model of investing.",
-      keyMetrics: {
-        totalAllocations: "$41.4B",
-        activeManagers: 150,
-        averageReturn: "12.4%",
-        riskLevel: "Moderate-High",
-      },
-      assetAllocation: {
-        alternatives: "65%",
-        publicEquity: "20%",
-        fixedIncome: "10%",
-        cash: "5%",
-      },
-      // Individual Contacts (Secondary)
-      contacts: [
-        {
-          id: "1",
-          name: "David Swensen",
-          title: "Chief Investment Officer",
-          email: "david.swensen@yale.edu",
-          phone: "+1 (203) 432-5000",
-          isPrimary: true,
-          avatar: "/placeholder.svg",
-        },
-        {
-          id: "2",
-          name: "Dean Takahashi",
-          title: "Senior Director",
-          email: "dean.takahashi@yale.edu",
-          phone: "+1 (203) 432-5001",
-          isPrimary: false,
-          avatar: "/placeholder.svg",
-        },
-      ],
-      investments: [
-        {
-          manager: "KKR",
-          strategy: "Private Equity",
-          vintage: "2019",
-          commitment: "$500M",
-          status: "Active",
-        },
-        {
-          manager: "Blackstone",
-          strategy: "Real Estate",
-          vintage: "2020",
-          commitment: "$300M",
-          status: "Active",
-        },
-      ],
-      recentActivity: [
-        {
-          activity: "New commitment to technology-focused private equity fund",
-          date: "2024-01-15",
-          type: "Investment",
-        },
-        {
-          activity: "Annual investment committee meeting completed",
-          date: "2024-01-10",
-          type: "Governance",
-        },
-      ],
-      documents: [
-        {
-          id: "1",
-          name: "Investment Policy Statement",
-          type: "Policy Document",
-          category: "Governance",
-          size: "2.1 MB",
-          lastModified: "2024-01-05",
-          status: "Active",
-        },
-      ],
-    5: {
-      // Firm Information (Primary)
-      firmName: "Ontario Teachers' Pension Plan",
-      organizationType: "Public Pension",
-      location: "Toronto, Canada",
-      website: "https://www.otpp.com",
-      aum: "$247.2B",
-      founded: "1990",
-      yearsInBusiness: 34,
-      focus: ["Direct Investing", "Infrastructure", "Real Estate", "Private Equity"],
-      about: "OTPP is one of the world's largest pension funds, known for its innovative direct investing approach.",
-      keyMetrics: {
-        totalAllocations: "$247.2B",
-        activeManagers: 100,
-        averageReturn: "9.8%",
-        riskLevel: "Moderate",
-      },
-      assetAllocation: {
-        alternatives: "45%",
-        publicEquity: "30%",
-        fixedIncome: "20%",
-        cash: "5%",
-      },
-      // Individual Contacts (Secondary)
-      contacts: [
-        {
-          id: "1",
-          name: "Jo Taylor",
-          title: "President & CEO",
-          email: "jo.taylor@otpp.com",
-          phone: "+1 (416) 730-3000",
-          isPrimary: true,
-          avatar: "/placeholder.svg",
-        },
-        {
-          id: "2",
-          name: "Ziad Hindo",
-          title: "Chief Investment Officer",
-          email: "ziad.hindo@otpp.com",
-          phone: "+1 (416) 730-3001",
-          isPrimary: false,
-          avatar: "/placeholder.svg",
-        },
-      ],
-      investments: [
-        {
-          manager: "OTPP Direct",
-          strategy: "Infrastructure",
-          vintage: "2021",
-          commitment: "$1.2B",
-          status: "Active",
-        },
-        {
-          manager: "OTPP Direct",
-          strategy: "Real Estate",
-          vintage: "2020",
-          commitment: "$800M",
-          status: "Active",
-        },
-      ],
-      recentActivity: [
-        {
-          activity: "New infrastructure investment in renewable energy",
-          date: "2024-01-12",
-          type: "Investment",
-        },
-        {
-          activity: "ESG integration framework updated",
-          date: "2024-01-08",
-          type: "Governance",
-        },
-      ],
-      documents: [
-        {
-          id: "1",
-          name: "Annual Report 2023",
-          type: "Annual Report",
-          category: "Financial",
-          size: "15.2 MB",
-          lastModified: "2024-01-03",
-          status: "Active",
-        },
-      ],
     6: {
       // Firm Information (Primary)
       firmName: "Allianz Global Investors",
@@ -685,18 +518,8 @@ export default function AllocatorProfilePage() {
       try {
         const profile = allocatorProfiles[Number(allocatorId) as keyof typeof allocatorProfiles]
         if (profile) {
-          // Use contacts from parameter if provided, otherwise use default contacts
-          let finalProfile = { ...profile }
-          if (contactsParam) {
-            try {
-              const customContacts = JSON.parse(decodeURIComponent(contactsParam))
-              finalProfile.contacts = customContacts
-            } catch (error) {
-              console.error('Error parsing contacts parameter:', error)
-            }
-          }
-          setAllocator(finalProfile)
-          setShareMessage(`I wanted to share ${finalProfile.firmName}'s profile with you.`)
+          setAllocator(profile)
+          setShareMessage(`I wanted to share ${profile.firmName}'s profile with you.`)
         } else {
           console.error('Profile not found for ID:', allocatorId)
         }
@@ -704,7 +527,7 @@ export default function AllocatorProfilePage() {
         console.error('Error loading profile:', error)
       }
     }
-  }, [allocatorId, contactsParam])
+  }, [allocatorId])
 
   // Share functionality
   const handleCopyLink = async () => {
