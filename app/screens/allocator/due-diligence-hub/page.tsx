@@ -1307,6 +1307,13 @@ export default function AllocatorDueDiligenceHubPage() {
 
   const handleStartInformalDueDiligence = () => {
     try {
+      // Check if we're on the client side
+      if (typeof window === 'undefined') {
+        console.error("handleStartInformalDueDiligence called on server side")
+        showNotification("Error: Function called on server side")
+        return
+      }
+
       // Create informal due diligence session
       const informalSession = {
         id: `informal-${Date.now()}`,
@@ -1320,12 +1327,22 @@ export default function AllocatorDueDiligenceHubPage() {
       }
       
       // Store in localStorage for persistence
-      const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
-      existingSessions.push(informalSession)
-      localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+      try {
+        const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
+        existingSessions.push(informalSession)
+        localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+      } catch (storageError) {
+        console.error("Error with localStorage:", storageError)
+        // Continue without localStorage if it fails
+      }
       
       // Store current session in sessionStorage
-      sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+      try {
+        sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+      } catch (storageError) {
+        console.error("Error with sessionStorage:", storageError)
+        // Continue without sessionStorage if it fails
+      }
       
       showNotification("Informal Due Diligence session started successfully")
       

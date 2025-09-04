@@ -903,10 +903,28 @@ export default function ManagerProfilePage() {
   const [manager, setManager] = useState<any>(null)
 
   useEffect(() => {
-    if (managerId && currentProfile) {
-      setManager(currentProfile)
+    if (managerId) {
+      if (viewType === "firm") {
+        // For firm view, use firmProfiles if available, otherwise fall back to managerProfiles
+        const firmProfile = firmProfiles[managerId as keyof typeof firmProfiles]
+        if (firmProfile) {
+          setManager(firmProfile)
+        } else {
+          // Fall back to manager profile if firm profile doesn't exist
+          const managerProfile = managerProfiles[managerId as keyof typeof managerProfiles]
+          if (managerProfile) {
+            setManager(managerProfile)
+          }
+        }
+      } else {
+        // For personal view, use managerProfiles
+        const managerProfile = managerProfiles[managerId as keyof typeof managerProfiles]
+        if (managerProfile) {
+          setManager(managerProfile)
+        }
+      }
     }
-  }, [managerId, currentProfile])
+  }, [managerId, viewType])
 
   const handleSendMessage = () => {
     setSelectedMessageContact(manager.contacts[0])
