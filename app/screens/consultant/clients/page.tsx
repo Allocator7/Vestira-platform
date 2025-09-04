@@ -39,7 +39,6 @@ interface ClientFirm {
   firmName: string
   organizationType: string
   location: string
-  aua: string
   contractValue: string
   assetClasses: string[]
   strategies: string[]
@@ -59,14 +58,13 @@ const mockClientFirms: ClientFirm[] = [
     firmName: "Sovereign Wealth Fund",
     organizationType: "Pension Fund",
     location: "Austin, TX",
-    aua: "$45B",
     contractValue: "$2.5M",
     assetClasses: ["Private Equity & Other Alternatives"],
     strategies: ["Private Equity", "Growth Equity"],
     logo: "/pension-fund-allocation.png",
     lastContact: "2024-01-10",
     relationship: "Active Client",
-    status: "Ongoing Project",
+    status: "Active Client",
     description: "Long-term institutional investor focused on alternative investments and ESG strategies.",
     consultingServices: ["Investment Strategy", "ESG Implementation", "Risk Management"],
     projectCount: 3,
@@ -92,14 +90,13 @@ const mockClientFirms: ClientFirm[] = [
     firmName: "University Endowment Foundation",
     organizationType: "Endowment",
     location: "Boston, MA",
-    aua: "$12B",
     contractValue: "$1.8M",
     assetClasses: ["Public Equities", "Private Equity & Other Alternatives"],
     strategies: ["Large Cap Equity", "Venture Capital"],
     logo: "/abstract-ej-typography.png",
     lastContact: "2024-01-08",
     relationship: "Active Client",
-    status: "Ongoing Project",
+    status: "Active Client",
     description: "Endowment manager with focus on long-term growth and diversified portfolio strategies.",
     consultingServices: ["Portfolio Optimization", "Alternative Investments", "Performance Analysis"],
     projectCount: 2,
@@ -125,14 +122,13 @@ const mockClientFirms: ClientFirm[] = [
     firmName: "Global Pension Alliance",
     organizationType: "Insurance Company",
     location: "New York, NY",
-    aua: "$85B",
     contractValue: "$3.2M",
     assetClasses: ["Public Fixed Income", "Private Fixed Income"],
     strategies: ["Investment Grade Corporate Bonds", "Direct Lending"],
     logo: "/abstract-vg.png",
     lastContact: "2024-01-05",
     relationship: "Active Client",
-    status: "Project Complete",
+    status: "Active Client",
     description: "Insurance investment professional specializing in fixed income and credit strategies.",
     consultingServices: ["Fixed Income Strategy", "Risk Management", "Regulatory Compliance"],
     projectCount: 4,
@@ -158,14 +154,13 @@ const mockClientFirms: ClientFirm[] = [
     firmName: "Sovereign Wealth Fund",
     organizationType: "Sovereign Wealth Fund",
     location: "Singapore",
-    aua: "$320B",
     contractValue: "$5.0M",
     assetClasses: ["Real Estate", "Private Fixed Income"],
     strategies: ["Real Estate Equity", "Infrastructure Debt"],
     logo: "/abstract-rk.png",
     lastContact: "2024-01-03",
     relationship: "Prospect",
-    status: "Proposal Submitted",
+    status: "Prospect",
     description: "Sovereign wealth fund manager focused on infrastructure and real estate investments.",
     consultingServices: ["Infrastructure Strategy", "Direct Investing", "Global Allocation"],
     projectCount: 0,
@@ -191,14 +186,13 @@ const mockClientFirms: ClientFirm[] = [
     firmName: "Family Office Partners",
     organizationType: "Family Office",
     location: "San Francisco, CA",
-    aua: "$8B",
     contractValue: "$800K",
     assetClasses: ["Public Equities", "Private Equity & Other Alternatives"],
     strategies: ["ESG/Sustainable Equity", "Venture Capital"],
     logo: "/sustainability-investing.png",
     lastContact: "2023-12-28",
     relationship: "Past Client",
-    status: "Project Complete",
+    status: "Active Client",
     description: "Family office CIO with emphasis on sustainable investing and technology ventures.",
     consultingServices: ["ESG Strategy", "Manager Selection", "Investment Committee Support"],
     projectCount: 1,
@@ -217,14 +211,13 @@ const mockClientFirms: ClientFirm[] = [
     firmName: "Healthcare Foundation",
     organizationType: "Foundation",
     location: "Chicago, IL",
-    aua: "$3.5B",
     contractValue: "$1.2M",
     assetClasses: ["Public Fixed Income", "Public Equities"],
     strategies: ["Core Fixed Income", "Large Cap Equity"],
     logo: "/medical-resonance-image.png",
     lastContact: "2023-12-20",
     relationship: "Past Client",
-    status: "Project Complete",
+    status: "Active Client",
     description: "Foundation investment leader focused on healthcare sector and conservative strategies.",
     consultingServices: ["Investment Policy", "Asset Allocation", "Governance"],
     projectCount: 2,
@@ -255,7 +248,47 @@ export default function ConsultantClientsPage() {
     strategies: [] as string[],
     organizationTypes: [] as string[],
   })
-  const [filteredClients, setFilteredClients] = useState(mockClientFirms)
+  // Computed filtered clients based on current filters and search
+  const filteredClients = mockClientFirms.filter((firm) => {
+    const matchesSearch =
+      firm.firmName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      firm.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      firm.consultingServices.some((service) => service.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      firm.contacts.some(
+        (contact) =>
+          contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          contact.title.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+
+    const matchesAssetClass =
+      filters.assetClasses.length === 0 || filters.assetClasses.some((ac) => firm.assetClasses.includes(ac))
+
+    const matchesStrategy =
+      filters.strategies.length === 0 || filters.strategies.some((s) => firm.strategies.includes(s))
+
+    const matchesOrgType =
+      !filters.organizationTypes ||
+      filters.organizationTypes.length === 0 ||
+      filters.organizationTypes.includes(firm.organizationType)
+
+    return matchesSearch && matchesAssetClass && matchesStrategy && matchesOrgType
+  }).sort((a, b) => {
+    // Apply sorting
+    if (sortBy === "contractValue") {
+      const valueA =
+        Number.parseFloat(a.contractValue.replace(/[$MK]/g, "")) * (a.contractValue.includes("M") ? 1000 : 1)
+      const valueB =
+        Number.parseFloat(b.contractValue.replace(/[$MK]/g, "")) * (b.contractValue.includes("M") ? 1000 : 1)
+      return valueB - valueA
+    } else if (sortBy === "firmName") {
+      return a.firmName.localeCompare(b.firmName)
+    } else if (sortBy === "lastContact") {
+      return new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime()
+    } else if (sortBy === "projectCount") {
+      return b.projectCount - a.projectCount
+    }
+    return 0
+  })
 
   const [selectedFirm, setSelectedFirm] = useState<ClientFirm | null>(null)
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -268,10 +301,11 @@ export default function ConsultantClientsPage() {
   const router = useRouter()
 
   const handleViewProfile = (firmId: string) => {
-    // Route to the correct client profile page
+    // Route to the correct client profile page with contact consistency
     const firm = mockClientFirms.find(f => f.id === firmId)
     if (firm) {
-      router.push(`/screens/general/allocator-profile?id=${firmId}&name=${encodeURIComponent(firm.firmName)}`)
+      // Pass the firm data to ensure contact consistency
+      router.push(`/screens/general/allocator-profile?id=${firmId}&name=${encodeURIComponent(firm.firmName)}&contacts=${encodeURIComponent(JSON.stringify(firm.contacts))}`)
     }
   }
 
@@ -341,76 +375,22 @@ export default function ConsultantClientsPage() {
       strategies: newFilters.strategies,
       organizationTypes: newFilters.organizationTypes || [],
     })
-
-    const filtered = mockClientFirms.filter((firm) => {
-      const matchesSearch =
-        firm.firmName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        firm.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        firm.consultingServices.some((service) => service.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        firm.contacts.some(
-          (contact) =>
-            contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            contact.title.toLowerCase().includes(searchTerm.toLowerCase()),
-        )
-
-      const matchesAssetClass =
-        newFilters.assetClasses.length === 0 || newFilters.assetClasses.some((ac) => firm.assetClasses.includes(ac))
-
-      const matchesStrategy =
-        newFilters.strategies.length === 0 || newFilters.strategies.some((s) => firm.strategies.includes(s))
-
-      const matchesOrgType =
-        !newFilters.organizationTypes ||
-        newFilters.organizationTypes.length === 0 ||
-        newFilters.organizationTypes.includes(firm.organizationType)
-
-      return matchesSearch && matchesAssetClass && matchesStrategy && matchesOrgType
-    })
-
-    // Apply sorting
-    if (sortBy === "contractValue") {
-      filtered.sort((a, b) => {
-        const valueA =
-          Number.parseFloat(a.contractValue.replace(/[$MK]/g, "")) * (a.contractValue.includes("M") ? 1000 : 1)
-        const valueB =
-          Number.parseFloat(b.contractValue.replace(/[$MK]/g, "")) * (b.contractValue.includes("M") ? 1000 : 1)
-        return valueB - valueA
-      })
-    } else if (sortBy === "aua") {
-      filtered.sort((a, b) => {
-        const auaA = Number.parseFloat(a.aua.replace(/[$B]/g, ""))
-        const auaB = Number.parseFloat(b.aua.replace(/[$B]/g, ""))
-        return auaB - auaA
-      })
-    } else if (sortBy === "firmName") {
-      filtered.sort((a, b) => a.firmName.localeCompare(b.firmName))
-    } else if (sortBy === "lastContact") {
-      filtered.sort((a, b) => new Date(b.lastContact).getTime() - new Date(a.lastContact).getTime())
-    } else if (sortBy === "projectCount") {
-      filtered.sort((a, b) => b.projectCount - a.projectCount)
-    }
-
-    setFilteredClients(filtered)
   }
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
-    handleFiltersChange(filters)
   }
 
   const handleSortChange = (value: string) => {
     setSortBy(value)
-    handleFiltersChange(filters)
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Ongoing Project":
+      case "Active Client":
         return "bg-green-100 text-green-800"
-      case "Project Complete":
+      case "Prospect":
         return "bg-blue-100 text-blue-800"
-      case "Proposal Submitted":
-        return "bg-yellow-100 text-yellow-800"
       default:
         return "bg-gray-100 text-gray-800"
     }
@@ -461,7 +441,6 @@ export default function ConsultantClientsPage() {
                       value={sortBy}
                       onChange={handleSortChange}
                       options={[
-                        { value: "aua", label: "Largest AUA" },
                         { value: "projectCount", label: "Most Active Searches" },
                         { value: "firmName", label: "Firm Name A-Z" },
                         { value: "lastContact", label: "Recent Contact" },
@@ -560,10 +539,6 @@ export default function ConsultantClientsPage() {
                     <div className="flex items-center gap-1">
                       <MapPin className="h-3 w-3 text-baseGray flex-shrink-0" />
                       <span className="text-baseGray truncate">{firm.location}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="h-3 w-3 text-baseGray flex-shrink-0" />
-                      <span className="text-baseGray">AUA: {firm.aua}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <FileText className="h-3 w-3 text-baseGray flex-shrink-0" />

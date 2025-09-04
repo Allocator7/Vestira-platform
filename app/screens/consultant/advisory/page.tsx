@@ -40,58 +40,44 @@ export default function ConsultantAdvisoryPage() {
 
   const [servicePackages, setServicePackages] = useState<ServicePackage[]>([
     {
-      id: "investment-consulting",
-      name: "Investment Consulting",
-      description: "Comprehensive investment strategy development and portfolio optimization",
+      id: "investment-policy",
+      name: "Investment Policy",
+      description: "Development and implementation of comprehensive investment policies and guidelines",
       duration: "Ongoing",
       features: [
-        "Investment strategy development",
-        "Portfolio analysis and optimization",
-        "Risk assessment and management",
-        "Quarterly strategy reviews",
-        "Direct access to senior consultants",
+        "Investment policy statement development",
+        "Asset allocation framework design",
+        "Risk tolerance assessment",
+        "Policy compliance monitoring",
+        "Regular policy reviews and updates",
       ],
       status: "active",
     },
     {
-      id: "ocio",
-      name: "OCIO (Outsourced Chief Investment Officer)",
-      description: "Full discretionary investment management services",
-      duration: "Ongoing",
-      features: [
-        "Complete portfolio management",
-        "Asset allocation strategy",
-        "Manager selection and oversight",
-        "Risk management",
-        "Performance reporting",
-      ],
-      status: "active",
-    },
-    {
-      id: "due-diligence-support",
-      name: "Due Diligence Support",
-      description: "Comprehensive due diligence facilitation and analysis services",
+      id: "manager-search",
+      name: "Manager Search",
+      description: "Comprehensive investment manager search and selection services",
       duration: "Project-based",
       features: [
-        "DDQ facilitation and coordination",
-        "Manager evaluation and analysis",
-        "Risk assessment documentation",
-        "Compliance verification support",
-        "Stakeholder communication management",
+        "Manager universe development",
+        "Due diligence coordination",
+        "Performance analysis and benchmarking",
+        "Reference checks and background verification",
+        "Selection recommendations and reporting",
       ],
       status: "active",
     },
     {
-      id: "market-research",
-      name: "Market Research & Analysis",
-      description: "In-depth market research and investment opportunity analysis",
-      duration: "Ongoing",
+      id: "operational-due-diligence",
+      name: "Operational Due Diligence",
+      description: "In-depth operational risk assessment and due diligence services",
+      duration: "Project-based",
       features: [
-        "Market trend analysis",
-        "Investment opportunity identification",
-        "Competitive landscape assessment",
-        "Performance benchmarking",
-        "Custom research reports",
+        "Operational risk assessment",
+        "Compliance and regulatory review",
+        "Technology and infrastructure evaluation",
+        "Business continuity planning review",
+        "Operational best practices benchmarking",
       ],
       status: "active",
     },
@@ -285,19 +271,6 @@ export default function ConsultantAdvisoryPage() {
           ))}
         </div>
 
-        <div className="mt-8 p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-          <div className="text-center">
-            <Package className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Create Additional Services</h3>
-            <p className="text-gray-600 mb-4">
-              Expand your advisory offerings by creating custom service packages tailored to your clients' needs.
-            </p>
-            <Button onClick={handleCreateNewService}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create New Service
-            </Button>
-          </div>
-        </div>
       </div>
 
       {/* Create New Service Modal */}

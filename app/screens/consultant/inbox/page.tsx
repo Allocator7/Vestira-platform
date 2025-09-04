@@ -145,16 +145,25 @@ export default function ConsultantInboxPage() {
   const handleStarMessage = (messageId: number) => {
     // Handle starring logic
     console.log("Star message:", messageId)
+    // In a real app, this would update the message state
   }
 
   const handleArchiveMessage = (messageId: number) => {
     // Handle archive logic
     console.log("Archive message:", messageId)
+    // In a real app, this would move the message to archive
   }
 
   const handleDeleteMessage = (messageId: number) => {
     // Handle delete logic
     console.log("Delete message:", messageId)
+    // In a real app, this would move the message to trash
+  }
+
+  const handleCompose = () => {
+    // Handle compose logic
+    console.log("Compose new message")
+    // In a real app, this would open a compose modal
   }
 
   const handleMarkUnread = (messageId: number) => {
@@ -183,15 +192,26 @@ export default function ConsultantInboxPage() {
             <h1 className="text-3xl font-bold tracking-tight text-deepBrand">Inbox</h1>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="flex items-center gap-2 bg-transparent">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 bg-transparent"
+              onClick={() => handleArchiveMessage(selectedMessage?.id || 0)}
+            >
               <Archive className="h-4 w-4" />
               Archive
             </Button>
-            <Button variant="outline" className="flex items-center gap-2 bg-transparent">
+            <Button 
+              variant="outline" 
+              className="flex items-center gap-2 bg-transparent"
+              onClick={() => handleDeleteMessage(selectedMessage?.id || 0)}
+            >
               <Trash2 className="h-4 w-4" />
               Delete
             </Button>
-            <Button className="flex items-center gap-2 bg-deepBrand hover:bg-deepBrand/90 text-white">
+            <Button 
+              className="flex items-center gap-2 bg-deepBrand hover:bg-deepBrand/90 text-white"
+              onClick={handleCompose}
+            >
               <Edit className="h-4 w-4" />
               Compose
             </Button>

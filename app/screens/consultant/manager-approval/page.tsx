@@ -259,7 +259,31 @@ export default function ConsultantManagerApprovalPage() {
     const manager = networkManagers.find(m => m.id === managerId)
     if (manager) {
       manager.watchlist = !manager.watchlist
+      toast({
+        title: manager.watchlist ? "Added to Watchlist" : "Removed from Watchlist",
+        description: `${manager.name} has been ${manager.watchlist ? 'added to' : 'removed from'} your watchlist.`,
+      })
     }
+  }
+
+  const handleViewProfile = (manager: any) => {
+    // Handle view profile logic
+    console.log("View profile for:", manager.name)
+    toast({
+      title: "Viewing Profile",
+      description: `Opening profile for ${manager.name}`,
+    })
+    // In a real app, this would navigate to the manager profile page
+  }
+
+  const handleContact = (manager: any) => {
+    // Handle contact logic
+    console.log("Contact manager:", manager.name, "at", manager.contactEmail)
+    toast({
+      title: "Contact Initiated",
+      description: `Contacting ${manager.name} at ${manager.contactEmail}`,
+    })
+    // In a real app, this would open a contact form or email client
   }
 
   const getStatusBadge = (status: string) => {
@@ -420,6 +444,7 @@ export default function ConsultantManagerApprovalPage() {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
+                        onClick={() => handleViewProfile(manager)}
                       >
                         <Eye className="h-4 w-4" />
                         View Profile
@@ -428,6 +453,7 @@ export default function ConsultantManagerApprovalPage() {
                         variant="outline"
                         size="sm"
                         className="flex items-center gap-1"
+                        onClick={() => handleContact(manager)}
                       >
                         <MessageSquare className="h-4 w-4" />
                         Contact

@@ -169,7 +169,7 @@ const allocators = [
 
 const managers = [
   {
-    id: 101,
+    id: 1,
     name: "David Rodriguez",
     shortName: "David Rodriguez",
     type: "Managing Partner",
@@ -194,7 +194,7 @@ const managers = [
     consultingFocus: ["Growth Strategy", "Technology Due Diligence", "Portfolio Optimization"],
   },
   {
-    id: 102,
+    id: 2,
     name: "Sarah Chen",
     shortName: "Sarah Chen",
     type: "Portfolio Manager",
@@ -218,7 +218,7 @@ const managers = [
     consultingFocus: ["ESG Strategy", "Impact Measurement", "Sustainable Investing"],
   },
   {
-    id: 103,
+    id: 3,
     name: "Michael Thompson",
     shortName: "Michael Thompson",
     type: "Senior Managing Director",
@@ -243,7 +243,7 @@ const managers = [
     consultingFocus: ["Infrastructure Strategy", "Global Markets", "Debt Structuring"],
   },
   {
-    id: 104,
+    id: 4,
     name: "Jennifer Park",
     shortName: "Jennifer Park",
     type: "Founding Partner",
@@ -267,7 +267,7 @@ const managers = [
     consultingFocus: ["Venture Strategy", "Technology Assessment", "Growth Planning"],
   },
   {
-    id: 105,
+    id: 5,
     name: "Robert Williams",
     shortName: "Robert Williams",
     type: "Chief Investment Officer",
@@ -297,7 +297,7 @@ const managers = [
     consultingFocus: ["Credit Strategy", "Risk Assessment", "Fixed Income Optimization"],
   },
   {
-    id: 106,
+    id: 6,
     name: "Lisa Anderson",
     shortName: "Lisa Anderson",
     type: "Managing Director",
@@ -338,7 +338,76 @@ export default function ConsultantAllocatorManagerSearchPage() {
   const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false)
 
   const currentData = activeTab === "allocators" ? allocators : managers
-  const [filteredData, setFilteredData] = useState(currentData)
+  
+  // Computed filtered data based on current filters and search
+  const filteredData = currentData.filter((contact) => {
+    const matchesSearch =
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.shortName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      contact.consultingFocus.some((focus) => focus.toLowerCase().includes(searchTerm.toLowerCase()))
+
+    const matchesAssetClass =
+      filters.assetClasses.length === 0 ||
+      filters.assetClasses.some((ac) => contact.assetClasses.includes(ac))
+
+    const matchesStrategy =
+      filters.strategies.length === 0 || filters.strategies.some((s) => contact.strategies.includes(s))
+
+    const matchesOrgType =
+      !filters.organizationTypes ||
+      filters.organizationTypes.length === 0 ||
+      filters.organizationTypes.includes(contact.type)
+
+    const matchesSector =
+      !filters.sectors ||
+      filters.sectors.length === 0 ||
+      (contact.sectors && filters.sectors.some((s) => contact.sectors.includes(s)))
+
+    return matchesSearch && matchesAssetClass && matchesStrategy && matchesOrgType && matchesSector
+  }).sort((a, b) => {
+    // Apply sorting
+    if (sortBy === "aum") {
+      const aumA = Number.parseFloat(a.aum.replace(/[^0-9.]/g, ""))
+      const aumB = Number.parseFloat(b.aum.replace(/[^0-9.]/g, ""))
+      return aumB - aumA
+    } else if (sortBy === "aum-desc") {
+      const aumA = Number.parseFloat(a.aum.replace(/[^0-9.]/g, ""))
+      const aumB = Number.parseFloat(b.aum.replace(/[^0-9.]/g, ""))
+      return aumA - aumB
+    } else if (sortBy === "aua") {
+      const auaA = Number.parseFloat(a.aua.replace(/[^0-9.]/g, ""))
+      const auaB = Number.parseFloat(b.aua.replace(/[^0-9.]/g, ""))
+      return auaB - auaA
+    } else if (sortBy === "aua-desc") {
+      const auaA = Number.parseFloat(a.aua.replace(/[^0-9.]/g, ""))
+      const auaB = Number.parseFloat(b.aua.replace(/[^0-9.]/g, ""))
+      return auaA - auaB
+    } else if (sortBy === "tenure") {
+      return b.tenureAsClient - a.tenureAsClient
+    } else if (sortBy === "tenure-desc") {
+      return a.tenureAsClient - b.tenureAsClient
+    } else if (sortBy === "name") {
+      return a.name.localeCompare(b.name)
+    } else if (sortBy === "name-desc") {
+      return b.name.localeCompare(a.name)
+    } else if (sortBy === "experience") {
+      const expA = Number.parseFloat(a.experience.replace(/[^0-9]/g, ""))
+      const expB = Number.parseFloat(b.experience.replace(/[^0-9]/g, ""))
+      return expB - expA
+    } else if (sortBy === "experience-desc") {
+      const expA = Number.parseFloat(a.experience.replace(/[^0-9]/g, ""))
+      const expB = Number.parseFloat(b.experience.replace(/[^0-9]/g, ""))
+      return expA - expB
+    } else if (sortBy === "bookmarked") {
+      return b.isBookmarked - a.isBookmarked
+    } else if (sortBy === "bookmarked-desc") {
+      return a.isBookmarked - b.isBookmarked
+    }
+    return 0
+  })
 
   const router = useRouter()
 
@@ -388,92 +457,16 @@ export default function ConsultantAllocatorManagerSearchPage() {
         organizationTypes: newFilters.organizationTypes || [],
         sectors: newFilters.sectors || [],
       })
-
-      const filtered = currentData.filter((contact) => {
-        const matchesSearch =
-          contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contact.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contact.shortName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contact.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          contact.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          contact.consultingFocus.some((focus) => focus.toLowerCase().includes(searchTerm.toLowerCase()))
-
-        const matchesAssetClass =
-          newFilters.assetClasses.length === 0 ||
-          newFilters.assetClasses.some((ac) => contact.assetClasses.includes(ac))
-
-        const matchesStrategy =
-          newFilters.strategies.length === 0 || newFilters.strategies.some((s) => contact.strategies.includes(s))
-
-        const matchesOrgType =
-          !newFilters.organizationTypes ||
-          newFilters.organizationTypes.length === 0 ||
-          newFilters.organizationTypes.includes(contact.type)
-
-        const matchesSector =
-          !newFilters.sectors ||
-          newFilters.sectors.length === 0 ||
-          (contact.sectors && newFilters.sectors.some((s) => contact.sectors.includes(s)))
-
-        return matchesSearch && matchesAssetClass && matchesStrategy && matchesOrgType && matchesSector
-      })
-
-      // Apply sorting
-      if (sortBy === "aum") {
-        filtered.sort((a, b) => {
-          const aumA = Number.parseFloat(a.aum.replace(/[^0-9.]/g, ""))
-          const aumB = Number.parseFloat(b.aum.replace(/[^0-9.]/g, ""))
-          return aumB - aumA
-        })
-      } else if (sortBy === "aum-desc") {
-        filtered.sort((a, b) => {
-          const aumA = Number.parseFloat(a.aum.replace(/[^0-9.]/g, ""))
-          const aumB = Number.parseFloat(b.aum.replace(/[^0-9.]/g, ""))
-          return aumA - aumB
-        })
-      } else if (sortBy === "aua") {
-        filtered.sort((a, b) => {
-          const auaA = Number.parseFloat(a.aua.replace(/[^0-9.]/g, ""))
-          const auaB = Number.parseFloat(b.aua.replace(/[^0-9.]/g, ""))
-          return auaB - auaA
-        })
-      } else if (sortBy === "aua-desc") {
-        filtered.sort((a, b) => {
-          const auaA = Number.parseFloat(a.aua.replace(/[^0-9.]/g, ""))
-          const auaB = Number.parseFloat(b.aua.replace(/[^0-9.]/g, ""))
-          return auaA - auaB
-        })
-      } else if (sortBy === "tenure") {
-        filtered.sort((a, b) => b.tenureAsClient - a.tenureAsClient)
-      } else if (sortBy === "tenure-desc") {
-        filtered.sort((a, b) => a.tenureAsClient - b.tenureAsClient)
-      } else if (sortBy === "experience") {
-        filtered.sort((a, b) => Number.parseInt(b.experience) - Number.parseInt(a.experience))
-      } else if (sortBy === "experience-desc") {
-        filtered.sort((a, b) => Number.parseInt(a.experience) - Number.parseInt(b.experience))
-      } else if (sortBy === "name") {
-        filtered.sort((a, b) => a.name.localeCompare(b.name))
-      } else if (sortBy === "name-desc") {
-        filtered.sort((a, b) => b.name.localeCompare(a.name))
-      } else if (sortBy === "bookmarked") {
-        filtered.sort((a, b) => (b.isBookmarked ? 1 : 0) - (a.isBookmarked ? 1 : 0))
-      } else if (sortBy === "bookmarked-desc") {
-        filtered.sort((a, b) => (a.isBookmarked ? 1 : 0) - (b.isBookmarked ? 1 : 0))
-      }
-
-      setFilteredData(filtered)
     },
-    [searchTerm, sortBy, currentData],
+    [],
   )
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
-    handleFiltersChange(filters)
   }
 
   const handleSortChange = (value: string) => {
     setSortBy(value)
-    handleFiltersChange(filters)
   }
 
   const handleTabChange = (value: string) => {
@@ -693,14 +686,6 @@ export default function ConsultantAllocatorManagerSearchPage() {
                             {strategy}
                           </Badge>
                         ))}
-                      </div>
-                      <div className="flex flex-wrap gap-1 min-h-[1.5rem]">
-                        {contact.sectors &&
-                          contact.sectors.map((sector) => (
-                            <Badge key={sector} variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                              {sector}
-                            </Badge>
-                          ))}
                       </div>
                     </div>
 

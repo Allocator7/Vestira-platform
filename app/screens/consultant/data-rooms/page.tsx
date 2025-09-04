@@ -326,7 +326,6 @@ function SendMessageModal({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="fund-manager">Fund Manager</SelectItem>
-                <SelectItem value="allocator">Allocator</SelectItem>
                 <SelectItem value="team-member">Team Member</SelectItem>
                 <SelectItem value="other">Other</SelectItem>
               </SelectContent>
@@ -663,7 +662,6 @@ export default function ConsultantDataRoomsPage() {
       lastActivity: room.lastActivity,
       deadline: room.deadline,
       tags: room.tags.join(", "),
-      allocators: room.allocators.join(", "),
     }))
 
     const headers = Object.keys(dataToExport[0])
@@ -797,14 +795,10 @@ export default function ConsultantDataRoomsPage() {
                         </div>
 
                         {/* Info grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
                           <div className="flex items-center gap-2">
                             <FileText className="h-4 w-4 text-baseGray" />
                             <span className="text-baseGray">{room.documentsCount} documents</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-baseGray" />
-                            <span className="text-baseGray">Due: {room.deadline}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-baseGray" />
@@ -812,17 +806,6 @@ export default function ConsultantDataRoomsPage() {
                           </div>
                         </div>
 
-                        {/* Connected allocators */}
-                        <div className="mb-4">
-                          <p className="text-sm text-baseGray mb-2">Connected Allocators:</p>
-                          <div className="flex gap-2 flex-wrap">
-                            {room.allocators.map((a) => (
-                              <Badge key={a} variant="outline" className="text-xs">
-                                {a}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
 
                         {/* Footer actions */}
                         <div className="flex items-center justify-between">

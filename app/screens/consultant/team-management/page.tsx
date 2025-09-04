@@ -205,12 +205,30 @@ export default function ConsultantTeamManagementPage() {
     }
   }
 
-  const handleToggleStatus = (id: string) => {
-    setTeamMembers(
-      teamMembers.map((member) =>
-        member.id === id ? { ...member, status: member.status === "active" ? "inactive" : "active" } : member,
+    const handleToggleStatus = (id: string) => {          
+    setTeamMembers(                 
+      teamMembers.map((member) =>   
+        member.id === id ? { ...member, status: member.status === "active" ? "inactive" : "active" } : member,      
       ),
     )
+  }
+
+  const handleSendEmail = (member: any) => {
+    // Handle send email logic
+    console.log("Send email to:", member.email)
+    toast({
+      title: "Email sent",
+      description: `Email sent to ${member.name} at ${member.email}`,
+    })
+  }
+
+  const handleManagePermissions = (member: any) => {
+    // Handle manage permissions logic
+    console.log("Manage permissions for:", member.name)
+    toast({
+      title: "Permissions updated",
+      description: `Permissions updated for ${member.name}`,
+    })
   }
 
   const openEditDialog = (member: (typeof teamMembersData)[0]) => {
@@ -571,11 +589,11 @@ export default function ConsultantTeamManagementPage() {
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleSendEmail(member)}>
                                     <Mail className="mr-2 h-4 w-4" />
                                     Send Email
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleManagePermissions(member)}>
                                     <Shield className="mr-2 h-4 w-4" />
                                     Permissions
                                   </DropdownMenuItem>

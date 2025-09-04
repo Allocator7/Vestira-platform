@@ -105,7 +105,6 @@ export default function ConsultantHomePage() {
 
   const clientMetrics = [
     { label: "Active Clients", value: "24", change: "+3", trend: "up", icon: Users },
-    { label: "Total AUA", value: "$2.1B", change: "+12%", trend: "up", icon: DollarSign },
     { label: "Active Engagements", value: "8", change: "0", trend: "neutral", icon: Briefcase },
   ]
 
@@ -232,18 +231,6 @@ export default function ConsultantHomePage() {
                 </div>
               </Link>
 
-              <Link href="/screens/consultant/market-research">
-                <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
-                  <div className="p-2 rounded-full bg-white shadow-sm">
-                    <TrendingUp className="h-5 w-5 text-electric-blue" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-deep-brand text-sm">Research Hub</h3>
-                    <p className="text-xs text-base-gray">Find allocators & managers</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </Link>
 
               <Link href="/screens/consultant/due-diligence-hub">
                 <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">

@@ -29,6 +29,22 @@ export default function ConsultantSecureDocumentCenter() {
   const [selectedSecurity, setSelectedSecurity] = useState("all")
   const [selectedStatus, setSelectedStatus] = useState("all")
 
+  // Download functionality
+  const handleDownload = (document: any) => {
+    try {
+      // Create a mock download
+      const link = document.createElement('a')
+      link.href = `#` // In a real app, this would be the actual file URL
+      link.download = document.name
+      link.click()
+      
+      // Show success message
+      console.log(`Downloaded: ${document.name}`)
+    } catch (error) {
+      console.error('Download failed:', error)
+    }
+  }
+
   // Sample data for consultant context
   const securityOverview = {
     restricted: 8,
@@ -386,7 +402,12 @@ export default function ConsultantSecureDocumentCenter() {
                       <Button variant="ghost" size="sm" className="text-base-gray hover:text-deep-brand">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-base-gray hover:text-deep-brand">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-base-gray hover:text-deep-brand"
+                        onClick={() => handleDownload(doc)}
+                      >
                         <Download className="h-4 w-4" />
                       </Button>
                       <DropdownMenu>
