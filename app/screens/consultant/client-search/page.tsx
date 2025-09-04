@@ -1,19 +1,19 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { Screen } from "@/components/Screen"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ComprehensiveFilters } from "@/components/ComprehensiveFilters"
-import { SearchInput } from "@/components/SearchInput"
-import { SortDropdown } from "@/components/SortDropdown"
-import { ExportButton } from "@/components/ExportButton"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Screen } from "../../../../components/Screen"
+import { Card, CardContent } from "../../../../components/ui/card"
+import { Button } from "../../../../components/ui/button"
+import { Badge } from "../../../../components/ui/badge"
+import { Avatar, AvatarFallback } from "../../../../components/ui/avatar"
+import { ComprehensiveFilters } from "../../../../components/ComprehensiveFilters"
+import { SearchInput } from "../../../../components/SearchInput"
+import { SortDropdown } from "../../../../components/SortDropdown"
+import { ExportButton } from "../../../../components/ExportButton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs"
 import { MapPin, TrendingUp, Users, MessageCircle, Calendar, Eye, Bookmark, Building2 } from "lucide-react"
-import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
-import { ScheduleMeetingModal } from "@/components/profile-modals/ScheduleMeetingModal"
+import { SendMessageModal } from "../../../../components/profile-modals/SendMessageModal"
+import { ScheduleMeetingModal } from "../../../../components/profile-modals/ScheduleMeetingModal"
 import { useRouter } from "next/navigation"
 
 const allocators = [
@@ -415,7 +415,7 @@ export default function ConsultantAllocatorManagerSearchPage() {
     try {
       // Route to the correct profile page with proper parameters
       const profileType = activeTab === "allocators" ? "allocator-profile" : "manager-profile"
-      const profileUrl = `/screens/general/${profileType}?id=${contact.id}&name=${encodeURIComponent(contact.name)}`
+      const profileUrl = `/screens/general/${profileType}?id=${contact.id}&name=${encodeURIComponent(contact.name)}&view=firm`
       router.push(profileUrl)
     } catch (error) {
       console.error('Error navigating to profile:', error)
@@ -558,6 +558,7 @@ export default function ConsultantAllocatorManagerSearchPage() {
                       <ExportButton
                         data={filteredData}
                         filename={`${activeTab}-search-results`}
+                        formats={["csv"]}
                       />
                     </div>
                   </div>
@@ -659,17 +660,6 @@ export default function ConsultantAllocatorManagerSearchPage() {
                       </div>
                     </div>
 
-                    {/* Consulting Focus Section */}
-                    <div className="mb-4">
-                      <div className="text-sm font-medium text-baseGray mb-2">Consulting Opportunities:</div>
-                      <div className="flex flex-wrap gap-1">
-                        {contact.consultingFocus.map((focus) => (
-                          <Badge key={focus} variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                            {focus}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
 
                     {/* Badges Section */}
                     <div className="space-y-2 mb-4">
@@ -684,8 +674,8 @@ export default function ConsultantAllocatorManagerSearchPage() {
                         {contact.strategies.map((strategy) => (
                           <Badge key={strategy} variant="outline" className="text-xs">
                             {strategy}
-                          </Badge>
-                        ))}
+                            </Badge>
+                          ))}
                       </div>
                     </div>
 

@@ -122,6 +122,8 @@ export default function ConsultantTeamManagementPage() {
   const [showInactive, setShowInactive] = useState(false)
   const [isAddMemberOpen, setIsAddMemberOpen] = useState(false)
   const [isEditMemberOpen, setIsEditMemberOpen] = useState(false)
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false)
   const [currentMember, setCurrentMember] = useState<(typeof teamMembersData)[0] | null>(null)
   const [activeTab, setActiveTab] = useState("all")
   const [newMember, setNewMember] = useState({
@@ -130,6 +132,11 @@ export default function ConsultantTeamManagementPage() {
     role: "Viewer",
     department: "Research",
   })
+  const [emailForm, setEmailForm] = useState({
+    subject: "",
+    message: "",
+  })
+  const [permissionsForm, setPermissionsForm] = useState<string[]>([])
 
   const { toast } = useToast()
 
@@ -214,21 +221,65 @@ export default function ConsultantTeamManagementPage() {
   }
 
   const handleSendEmail = (member: any) => {
-    // Handle send email logic
-    console.log("Send email to:", member.email)
-    toast({
-      title: "Email sent",
-      description: `Email sent to ${member.name} at ${member.email}`,
+    setCurrentMember(member)
+    setEmailForm({
+      subject: "",
+      message: "",
     })
+    setIsEmailModalOpen(true)
   }
 
   const handleManagePermissions = (member: any) => {
-    // Handle manage permissions logic
-    console.log("Manage permissions for:", member.name)
+    setCurrentMember(member)
+    setPermissionsForm([...member.permissions])
+    setIsPermissionsModalOpen(true)
+  }
+
+  const handleSendEmailSubmit = () => {
+    if (!emailForm.subject.trim() || !emailForm.message.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in both subject and message fields.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Email sent",
+      description: `Email sent to ${currentMember?.name} at ${currentMember?.email}`,
+    })
+    
+    setIsEmailModalOpen(false)
+    setEmailForm({ subject: "", message: "" })
+    setCurrentMember(null)
+  }
+
+  const handlePermissionsSubmit = () => {
+    if (!currentMember) return
+
+    setTeamMembers(teamMembers.map((member) => 
+      member.id === currentMember.id 
+        ? { ...member, permissions: permissionsForm }
+        : member
+    ))
+
     toast({
       title: "Permissions updated",
-      description: `Permissions updated for ${member.name}`,
+      description: `Permissions updated for ${currentMember.name}`,
     })
+    
+    setIsPermissionsModalOpen(false)
+    setPermissionsForm([])
+    setCurrentMember(null)
+  }
+
+  const togglePermission = (permission: string) => {
+    setPermissionsForm(prev => 
+      prev.includes(permission)
+        ? prev.filter(p => p !== permission)
+        : [...prev, permission]
+    )
   }
 
   const openEditDialog = (member: (typeof teamMembersData)[0]) => {
@@ -434,6 +485,98 @@ export default function ConsultantTeamManagementPage() {
               </DialogContent>
             </Dialog>
           )}
+
+          {/* Send Email Modal */}
+          <Dialog open={isEmailModalOpen} onOpenChange={setIsEmailModalOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Send Email to {currentMember?.name}</DialogTitle>
+                <DialogDescription>Send an email message to {currentMember?.email}</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="email-subject">Subject</Label>
+                  <Input
+                    id="email-subject"
+                    value={emailForm.subject}
+                    onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })}
+                    placeholder="Enter email subject"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="email-message">Message</Label>
+                  <textarea
+                    id="email-message"
+                    className="min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={emailForm.message}
+                    onChange={(e) => setEmailForm({ ...emailForm, message: e.target.value })}
+                    placeholder="Enter your message"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsEmailModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSendEmailSubmit} className="bg-deepBrand hover:bg-deepBrand/90 text-white">
+                  <Mail className="mr-2 h-4 w-4" />
+                  Send Email
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* Manage Permissions Modal */}
+          <Dialog open={isPermissionsModalOpen} onOpenChange={setIsPermissionsModalOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Manage Permissions for {currentMember?.name}</DialogTitle>
+                <DialogDescription>Update access permissions for {currentMember?.name}</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">Available Permissions</Label>
+                  <div className="space-y-2">
+                    {[
+                      { key: "view", label: "View Content", description: "Can view documents and data" },
+                      { key: "edit", label: "Edit Content", description: "Can edit documents and data" },
+                      { key: "delete", label: "Delete Content", description: "Can delete documents and data" },
+                      { key: "invite", label: "Invite Users", description: "Can invite new team members" },
+                      { key: "manage_team", label: "Manage Team", description: "Can manage team members" },
+                      { key: "manage_clients", label: "Manage Clients", description: "Can manage client relationships" },
+                      { key: "manage_data_rooms", label: "Manage Data Rooms", description: "Can manage data room access" },
+                      { key: "manage_insights", label: "Manage Insights", description: "Can manage insights and reports" },
+                    ].map((permission) => (
+                      <div key={permission.key} className="flex items-center space-x-3">
+                        <input
+                          type="checkbox"
+                          id={permission.key}
+                          checked={permissionsForm.includes(permission.key)}
+                          onChange={() => togglePermission(permission.key)}
+                          className="h-4 w-4 rounded border-gray-300 text-deepBrand focus:ring-deepBrand"
+                        />
+                        <div className="flex-1">
+                          <Label htmlFor={permission.key} className="text-sm font-medium cursor-pointer">
+                            {permission.label}
+                          </Label>
+                          <p className="text-xs text-gray-500">{permission.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsPermissionsModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handlePermissionsSubmit} className="bg-deepBrand hover:bg-deepBrand/90 text-white">
+                  <Shield className="mr-2 h-4 w-4" />
+                  Update Permissions
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Card>

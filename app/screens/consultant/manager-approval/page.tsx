@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -160,14 +161,20 @@ const strategies = [
 ]
 
 export default function ConsultantManagerApprovalPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("pending")
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedAssetClasses, setSelectedAssetClasses] = useState<string[]>([])
   const [selectedStrategies, setSelectedStrategies] = useState<string[]>([])
   const [showAddManagerModal, setShowAddManagerModal] = useState(false)
   const [showApprovalModal, setShowApprovalModal] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
   const [selectedManager, setSelectedManager] = useState<any>(null)
   const [approvalNotes, setApprovalNotes] = useState("")
+  const [contactForm, setContactForm] = useState({
+    subject: "",
+    message: "",
+  })
   const [newManager, setNewManager] = useState({
     name: "",
     managerName: "",
@@ -176,8 +183,22 @@ export default function ConsultantManagerApprovalPage() {
     contactEmail: "",
     website: "",
   })
+  const [watchlist, setWatchlist] = useState<string[]>([])
 
   const { toast } = useToast()
+
+  // Load watchlist from localStorage on component mount
+  useEffect(() => {
+    const savedWatchlist = localStorage.getItem('consultant-watchlist')
+    if (savedWatchlist) {
+      setWatchlist(JSON.parse(savedWatchlist))
+    }
+  }, [])
+
+  // Save watchlist to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('consultant-watchlist', JSON.stringify(watchlist))
+  }, [watchlist])
 
   // Filter managers based on active tab and search
   const filteredManagers = networkManagers.filter((manager) => {
@@ -258,32 +279,58 @@ export default function ConsultantManagerApprovalPage() {
   const toggleWatchlist = (managerId: string) => {
     const manager = networkManagers.find(m => m.id === managerId)
     if (manager) {
-      manager.watchlist = !manager.watchlist
-      toast({
-        title: manager.watchlist ? "Added to Watchlist" : "Removed from Watchlist",
-        description: `${manager.name} has been ${manager.watchlist ? 'added to' : 'removed from'} your watchlist.`,
-      })
+      const isInWatchlist = watchlist.includes(managerId)
+      if (isInWatchlist) {
+        setWatchlist(prev => prev.filter(id => id !== managerId))
+        manager.watchlist = false
+        toast({
+          title: "Removed from Watchlist",
+          description: `${manager.name} has been removed from your watchlist.`,
+        })
+      } else {
+        setWatchlist(prev => [...prev, managerId])
+        manager.watchlist = true
+        toast({
+          title: "Added to Watchlist",
+          description: `${manager.name} has been added to your watchlist.`,
+        })
+      }
     }
   }
 
   const handleViewProfile = (manager: any) => {
-    // Handle view profile logic
-    console.log("View profile for:", manager.name)
-    toast({
-      title: "Viewing Profile",
-      description: `Opening profile for ${manager.name}`,
-    })
-    // In a real app, this would navigate to the manager profile page
+    // Navigate to manager profile page with firm view
+    const profileUrl = `/screens/general/manager-profile?id=${manager.id}&name=${encodeURIComponent(manager.name)}&view=firm`
+    router.push(profileUrl)
   }
 
   const handleContact = (manager: any) => {
-    // Handle contact logic
-    console.log("Contact manager:", manager.name, "at", manager.contactEmail)
-    toast({
-      title: "Contact Initiated",
-      description: `Contacting ${manager.name} at ${manager.contactEmail}`,
+    setSelectedManager(manager)
+    setContactForm({
+      subject: `Inquiry from Vestira Platform - ${manager.name}`,
+      message: "",
     })
-    // In a real app, this would open a contact form or email client
+    setShowContactModal(true)
+  }
+
+  const handleContactSubmit = () => {
+    if (!contactForm.subject.trim() || !contactForm.message.trim()) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in both subject and message fields.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    toast({
+      title: "Message sent",
+      description: `Your message has been sent to ${selectedManager?.name} at ${selectedManager?.contactEmail}`,
+    })
+    
+    setShowContactModal(false)
+    setContactForm({ subject: "", message: "" })
+    setSelectedManager(null)
   }
 
   const getStatusBadge = (status: string) => {
@@ -375,7 +422,7 @@ export default function ConsultantManagerApprovalPage() {
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-lg font-semibold text-deep-brand">{manager.name}</h3>
-                          {manager.watchlist && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
+                          {watchlist.includes(manager.id) && <Star className="h-4 w-4 text-yellow-500 fill-current" />}
                           {getStatusBadge(manager.status)}
                         </div>
                         <p className="text-sm text-base-gray mb-1">
@@ -435,10 +482,10 @@ export default function ConsultantManagerApprovalPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => toggleWatchlist(manager.id)}
-                        className={`flex items-center gap-1 ${manager.watchlist ? 'text-blue-600 border-blue-600' : ''}`}
+                        className={`flex items-center gap-1 ${watchlist.includes(manager.id) ? 'text-blue-600 border-blue-600' : ''}`}
                       >
-                        <Bookmark className={`h-4 w-4 ${manager.watchlist ? 'fill-current' : ''}`} />
-                        {manager.watchlist ? 'Watching' : 'Add to Watchlist'}
+                        <Bookmark className={`h-4 w-4 ${watchlist.includes(manager.id) ? 'fill-current' : ''}`} />
+                        {watchlist.includes(manager.id) ? 'Watching' : 'Add to Watchlist'}
                       </Button>
                       <Button
                         variant="outline"
@@ -619,6 +666,51 @@ export default function ConsultantManagerApprovalPage() {
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               Approve
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Contact Modal */}
+      <Dialog open={showContactModal} onOpenChange={setShowContactModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Contact {selectedManager?.name}</DialogTitle>
+            <DialogDescription>
+              Send a message to {selectedManager?.managerName} at {selectedManager?.contactEmail}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact-subject">Subject</Label>
+              <Input
+                id="contact-subject"
+                value={contactForm.subject}
+                onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
+                placeholder="Enter message subject"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="contact-message">Message</Label>
+              <Textarea
+                id="contact-message"
+                value={contactForm.message}
+                onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
+                placeholder="Enter your message"
+                rows={6}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContactModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleContactSubmit} className="bg-electric-blue hover:bg-electric-blue/90 text-white">
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Send Message
             </Button>
           </DialogFooter>
         </DialogContent>

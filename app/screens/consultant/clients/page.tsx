@@ -420,6 +420,7 @@ export default function ConsultantClientsPage() {
           <ExportButton
             data={filteredClients}
             filename="consulting-client-firms"
+            formats={["csv"]}
           />
         </div>
 
@@ -441,7 +442,8 @@ export default function ConsultantClientsPage() {
                       value={sortBy}
                       onChange={handleSortChange}
                       options={[
-                        { value: "projectCount", label: "Most Active Searches" },
+                        { value: "contractValue", label: "Contract Value" },
+                        { value: "projectCount", label: "Most Active Projects" },
                         { value: "firmName", label: "Firm Name A-Z" },
                         { value: "lastContact", label: "Recent Contact" },
                       ]}

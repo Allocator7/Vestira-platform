@@ -215,62 +215,87 @@ export default function ConsultantHomePage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white rounded-xl shadow-vestira p-8 border border-gray-100">
-            <h2 className="text-xl font-semibold text-deep-brand mb-6">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Link href="/screens/consultant/client-search">
-                <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
-                  <div className="p-2 rounded-full bg-white shadow-sm">
-                    <Search className="h-5 w-5 text-electric-blue" />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Link href="/screens/consultant/client-search">
+              <Card className="vestira-card-minimal hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-electric-blue/10">
+                      <Search className="h-5 w-5 text-electric-blue" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-deep-brand text-sm">Find Clients</h3>
+                      <p className="text-xs text-base-gray">Search prospects</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-electric-blue" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-deep-brand text-sm">Find Clients</h3>
-                    <p className="text-xs text-base-gray">Search prospects</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </Link>
+                </CardContent>
+              </Card>
+            </Link>
 
+            <Link href="/screens/consultant/due-diligence-hub">
+              <Card className="vestira-card-minimal hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-electric-blue/10">
+                      <Lightbulb className="h-5 w-5 text-electric-blue" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-deep-brand text-sm">Due Diligence</h3>
+                      <p className="text-xs text-base-gray">Start research</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-electric-blue" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
 
-              <Link href="/screens/consultant/due-diligence-hub">
-                <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
-                  <div className="p-2 rounded-full bg-white shadow-sm">
-                    <Lightbulb className="h-5 w-5 text-electric-blue" />
+            <Link href="/screens/general/connection-center">
+              <Card className="vestira-card-minimal hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-electric-blue/10">
+                      <Network className="h-5 w-5 text-electric-blue" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-deep-brand text-sm">Network</h3>
+                      <p className="text-xs text-base-gray">Manage connections</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-electric-blue" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-deep-brand text-sm">Due Diligence</h3>
-                    <p className="text-xs text-base-gray">Start research</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </Link>
+                </CardContent>
+              </Card>
+            </Link>
 
-              <Link href="/screens/general/connection-center">
-                <div className="group flex items-center gap-3 p-4 rounded-lg bg-electric-blue/5 hover:bg-electric-blue/10 border border-electric-blue/20 hover:border-electric-blue/30 transition-all duration-300 min-h-[80px]">
-                  <div className="p-2 rounded-full bg-white shadow-sm">
-                    <Network className="h-5 w-5 text-electric-blue" />
+            <Link href="/screens/consultant/clients">
+              <Card className="vestira-card-minimal hover:shadow-md transition-shadow cursor-pointer">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-electric-blue/10">
+                      <Users className="h-5 w-5 text-electric-blue" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-deep-brand text-sm">My Clients</h3>
+                      <p className="text-xs text-base-gray">View portfolio</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-electric-blue" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-deep-brand text-sm">Network</h3>
-                    <p className="text-xs text-base-gray">Manage connections</p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-electric-blue opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </Link>
-            </div>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             {/* Left Column - Main Content */}
-            <div className="lg:col-span-2 space-y-8">
+            <div className="col-span-4 space-y-6">
               {/* Client Metrics */}
-              <Card className="shadow-vestira border-gray-100">
+              <Card className="vestira-card-minimal">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="text-deep-brand">Client Overview</CardTitle>
-                      <CardDescription>Key metrics from your client portfolio</CardDescription>
+                      <CardDescription className="text-base-gray">Key metrics from your client portfolio</CardDescription>
                     </div>
                     <select
                       value={selectedTimeframe}
@@ -284,7 +309,7 @@ export default function ConsultantHomePage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {clientMetrics.map((metric, index) => (
                       <div key={index} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
                         <div className="flex items-center justify-between mb-3">

@@ -75,6 +75,7 @@ const documentsData = [
     status: "Updated",
     downloadCount: 12,
     views: 45,
+    access: "view-download",
   },
   {
     id: 2,
@@ -86,6 +87,7 @@ const documentsData = [
     status: "New",
     downloadCount: 8,
     views: 23,
+    access: "view-only",
   },
   {
     id: 3,
@@ -97,6 +99,7 @@ const documentsData = [
     status: "Reviewed",
     downloadCount: 15,
     views: 67,
+    access: "view-only",
   },
   {
     id: 4,
@@ -108,6 +111,7 @@ const documentsData = [
     status: "Final",
     downloadCount: 22,
     views: 89,
+    access: "view-download",
   },
   {
     id: 5,
@@ -119,6 +123,7 @@ const documentsData = [
     status: "Under Review",
     downloadCount: 5,
     views: 12,
+    access: "view-download",
   },
 ]
 
@@ -299,9 +304,8 @@ Generated: ${new Date().toISOString()}`
     }
   }
   const handleManageFiles = () => {
-    // Open file management interface
-    // This could open a modal or navigate to a file management page
-    showNotification("File management feature coming soon!")
+    // Navigate to document management page
+    router.push('/screens/general/document-management')
   }
 
   const handleSendMessage = (participant: any) => {
@@ -443,26 +447,6 @@ Generated: ${new Date().toISOString()}`
                 </Button>
               </Card>
 
-              {/* Security & Compliance */}
-              <Card className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Shield className="h-4 w-4 text-green-600" />
-                  <span className="text-sm font-medium">Security Status</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span>Encryption:</span>
-                    <span className="font-medium text-green-600">{dataRoomData.security.encryption}</span>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {dataRoomData.security.compliance.map((cert) => (
-                      <Badge key={cert} variant="outline" className="text-xs">
-                        {cert}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </Card>
             </div>
 
             {/* Key Stats Row - Clean and Balanced */}
@@ -490,7 +474,6 @@ Generated: ${new Date().toISOString()}`
                   <span className="text-sm font-medium">Deadline</span>
                 </div>
                 <p className="text-xl font-bold text-deepBrand">{dataRoomData.deadline}</p>
-                <p className="text-xs text-gray-500">Due date</p>
               </div>
             </div>
           </CardContent>
@@ -727,10 +710,12 @@ Generated: ${new Date().toISOString()}`
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDownloadDocument(doc)}>
-                          <Download className="h-4 w-4 mr-1" />
-                          Download
-                        </Button>
+                        {doc.access === "view-download" && (
+                          <Button variant="outline" size="sm" onClick={() => handleDownloadDocument(doc)}>
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ))}

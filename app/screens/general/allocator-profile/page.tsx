@@ -48,6 +48,7 @@ export default function AllocatorProfilePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const allocatorId = searchParams.get("id")
+  const contactsParam = searchParams.get("contacts")
   const [activeTab, setActiveTab] = useState("overview")
   const { toast } = useToast()
 
@@ -518,8 +519,18 @@ export default function AllocatorProfilePage() {
       try {
         const profile = allocatorProfiles[Number(allocatorId) as keyof typeof allocatorProfiles]
         if (profile) {
-          setAllocator(profile)
-          setShareMessage(`I wanted to share ${profile.firmName}'s profile with you.`)
+          // Use contacts from parameter if provided, otherwise use default contacts
+          let finalProfile = { ...profile }
+          if (contactsParam) {
+            try {
+              const customContacts = JSON.parse(decodeURIComponent(contactsParam))
+              finalProfile.contacts = customContacts
+            } catch (error) {
+              console.error('Error parsing contacts parameter:', error)
+            }
+          }
+          setAllocator(finalProfile)
+          setShareMessage(`I wanted to share ${finalProfile.firmName}'s profile with you.`)
         } else {
           console.error('Profile not found for ID:', allocatorId)
         }
@@ -527,7 +538,7 @@ export default function AllocatorProfilePage() {
         console.error('Error loading profile:', error)
       }
     }
-  }, [allocatorId])
+  }, [allocatorId, contactsParam])
 
   // Share functionality
   const handleCopyLink = async () => {

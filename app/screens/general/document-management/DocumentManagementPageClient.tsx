@@ -302,6 +302,21 @@ export default function DocumentManagementPageClient() {
       (doc.consultants && filters.consultants.some((consultant) => doc.consultants!.includes(consultant)))
 
     return matchesSearch && matchesClassification && matchesType && matchesAuthor && matchesManager && matchesConsultant
+  }).sort((a, b) => {
+    // Apply sorting based on sortBy value
+    switch (sortBy) {
+      case "Title":
+        return a.title.localeCompare(b.title)
+      case "Author":
+        return a.author.localeCompare(b.author)
+      case "Date":
+        // Parse dates and sort by newest first
+        const dateA = new Date(a.uploadDate)
+        const dateB = new Date(b.uploadDate)
+        return dateB.getTime() - dateA.getTime()
+      default:
+        return 0
+    }
   })
 
   const getClassificationColor = (classification: string) => {

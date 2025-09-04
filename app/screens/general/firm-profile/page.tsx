@@ -2,15 +2,21 @@
 
 import { useSearchParams } from "next/navigation"
 import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export default function FirmProfilePage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const managerId = searchParams.get("id")
 
-  // Redirect to the manager-profile page with view=firm parameter
+  useEffect(() => {
+    // Redirect to the manager-profile page with view=firm parameter
+    if (managerId) {
+      router.push(`/screens/general/manager-profile?id=${managerId}&view=firm`)
+    }
+  }, [managerId, router])
+
   if (managerId) {
-    router.push(`/screens/general/manager-profile?id=${managerId}&view=firm`)
     return <div>Redirecting...</div>
   }
 
