@@ -1306,6 +1306,7 @@ export default function AllocatorDueDiligenceHubPage() {
   }
 
   const handleStartInformalDueDiligence = () => {
+    console.log("handleStartInformalDueDiligence called")
     try {
       // Check if we're on the client side
       if (typeof window === 'undefined') {
@@ -1314,9 +1315,11 @@ export default function AllocatorDueDiligenceHubPage() {
         return
       }
 
+      console.log("Creating informal session...")
       // Create informal due diligence session
       const informalSession = {
         id: `informal-${Date.now()}`,
+        title: "Untitled Session",
         type: "informal",
         createdAt: new Date().toISOString(),
         status: "active",
@@ -1326,11 +1329,14 @@ export default function AllocatorDueDiligenceHubPage() {
         allocator: "Current User"
       }
       
+      console.log("Session created:", informalSession)
+      
       // Store in localStorage for persistence
       try {
         const existingSessions = JSON.parse(localStorage.getItem('informal-dd-sessions') || '[]')
         existingSessions.push(informalSession)
         localStorage.setItem('informal-dd-sessions', JSON.stringify(existingSessions))
+        console.log("Stored in localStorage")
       } catch (storageError) {
         console.error("Error with localStorage:", storageError)
         // Continue without localStorage if it fails
@@ -1339,13 +1345,16 @@ export default function AllocatorDueDiligenceHubPage() {
       // Store current session in sessionStorage
       try {
         sessionStorage.setItem('current-informal-session', JSON.stringify(informalSession))
+        console.log("Stored in sessionStorage")
       } catch (storageError) {
         console.error("Error with sessionStorage:", storageError)
         // Continue without sessionStorage if it fails
       }
       
+      console.log("Showing notification...")
       showNotification("Informal Due Diligence session started successfully")
       
+      console.log("Navigating to informal due diligence page...")
       // Navigate to the informal due diligence page
       router.push('/screens/allocator/informal-due-diligence')
       

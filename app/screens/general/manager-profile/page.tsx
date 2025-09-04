@@ -896,11 +896,8 @@ export default function ManagerProfilePage() {
     },
   }
 
-  // Determine which profile to show based on view parameter
-  const currentProfile = viewType === "firm" ? firmProfiles[managerId as keyof typeof firmProfiles] : managerProfiles[managerId as keyof typeof managerProfiles]
-  const isFirmView = viewType === "firm"
-
   const [manager, setManager] = useState<any>(null)
+  const isFirmView = viewType === "firm"
 
   useEffect(() => {
     if (managerId) {
