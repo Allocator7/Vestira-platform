@@ -223,7 +223,7 @@ export default function DocumentManagementPageClient() {
   const profileType = searchParams.get("type") || "user"
 
   const [searchTerm, setSearchTerm] = useState("")
-  const [sortBy, setSortBy] = useState("Date")
+  const [sortBy, setSortBy] = useState("Date Newest")
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showDetailsDialog, setShowDetailsDialog] = useState(false)
   const [showAccessDialog, setShowAccessDialog] = useState(false)
@@ -305,15 +305,24 @@ export default function DocumentManagementPageClient() {
   }).sort((a, b) => {
     // Apply sorting based on sortBy value
     switch (sortBy) {
-      case "Title":
+      case "Title A-Z":
         return a.title.localeCompare(b.title)
-      case "Author":
+      case "Title Z-A":
+        return b.title.localeCompare(a.title)
+      case "Author A-Z":
         return a.author.localeCompare(b.author)
-      case "Date":
+      case "Author Z-A":
+        return b.author.localeCompare(a.author)
+      case "Date Newest":
         // Parse dates and sort by newest first
         const dateA = new Date(a.uploadDate)
         const dateB = new Date(b.uploadDate)
         return dateB.getTime() - dateA.getTime()
+      case "Date Oldest":
+        // Parse dates and sort by oldest first
+        const dateAOld = new Date(a.uploadDate)
+        const dateBOld = new Date(b.uploadDate)
+        return dateAOld.getTime() - dateBOld.getTime()
       default:
         return 0
     }
@@ -906,9 +915,12 @@ export default function DocumentManagementPageClient() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Date">Sort by Date</SelectItem>
-                    <SelectItem value="Title">Sort by Title</SelectItem>
-                    <SelectItem value="Author">Sort by Author</SelectItem>
+                    <SelectItem value="Date Newest">Date (Newest First)</SelectItem>
+                    <SelectItem value="Date Oldest">Date (Oldest First)</SelectItem>
+                    <SelectItem value="Title A-Z">Title (A-Z)</SelectItem>
+                    <SelectItem value="Title Z-A">Title (Z-A)</SelectItem>
+                    <SelectItem value="Author A-Z">Author (A-Z)</SelectItem>
+                    <SelectItem value="Author Z-A">Author (Z-A)</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button variant="outline" onClick={handleFiltersButtonClick}>

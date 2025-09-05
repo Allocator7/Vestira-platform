@@ -286,9 +286,9 @@ export default function ConsultantHomePage() {
           </div>
 
           {/* Main Content Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div className="grid gap-6 lg:grid-cols-3">
             {/* Left Column - Main Content */}
-            <div className="col-span-4 space-y-6">
+            <div className="lg:col-span-2 space-y-6">
               {/* Client Metrics */}
               <Card className="vestira-card-minimal">
                 <CardHeader className="pb-4">
@@ -309,10 +309,10 @@ export default function ConsultantHomePage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {clientMetrics.map((metric, index) => (
                       <div key={index} className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-                        <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center justify-between mb-2">
                           <metric.icon className="h-5 w-5 text-electric-blue" />
                           <div
                             className={`text-xs font-medium ${
@@ -376,7 +376,7 @@ export default function ConsultantHomePage() {
             </div>
 
             {/* Right Column - Sidebar */}
-            <div className="space-y-8">
+            <div className="space-y-6">
               {/* Action Items */}
               <Card className="shadow-vestira border-gray-100">
                 <CardHeader className="pb-4">

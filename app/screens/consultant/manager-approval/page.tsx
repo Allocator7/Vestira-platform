@@ -202,7 +202,7 @@ export default function ConsultantManagerApprovalPage() {
 
   // Filter managers based on active tab and search
   const filteredManagers = networkManagers.filter((manager) => {
-    const matchesTab = manager.status === activeTab
+    const matchesTab = activeTab === "watchlist" ? watchlist.includes(manager.id) : manager.status === activeTab
     const matchesSearch = 
       manager.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       manager.managerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -392,7 +392,7 @@ export default function ConsultantManagerApprovalPage() {
 
       {/* Manager Approval Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="pending" className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
             Pending Review ({networkManagers.filter(m => m.status === "pending").length})
@@ -404,6 +404,10 @@ export default function ConsultantManagerApprovalPage() {
           <TabsTrigger value="rejected" className="flex items-center gap-2">
             <XCircle className="h-4 w-4" />
             Rejected ({networkManagers.filter(m => m.status === "rejected").length})
+          </TabsTrigger>
+          <TabsTrigger value="watchlist" className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            Watchlist ({watchlist.length})
           </TabsTrigger>
         </TabsList>
 

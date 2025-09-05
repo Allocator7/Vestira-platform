@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 import {
   Search,
@@ -27,6 +28,7 @@ import {
   AlertTriangle,
   Info,
   Settings,
+  MoreVertical,
 } from "lucide-react"
 import { SendMessageModal } from "@/components/profile-modals/SendMessageModal"
 import { useToast } from "@/hooks/use-toast"
@@ -173,6 +175,7 @@ const activityData = [
 
 export default function DataRoomProfilePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [activeTab, setActiveTab] = useState("overview")
@@ -183,6 +186,7 @@ export default function DataRoomProfilePage() {
 
   const [showMessageModal, setShowMessageModal] = useState(false)
   const [selectedParticipant, setSelectedParticipant] = useState<any>(null)
+  const [dataRoomStatus, setDataRoomStatus] = useState(dataRoomData.status)
   const { toast } = useToast()
 
   const [isDownloading, setIsDownloading] = useState(false)
@@ -313,6 +317,22 @@ Generated: ${new Date().toISOString()}`
     setShowMessageModal(true)
   }
 
+  const handleScheduleCheckIn = (participant: any) => {
+    // For now, show a simple alert - this could be expanded to a proper modal
+    toast({
+      title: "Schedule Check-in",
+      description: `Scheduling check-in with ${participant.name} (${participant.title}) at ${participant.company}. You can invite other team members to join.`,
+    })
+  }
+
+  const handleUpdateStatus = (newStatus: string) => {
+    setDataRoomStatus(newStatus)
+    toast({
+      title: "Status Updated",
+      description: `Data room status updated to "${newStatus}"`,
+    })
+  }
+
   const handleMessageSent = async (messageData: any) => {
     try {
       // Store message in localStorage for persistence
@@ -400,12 +420,37 @@ Generated: ${new Date().toISOString()}`
                 <AvatarFallback>{dataRoomData.manager.substring(0, 2)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <h1 className="text-2xl font-bold text-deepBrand mb-2">{dataRoomName}</h1>
-                <p className="text-baseGray mb-3 max-w-3xl">{dataRoomData.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge className="bg-green-100 text-green-800">{dataRoomData.status}</Badge>
-                  <Badge className="bg-blue-100 text-blue-800">{dataRoomData.accessLevel}</Badge>
-                  <Badge variant="outline">{dataRoomData.type}</Badge>
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h1 className="text-2xl font-bold text-deepBrand mb-2">{dataRoomName}</h1>
+                    <p className="text-baseGray mb-3 max-w-3xl">{dataRoomData.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge className="bg-green-100 text-green-800">{dataRoomStatus}</Badge>
+                      <Badge className="bg-blue-100 text-blue-800">{dataRoomData.accessLevel}</Badge>
+                      <Badge variant="outline">{dataRoomData.type}</Badge>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleUpdateStatus("Active")}>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Set Active
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleUpdateStatus("Pending")}>
+                        <Clock className="h-4 w-4 mr-2" />
+                        Set Pending
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleUpdateStatus("Closed")}>
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        Set Closed
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </div>
@@ -450,9 +495,9 @@ Generated: ${new Date().toISOString()}`
             </div>
 
             {/* Key Stats Row - Clean and Balanced */}
-            <div className="grid grid-cols-4 gap-4 pt-4 border-t">
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <div className="flex items-center justify-center gap-1 text-blue-600 mb-1">
+            <div className="grid grid-cols-3 gap-6 pt-4 border-t">
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center justify-center gap-1 text-blue-600 mb-2">
                   <FileText className="h-4 w-4" />
                   <span className="text-sm font-medium">Documents</span>
                 </div>
@@ -460,16 +505,17 @@ Generated: ${new Date().toISOString()}`
                 <p className="text-xs text-gray-500">Total available</p>
               </div>
 
-              <div className="text-center p-3 bg-purple-50 rounded-lg">
-                <div className="flex items-center justify-center gap-1 text-purple-600 mb-1">
+              <div className="text-center p-4 bg-purple-50 rounded-lg">
+                <div className="flex items-center justify-center gap-1 text-purple-600 mb-2">
                   <Clock className="h-4 w-4" />
                   <span className="text-sm font-medium">Last Updated</span>
                 </div>
                 <p className="text-xl font-bold text-deepBrand">{dataRoomData.lastUpdated}</p>
                 <p className="text-xs text-gray-500">Recent activity</p>
               </div>
-              <div className="text-center p-3 bg-orange-50 rounded-lg">
-                <div className="flex items-center justify-center gap-1 text-orange-600 mb-1">
+              
+              <div className="text-center p-4 bg-orange-50 rounded-lg">
+                <div className="flex items-center justify-center gap-1 text-orange-600 mb-2">
                   <Calendar className="h-4 w-4" />
                   <span className="text-sm font-medium">Deadline</span>
                 </div>
@@ -758,74 +804,6 @@ Generated: ${new Date().toISOString()}`
 
           <TabsContent value="participants">
             <div className="space-y-6">
-              {/* Connected Allocators */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Connected Allocators (5)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <img src="/placeholder.svg?height=40&width=40" alt="State Teachers Pension" />
-                          <AvatarFallback>ST</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">State Teachers Pension</p>
-                          <p className="text-sm text-baseGray">Pension Fund • $45B AUM</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-green-100 text-green-800">Active</Badge>
-                        <Button size="sm" variant="outline" onClick={() => handleSendMessage({ name: "State Teachers Pension", title: "Pension Fund", company: "State Teachers Pension", email: "contact@stateteachers.org" })}>
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          Message
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <img src="/placeholder.svg?height=40&width=40" alt="University Endowment" />
-                          <AvatarFallback>UE</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">University Endowment Foundation</p>
-                          <p className="text-sm text-baseGray">Endowment • $12B AUM</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-blue-100 text-blue-800">Reviewing</Badge>
-                        <Button size="sm" variant="outline" onClick={() => handleSendMessage({ name: "State Teachers Pension", title: "Pension Fund", company: "State Teachers Pension", email: "contact@stateteachers.org" })}>
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          Message
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10">
-                          <img src="/placeholder.svg?height=40&width=40" alt="Healthcare Foundation" />
-                          <AvatarFallback>HF</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium">Healthcare Foundation</p>
-                          <p className="text-sm text-baseGray">Foundation • $3.5B AUM</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
-                        <Button size="sm" variant="outline" onClick={() => handleSendMessage({ name: "State Teachers Pension", title: "Pension Fund", company: "State Teachers Pension", email: "contact@stateteachers.org" })}>
-                          <MessageSquare className="h-4 w-4 mr-1" />
-                          Message
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Firm Contacts */}
               <Card>
                 <CardHeader>
@@ -846,21 +824,36 @@ Generated: ${new Date().toISOString()}`
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge>Owner</Badge>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                          handleSendMessage({
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handleSendMessage({
+                              name: "Sarah Johnson",
+                              title: "Managing Director",
+                              company: "BlackRock",
+                              email: "sarah.johnson@blackrock.com",
+                            })
+                          }
+                        >
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Message Manager
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleScheduleCheckIn({
                             name: "Sarah Johnson",
                             title: "Managing Director",
                             company: "BlackRock",
                             email: "sarah.johnson@blackrock.com",
-                          })
-                        }
-                      >
-                        <MessageSquare className="h-4 w-4 mr-1" />
-                        Message
-                      </Button>
+                          })}
+                        >
+                          <Calendar className="h-4 w-4 mr-1" />
+                          Schedule Check-in
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -889,7 +882,7 @@ Generated: ${new Date().toISOString()}`
                         }
                       >
                         <MessageSquare className="h-4 w-4 mr-1" />
-                        Message
+                        Message Team Member
                       </Button>
                     </div>
                   </div>
@@ -919,7 +912,7 @@ Generated: ${new Date().toISOString()}`
                         }
                       >
                         <MessageSquare className="h-4 w-4 mr-1" />
-                        Message
+                        Message Team Member
                       </Button>
                     </div>
                   </div>
